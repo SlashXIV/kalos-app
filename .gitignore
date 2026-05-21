@@ -1,0 +1,30 @@
+# Gradle
+.gradle/
+build/
+**/build/
+local.properties
+
+# Android Studio
+.idea/
+*.iml
+.DS_Store
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Keystore
+*.jks
+*.keystore
+
+# APK / AAB (committed separately as release assets)
+*.apk
+*.aab
+
+# Kotlin
+*.class
+
+# Claude Code local config
+.claude/
+
+# Kotlin compiler sessions
+.kotlin/

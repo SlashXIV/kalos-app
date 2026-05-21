@@ -1,0 +1,29 @@
+package com.kalos.app.core.domain.model
+
+data class Exercise(
+    val id: Long = 0,
+    val name: String,
+    val primaryMuscle: String,
+    val secondaryMuscles: List<String> = emptyList(),
+    val equipment: String = "Aucun",
+    val level: ExerciseLevel = ExerciseLevel.BEGINNER,
+    val type: ExerciseType = ExerciseType.STRENGTH,
+    val description: String = "",
+    val instructions: String = "",
+    val imageUrl: String = "",
+    val isCustom: Boolean = false,
+)
+
+enum class ExerciseLevel(val label: String) {
+    BEGINNER("Débutant"),
+    INTERMEDIATE("Intermédiaire"),
+    ADVANCED("Avancé"),
+}
+
+enum class ExerciseType(val label: String) {
+    STRENGTH("Musculation"),
+    CARDIO("Cardio"),
+    BODYWEIGHT("Poids du corps"),
+    MOBILITY("Mobilité"),
+    HIIT("HIIT"),
+}

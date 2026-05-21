@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kalos</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Accueil</string>
+    <string name="nav_nutrition">Nutrition</string>
+    <string name="nav_workout">Sport</string>
+    <string name="nav_calendar">Calendrier</string>
+    <string name="nav_profile">Profil</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">Bienvenue sur Kalos</string>
+    <string name="onboarding_welcome_subtitle">Votre compagnon fitness et nutrition au quotidien</string>
+    <string name="onboarding_profile_title">Votre profil</string>
+    <string name="onboarding_goal_title">Vos objectifs</string>
+    <string name="onboarding_result_title">Vos besoins journaliers</string>
+    <string name="btn_continue">Continuer</string>
+    <string name="btn_start">Commencer</string>
+    <string name="btn_save">Enregistrer</string>
+    <string name="btn_cancel">Annuler</string>
+    <string name="btn_delete">Supprimer</string>
+    <string name="btn_add">Ajouter</string>
+
+    <!-- Nutrition -->
+    <string name="nutrition_daily_journal">Journal du jour</string>
+    <string name="nutrition_breakfast">Petit-déjeuner</string>
+    <string name="nutrition_lunch">Déjeuner</string>
+    <string name="nutrition_dinner">Dîner</string>
+    <string name="nutrition_snack">Collation</string>
+    <string name="nutrition_calories">Calories</string>
+    <string name="nutrition_protein">Protéines</string>
+    <string name="nutrition_carbs">Glucides</string>
+    <string name="nutrition_fat">Lipides</string>
+    <string name="nutrition_search_food">Rechercher un aliment…</string>
+    <string name="nutrition_add_food">Ajouter un aliment</string>
+    <string name="nutrition_custom_food">Aliment personnalisé</string>
+    <string name="nutrition_no_food_found">Aucun aliment trouvé</string>
+
+    <!-- Workout -->
+    <string name="workout_my_workouts">Mes séances</string>
+    <string name="workout_programs">Programmes</string>
+    <string name="workout_history">Historique</string>
+    <string name="workout_new_workout">Nouvelle séance</string>
+    <string name="workout_start">Démarrer</string>
+    <string name="workout_finish">Terminer</string>
+    <string name="workout_sets">séries</string>
+    <string name="workout_reps">rép.</string>
+    <string name="workout_weight_kg">kg</string>
+    <string name="workout_rest">Repos</string>
+    <string name="workout_exercise_catalog">Catalogue d\'exercices</string>
+
+    <!-- Common -->
+    <string name="kcal">kcal</string>
+    <string name="g">g</string>
+    <string name="kg">kg</string>
+    <string name="cm">cm</string>
+    <string name="empty_state_default">Rien ici pour l\'instant</string>
+    <string name="loading">Chargement…</string>
+    <string name="error_generic">Une erreur est survenue</string>
+</resources>

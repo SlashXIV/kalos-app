@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme — used for splash screen window background -->
+    <style name="Theme.Kalos" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.Kalos.NoActionBar</item>
+    </style>
+
+    <style name="Theme.Kalos.NoActionBar" parent="android:Theme.Material.NoActionBar" />
+</resources>

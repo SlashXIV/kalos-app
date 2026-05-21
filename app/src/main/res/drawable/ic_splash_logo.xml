@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Leaf / flame shape representing fitness & nutrition -->
+    <path
+        android:fillColor="#1B5E20"
+        android:pathData="M54,10 C54,10 20,35 20,58 C20,76.5 35.6,91 54,91 C72.4,91 88,76.5 88,58 C88,35 54,10 54,10 Z" />
+    <path
+        android:fillColor="#FF6D00"
+        android:pathData="M54,30 C54,30 38,50 38,62 C38,71.4 45.2,79 54,79 C62.8,79 70,71.4 70,62 C70,50 54,30 54,30 Z" />
+    <path
+        android:fillColor="#FAFAFA"
+        android:pathData="M54,50 C54,50 46,60 46,65 C46,69.4 49.6,73 54,73 C58.4,73 62,69.4 62,65 C62,60 54,50 54,50 Z" />
+</vector>

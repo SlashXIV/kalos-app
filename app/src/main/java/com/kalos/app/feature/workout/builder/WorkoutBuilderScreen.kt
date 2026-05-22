@@ -3,12 +3,14 @@ package com.kalos.app.feature.workout.builder
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -25,18 +27,66 @@ fun WorkoutBuilderScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val currentEntry = navController.currentBackStackEntry
 
+    var editingExerciseIndex by remember { mutableStateOf<Int?>(null) }
+    var editSets by remember { mutableStateOf("") }
+    var editReps by remember { mutableStateOf("") }
+
     LaunchedEffect(templateId) { viewModel.loadTemplate(templateId) }
     LaunchedEffect(state.savedId) { if (state.savedId != null) navController.popBackStack() }
 
-    // Receive exercise selected from the catalog
+    // Receive exercise selected from the catalog — use null assignment to keep the flow alive
     LaunchedEffect(currentEntry) {
         currentEntry?.savedStateHandle?.let { handle ->
             handle.getStateFlow<Long?>("added_exercise_id", null).collect { exerciseId ->
                 if (exerciseId != null) {
                     viewModel.addExerciseById(exerciseId)
-                    handle.remove<Long>("added_exercise_id")
+                    handle["added_exercise_id"] = null
                 }
             }
+        }
+    }
+
+    // Edit sets/reps dialog
+    editingExerciseIndex?.let { idx ->
+        if (idx < state.exercises.size) {
+            val te = state.exercises[idx]
+            AlertDialog(
+                onDismissRequest = { editingExerciseIndex = null },
+                title = { Text(te.exercise.name, style = MaterialTheme.typography.titleMedium) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedTextField(
+                            value = editSets,
+                            onValueChange = { editSets = it },
+                            label = { Text("Séries") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        OutlinedTextField(
+                            value = editReps,
+                            onValueChange = { editReps = it },
+                            label = { Text("Répétitions") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        viewModel.updateExerciseParams(
+                            idx,
+                            editSets.toIntOrNull() ?: te.defaultSets,
+                            editReps.toIntOrNull() ?: te.defaultReps,
+                        )
+                        editingExerciseIndex = null
+                    }) { Text("OK") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { editingExerciseIndex = null }) { Text("Annuler") }
+                },
+            )
         }
     }
 
@@ -91,7 +141,7 @@ fun WorkoutBuilderScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text("Exercices (${state.exercises.size})", style = MaterialTheme.typography.titleSmall)
-                    FilledTonalButton(
+                    OutlinedButton(
                         onClick = { navController.navigate(Screen.ExerciseCatalog.route(templateId)) }
                     ) {
                         Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -103,20 +153,44 @@ fun WorkoutBuilderScreen(
 
             if (state.exercises.isEmpty()) {
                 item {
-                    Text(
-                        "Aucun exercice ajouté. Touchez « Ajouter » pour parcourir le catalogue.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Icon(
+                            Icons.Filled.FitnessCenter,
+                            contentDescription = null,
+                            modifier = Modifier.size(40.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                        )
+                        Text(
+                            "Aucun exercice ajouté",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(
+                            "Touchez « Ajouter » pour parcourir le catalogue",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        )
+                    }
                 }
             } else {
                 itemsIndexed(state.exercises, key = { i, _ -> i }) { index, te ->
                     ElevatedCard(modifier = Modifier.fillMaxWidth()) {
                         Row(
-                            modifier = Modifier.padding(12.dp),
+                            modifier = Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text("${index + 1}.", style = MaterialTheme.typography.titleMedium, modifier = Modifier.width(28.dp))
+                            Text(
+                                "${index + 1}.",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.width(28.dp),
+                            )
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(te.exercise.name, style = MaterialTheme.typography.bodyLarge)
                                 Text(
@@ -124,6 +198,13 @@ fun WorkoutBuilderScreen(
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
+                            }
+                            IconButton(onClick = {
+                                editingExerciseIndex = index
+                                editSets = te.defaultSets.toString()
+                                editReps = te.defaultReps.toString()
+                            }) {
+                                Icon(Icons.Filled.Edit, contentDescription = "Modifier", tint = MaterialTheme.colorScheme.primary)
                             }
                             IconButton(onClick = { viewModel.removeExercise(index) }) {
                                 Icon(Icons.Filled.Delete, contentDescription = "Supprimer", tint = MaterialTheme.colorScheme.error)

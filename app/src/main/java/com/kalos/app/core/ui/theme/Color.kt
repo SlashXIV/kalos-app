@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 val PrimaryGreen              = Color(0xFF34D399)   // Emerald 400 — vivid on dark
 val PrimaryGreenDark          = Color(0xFF065F46)   // Emerald 900 — container
 val AccentOrange              = Color(0xFFFB923C)   // Orange 400 — refined accent
-val AccentOrangeDark          = Color(0xFF431407)   // Dark orange — container
+val AccentOrangeDark          = Color(0xFF2A1200)   // Dark orange — container
 
 // ── Macro colors ──────────────────────────────────────────────────────────────
 val ColorProtein              = Color(0xFF818CF8)   // Indigo 400

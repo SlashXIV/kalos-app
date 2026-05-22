@@ -78,6 +78,14 @@ class WorkoutBuilderViewModel @Inject constructor(
         }
     }
 
+    fun updateExerciseParams(index: Int, sets: Int, reps: Int) {
+        _state.update { state ->
+            state.copy(exercises = state.exercises.mapIndexed { i, te ->
+                if (i == index) te.copy(defaultSets = sets, defaultReps = reps) else te
+            })
+        }
+    }
+
     fun save() {
         val s = _state.value
         if (s.name.isBlank()) return

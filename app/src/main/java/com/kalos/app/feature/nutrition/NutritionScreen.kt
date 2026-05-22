@@ -3,7 +3,6 @@ package com.kalos.app.feature.nutrition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -17,6 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.MealEntry
+import com.kalos.app.core.domain.model.MealItem
 import com.kalos.app.core.domain.model.MealType
 import com.kalos.app.core.ui.component.CalorieProgressRing
 import com.kalos.app.core.ui.component.MacroTrioRow
@@ -137,6 +137,7 @@ fun NutritionScreen(
                                 Screen.FoodSearch.route(mealType.name, state.date)
                             )
                         },
+                        onDeleteItem = viewModel::deleteItem,
                     )
                 }
             }
@@ -149,6 +150,7 @@ private fun MealSection(
     mealType: MealType,
     entry: MealEntry?,
     onAddFood: () -> Unit,
+    onDeleteItem: (Long) -> Unit,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -192,33 +194,9 @@ private fun MealSection(
             if (entry != null && entry.items.isNotEmpty()) {
                 Spacer(Modifier.height(12.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(4.dp))
                 entry.items.forEach { item ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                item.food.name,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                            Text(
-                                "${item.amountG.toInt()}g",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        Text(
-                            "${item.kcal.toInt()} kcal",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
+                    MealItemRow(item = item, onDelete = { onDeleteItem(item.id) })
                 }
             } else {
                 Spacer(Modifier.height(8.dp))
@@ -228,6 +206,47 @@ private fun MealSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun MealItemRow(item: MealItem, onDelete: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                item.food.name,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                "${item.amountG.toInt()}g",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Text(
+            "${item.kcal.toInt()} kcal",
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.width(4.dp))
+        IconButton(
+            onClick = onDelete,
+            modifier = Modifier.size(32.dp),
+        ) {
+            Icon(
+                Icons.Filled.Close,
+                contentDescription = "Supprimer",
+                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+                modifier = Modifier.size(16.dp),
+            )
         }
     }
 }

@@ -7,6 +7,7 @@ import com.kalos.app.core.domain.repository.MealRepository
 import com.kalos.app.core.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -55,4 +56,8 @@ class NutritionViewModel @Inject constructor(
     fun goToPreviousDay() { _date.update { LocalDate.parse(it).minusDays(1).toString() } }
     fun goToNextDay() { _date.update { LocalDate.parse(it).plusDays(1).toString() } }
     fun goToToday() { _date.value = LocalDate.now().toString() }
+
+    fun deleteItem(itemId: Long) {
+        viewModelScope.launch { mealRepository.removeItem(itemId) }
+    }
 }

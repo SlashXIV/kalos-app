@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.kalos.app.core.domain.model.Food
 import com.kalos.app.core.domain.model.MealEntry
 import com.kalos.app.core.domain.model.MealItem
 import com.kalos.app.core.domain.model.MealType
@@ -166,7 +167,7 @@ fun NutritionScreen(
                                 Screen.FoodSearch.route(mealType.name, state.date)
                             )
                         },
-                        onDeleteItem = viewModel::deleteItem,
+                        onDeleteItems = viewModel::deleteItems,
                     )
                 }
             }
@@ -197,7 +198,7 @@ private fun MealSection(
     mealType: MealType,
     entry: MealEntry?,
     onAddFood: () -> Unit,
-    onDeleteItem: (Long) -> Unit,
+    onDeleteItems: (List<Long>) -> Unit,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -242,8 +243,11 @@ private fun MealSection(
                 Spacer(Modifier.height(12.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
                 Spacer(Modifier.height(4.dp))
-                entry.items.forEach { item ->
-                    MealItemRow(item = item, onDelete = { onDeleteItem(item.id) })
+                consolidate(entry.items).forEach { consolidated ->
+                    MealItemRow(
+                        item = consolidated,
+                        onDelete = { onDeleteItems(consolidated.itemIds) },
+                    )
                 }
             } else {
                 Spacer(Modifier.height(8.dp))
@@ -568,8 +572,8 @@ private fun buildDailySummary(state: NutritionUiState, waterState: WaterUiState)
         nonEmpty.forEach { meal ->
             sb.appendLine()
             sb.appendLine("${meal.mealType.label} :")
-            meal.items.forEach { item ->
-                sb.appendLine("- ${item.food.name} — ${item.amountG.toInt()} g — ${item.kcal.toInt()} kcal")
+            consolidate(meal.items).forEach { item ->
+                sb.appendLine("- ${item.food.name} — ${item.totalAmountG.toInt()} g — ${item.totalKcal.toInt()} kcal")
             }
         }
     }
@@ -577,8 +581,26 @@ private fun buildDailySummary(state: NutritionUiState, waterState: WaterUiState)
     return sb.toString().trimEnd()
 }
 
+private data class ConsolidatedItem(
+    val food: Food,
+    val totalAmountG: Float,
+    val totalKcal: Float,
+    val itemIds: List<Long>,
+)
+
+private fun consolidate(items: List<MealItem>): List<ConsolidatedItem> =
+    items.groupBy { it.food.id }.values.map { group ->
+        val first = group.first()
+        ConsolidatedItem(
+            food = first.food,
+            totalAmountG = group.sumOf { it.amountG.toDouble() }.toFloat(),
+            totalKcal = group.sumOf { it.kcal.toDouble() }.toFloat(),
+            itemIds = group.map { it.id },
+        )
+    }
+
 @Composable
-private fun MealItemRow(item: MealItem, onDelete: () -> Unit) {
+private fun MealItemRow(item: ConsolidatedItem, onDelete: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -593,13 +615,13 @@ private fun MealItemRow(item: MealItem, onDelete: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                "${item.amountG.toInt()}g",
+                "${item.totalAmountG.toInt()}g",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         Text(
-            "${item.kcal.toInt()} kcal",
+            "${item.totalKcal.toInt()} kcal",
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

@@ -82,4 +82,8 @@ class NutritionViewModel @Inject constructor(
     fun deleteItem(itemId: Long) {
         viewModelScope.launch { mealRepository.removeItem(itemId) }
     }
+
+    fun deleteItems(itemIds: List<Long>) {
+        viewModelScope.launch { itemIds.forEach { mealRepository.removeItem(it) } }
+    }
 }

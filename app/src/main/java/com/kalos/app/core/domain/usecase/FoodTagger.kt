@@ -16,9 +16,11 @@ object FoodTagger {
     )
     private val JUNK_KEYWORDS = listOf("frites", "pizza", "hamburger", "kebab", "chips", "hot dog", "nuggets")
 
-    fun containsPork(food: Food): Boolean = PORK_RE.containsMatchIn(food.name)
+    fun containsPork(food: Food): Boolean =
+        "pork" in food.tags || PORK_RE.containsMatchIn(food.name)
 
-    fun containsAlcohol(food: Food): Boolean = ALCOHOL_RE.containsMatchIn(food.name)
+    fun containsAlcohol(food: Food): Boolean =
+        "alcohol" in food.tags || ALCOHOL_RE.containsMatchIn(food.name)
 
     fun isMeat(food: Food): Boolean = food.category == "Viandes"
 
@@ -71,8 +73,9 @@ object FoodTagger {
     fun passes(food: Food, filters: Set<DietaryFilter>): Boolean {
         if (DietaryFilter.NO_PORK in filters && containsPork(food)) return false
         if (DietaryFilter.NO_ALCOHOL in filters && containsAlcohol(food)) return false
-        if (DietaryFilter.VEGETARIAN in filters && (isMeat(food) || isFish(food))) return false
-        if (DietaryFilter.VEGAN in filters && isAnimalProduct(food)) return false
+        // Explicit positive tags set by the user override category-based exclusion.
+        if (DietaryFilter.VEGETARIAN in filters && "vegetarian" !in food.tags && (isMeat(food) || isFish(food))) return false
+        if (DietaryFilter.VEGAN in filters && "vegan" !in food.tags && isAnimalProduct(food)) return false
         return true
     }
 }

@@ -15,6 +15,7 @@ data class Food(
     val isCustom: Boolean = false,
     val isFavorite: Boolean = false,
     val lastUsedAt: Long = 0,
+    val tags: List<String> = emptyList(),
 ) {
     fun kcalForAmount(amountG: Float) = kcalPer100g * amountG / 100f
     fun proteinForAmount(amountG: Float) = proteinPer100g * amountG / 100f

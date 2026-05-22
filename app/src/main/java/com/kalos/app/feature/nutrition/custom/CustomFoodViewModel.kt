@@ -20,6 +20,10 @@ data class CustomFoodState(
     val fiber: String = "0",
     val serving: String = "100",
     val unit: String = "g",
+    val containsPork: Boolean = false,
+    val containsAlcohol: Boolean = false,
+    val isVegetarian: Boolean = false,
+    val isVegan: Boolean = false,
     val isEditing: Boolean = false,
     val isSaving: Boolean = false,
     val savedSuccessfully: Boolean = false,
@@ -43,7 +47,12 @@ class CustomFoodViewModel @Inject constructor(
                         kcal = food.kcalPer100g.toString(), protein = food.proteinPer100g.toString(),
                         carbs = food.carbsPer100g.toString(), fat = food.fatPer100g.toString(),
                         fiber = food.fiberPer100g.toString(), serving = food.defaultServingG.toString(),
-                        unit = food.servingUnit, isEditing = true,
+                        unit = food.servingUnit,
+                        containsPork = "pork" in food.tags,
+                        containsAlcohol = "alcohol" in food.tags,
+                        isVegetarian = "vegetarian" in food.tags,
+                        isVegan = "vegan" in food.tags,
+                        isEditing = true,
                     )
                 }
             }
@@ -58,6 +67,14 @@ class CustomFoodViewModel @Inject constructor(
     fun onFatChange(v: String) = _state.update { it.copy(fat = v) }
     fun onFiberChange(v: String) = _state.update { it.copy(fiber = v) }
     fun onServingChange(v: String) = _state.update { it.copy(serving = v) }
+    fun onContainsPorkChange(v: Boolean) = _state.update { it.copy(containsPork = v) }
+    fun onContainsAlcoholChange(v: Boolean) = _state.update { it.copy(containsAlcohol = v) }
+    fun onIsVegetarianChange(v: Boolean) = _state.update {
+        it.copy(isVegetarian = v, isVegan = if (!v) false else it.isVegan)
+    }
+    fun onIsVeganChange(v: Boolean) = _state.update {
+        it.copy(isVegan = v, isVegetarian = if (v) true else it.isVegetarian)
+    }
 
     val isValid: Boolean get() = with(_state.value) {
         name.isNotBlank() && kcal.toFloatOrNull() != null &&
@@ -67,6 +84,12 @@ class CustomFoodViewModel @Inject constructor(
 
     fun save() {
         val s = _state.value
+        val tags = buildList {
+            if (s.containsPork) add("pork")
+            if (s.containsAlcohol) add("alcohol")
+            if (s.isVegetarian) add("vegetarian")
+            if (s.isVegan) add("vegan")
+        }
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
             foodRepository.save(
@@ -80,6 +103,7 @@ class CustomFoodViewModel @Inject constructor(
                     defaultServingG = s.serving.toFloatOrNull() ?: 100f,
                     servingUnit = s.unit,
                     isCustom = true,
+                    tags = tags,
                 )
             )
             _state.update { it.copy(isSaving = false, savedSuccessfully = true) }

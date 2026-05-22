@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -90,6 +91,18 @@ fun CustomFoodScreen(
                 )
             }
 
+            HorizontalDivider()
+            Text("Compatibilité alimentaire", style = MaterialTheme.typography.titleSmall)
+            Text(
+                "Optionnel — permet au filtre de préférences de classer correctement cet aliment.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            DietaryCheckRow("Contient du porc", state.containsPork, viewModel::onContainsPorkChange)
+            DietaryCheckRow("Contient de l'alcool", state.containsAlcohol, viewModel::onContainsAlcoholChange)
+            DietaryCheckRow("Convient aux végétariens", state.isVegetarian, viewModel::onIsVegetarianChange)
+            DietaryCheckRow("Convient aux végans", state.isVegan, viewModel::onIsVeganChange)
+
             Spacer(Modifier.height(8.dp))
             Button(
                 onClick = viewModel::save,
@@ -113,4 +126,16 @@ private fun NumField(label: String, value: String, onChange: (String) -> Unit, m
         modifier = modifier,
         singleLine = true,
     )
+}
+
+@Composable
+private fun DietaryCheckRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+        Checkbox(checked = checked, onCheckedChange = onCheckedChange)
+    }
 }

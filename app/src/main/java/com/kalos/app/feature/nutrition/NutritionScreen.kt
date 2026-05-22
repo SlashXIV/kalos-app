@@ -11,6 +11,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -28,6 +30,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +41,10 @@ fun NutritionScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val waterState by waterViewModel.uiState.collectAsStateWithLifecycle()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val clipboardManager = LocalClipboardManager.current
 
     val dateLabel = remember(state.date) {
         val d = LocalDate.parse(state.date)
@@ -55,6 +62,12 @@ fun NutritionScreen(
             TopAppBar(
                 title = { Text("Nutrition", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) },
                 actions = {
+                    IconButton(onClick = {
+                        clipboardManager.setText(AnnotatedString(buildDailySummary(state, waterState)))
+                        scope.launch { snackbarHostState.showSnackbar("Résumé nutritionnel copié") }
+                    }) {
+                        Icon(Icons.Filled.ContentCopy, contentDescription = "Copier le résumé")
+                    }
                     IconButton(onClick = { navController.navigate(Screen.NutritionHistory.route) }) {
                         Icon(Icons.Filled.BarChart, contentDescription = "Historique")
                     }
@@ -65,6 +78,7 @@ fun NutritionScreen(
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         LazyColumn(
             contentPadding = PaddingValues(
@@ -517,6 +531,50 @@ private fun SuggestionRow(suggestion: FoodSuggestion, onClick: () -> Unit) {
             Icon(Icons.Filled.Add, contentDescription = "Ajouter", modifier = Modifier.size(16.dp))
         }
     }
+}
+
+private fun buildDailySummary(state: NutritionUiState, waterState: WaterUiState): String {
+    val sb = StringBuilder()
+
+    sb.appendLine("Date : ${state.date}")
+    sb.appendLine()
+
+    sb.appendLine("Calories : ${state.totalKcal.toInt()} / ${state.goal.kcal} kcal")
+    sb.appendLine("Restant : ${(state.goal.kcal - state.totalKcal).toInt()} kcal")
+    sb.appendLine()
+
+    sb.appendLine("Protéines : ${state.totalProtein.toInt()} / ${state.goal.proteinG} g")
+    sb.appendLine("Restant : ${(state.goal.proteinG - state.totalProtein).toInt()} g")
+    sb.appendLine()
+
+    sb.appendLine("Glucides : ${state.totalCarbs.toInt()} / ${state.goal.carbsG} g")
+    sb.appendLine("Restant : ${(state.goal.carbsG - state.totalCarbs).toInt()} g")
+    sb.appendLine()
+
+    sb.appendLine("Lipides : ${state.totalFat.toInt()} / ${state.goal.fatG} g")
+    sb.appendLine("Restant : ${(state.goal.fatG - state.totalFat).toInt()} g")
+    sb.appendLine()
+
+    sb.append("Hydratation : ${waterState.todayMl} / ${waterState.goalMl} ml")
+    if (waterState.isGoalReached) {
+        sb.appendLine("  ✓ Objectif atteint")
+    } else {
+        sb.appendLine()
+        sb.appendLine("Restant : ${waterState.goalMl - waterState.todayMl} ml")
+    }
+
+    val nonEmpty = state.meals.filter { it.items.isNotEmpty() }
+    if (nonEmpty.isNotEmpty()) {
+        nonEmpty.forEach { meal ->
+            sb.appendLine()
+            sb.appendLine("${meal.mealType.label} :")
+            meal.items.forEach { item ->
+                sb.appendLine("- ${item.food.name} — ${item.amountG.toInt()} g — ${item.kcal.toInt()} kcal")
+            }
+        }
+    }
+
+    return sb.toString().trimEnd()
 }
 
 @Composable

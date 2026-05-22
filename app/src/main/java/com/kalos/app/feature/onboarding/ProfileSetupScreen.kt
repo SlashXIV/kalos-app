@@ -51,11 +51,21 @@ fun ProfileSetupScreen(
                 selected = state.sex == Sex.MALE,
                 onClick = { viewModel.onSexChange(Sex.MALE) },
                 shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                colors = SegmentedButtonDefaults.colors(
+                    activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    activeBorderColor = MaterialTheme.colorScheme.primary,
+                ),
             ) { Text("Homme") }
             SegmentedButton(
                 selected = state.sex == Sex.FEMALE,
                 onClick = { viewModel.onSexChange(Sex.FEMALE) },
                 shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                colors = SegmentedButtonDefaults.colors(
+                    activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    activeBorderColor = MaterialTheme.colorScheme.primary,
+                ),
             ) { Text("Femme") }
         }
 

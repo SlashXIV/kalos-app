@@ -148,6 +148,11 @@ fun EditProfileScreen(
                         onClick = { viewModel.onSexChange(sex) },
                         shape = SegmentedButtonDefaults.itemShape(i, 2),
                         label = { Text(label) },
+                        colors = SegmentedButtonDefaults.colors(
+                            activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            activeBorderColor = MaterialTheme.colorScheme.primary,
+                        ),
                     )
                 }
             }

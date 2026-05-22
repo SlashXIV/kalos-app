@@ -105,6 +105,10 @@ fun HomeScreen(
             FilledTonalButton(
                 onClick = { navController.navigate(Screen.Nutrition.route) },
                 modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
             ) {
                 Icon(Icons.Outlined.Restaurant, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(4.dp))
@@ -113,6 +117,10 @@ fun HomeScreen(
             FilledTonalButton(
                 onClick = { navController.navigate(Screen.Workout.route) },
                 modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
             ) {
                 Icon(Icons.Filled.FitnessCenter, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(4.dp))

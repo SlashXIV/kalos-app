@@ -191,11 +191,21 @@ private fun FoodDetailSheet(
                     selected = servingMode == ServingMode.UNITS,
                     onClick = { onServingModeChange(ServingMode.UNITS) },
                     shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                    colors = SegmentedButtonDefaults.colors(
+                        activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        activeBorderColor = MaterialTheme.colorScheme.primary,
+                    ),
                 ) { Text(food.servingUnit.replaceFirstChar { it.uppercaseChar() }) }
                 SegmentedButton(
                     selected = servingMode == ServingMode.GRAMS,
                     onClick = { onServingModeChange(ServingMode.GRAMS) },
                     shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                    colors = SegmentedButtonDefaults.colors(
+                        activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        activeBorderColor = MaterialTheme.colorScheme.primary,
+                    ),
                 ) { Text("Grammes") }
             }
         }

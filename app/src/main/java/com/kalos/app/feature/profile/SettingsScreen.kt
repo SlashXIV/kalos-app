@@ -40,16 +40,25 @@ fun SettingsScreen(
     navController: NavController,
     viewModel: SettingsViewModel = hiltViewModel(),
     exportViewModel: ExportViewModel = hiltViewModel(),
+    importViewModel: ImportViewModel = hiltViewModel(),
 ) {
     val activeFilters by viewModel.filters.collectAsStateWithLifecycle()
     val exportState by exportViewModel.state.collectAsStateWithLifecycle()
+    val importState by importViewModel.state.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // ── Export launcher ───────────────────────────────────────────────────────
     val createDocumentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json"),
     ) { uri -> uri?.let { exportViewModel.onUriSelected(it) } }
 
+    // ── Import launcher ───────────────────────────────────────────────────────
+    val openDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri -> uri?.let { importViewModel.onUriSelected(it) } }
+
+    // ── Snackbar side-effects ─────────────────────────────────────────────────
     LaunchedEffect(exportState) {
         when (val s = exportState) {
             is ExportState.Success -> {
@@ -57,11 +66,54 @@ fun SettingsScreen(
                 exportViewModel.resetState()
             }
             is ExportState.Error -> {
-                snackbarHostState.showSnackbar("Erreur : ${s.message}")
+                snackbarHostState.showSnackbar("Export : ${s.message}")
                 exportViewModel.resetState()
             }
             else -> {}
         }
+    }
+
+    LaunchedEffect(importState) {
+        when (val s = importState) {
+            is ImportState.Success -> {
+                snackbarHostState.showSnackbar("Données importées avec succès")
+                importViewModel.resetState()
+            }
+            is ImportState.Error -> {
+                snackbarHostState.showSnackbar("Import : ${s.message}")
+                importViewModel.resetState()
+            }
+            else -> {}
+        }
+    }
+
+    // ── Import confirmation dialog ────────────────────────────────────────────
+    if (importState is ImportState.ConfirmRequired) {
+        val backup = (importState as ImportState.ConfirmRequired).backup
+        val exportDate = backup.exportedAt.substringBefore("T")
+        AlertDialog(
+            onDismissRequest = { importViewModel.onCancelImport() },
+            title = { Text("Confirmer l'import") },
+            text = {
+                Text(
+                    "Cette action remplacera vos données locales actuelles " +
+                    "(profil, journal nutrition, entraînements, hydratation…) " +
+                    "par celles du fichier sélectionné.\n\n" +
+                    "Fichier exporté le $exportDate.\n\n" +
+                    "Les données actuelles seront perdues. Continuer ?",
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { importViewModel.onConfirmImport(backup) }) {
+                    Text("Importer", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { importViewModel.onCancelImport() }) {
+                    Text("Annuler")
+                }
+            },
+        )
     }
 
     Scaffold(
@@ -85,7 +137,7 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            // ── Dietary preferences ──────────────────────────────────────
+            // ── Dietary preferences ──────────────────────────────────────────
             Text(
                 "Préférences alimentaires",
                 style = MaterialTheme.typography.titleSmall,
@@ -110,7 +162,6 @@ fun SettingsScreen(
                 }
             }
 
-            // Honest disclaimer about halal / religious filtering
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
@@ -141,7 +192,7 @@ fun SettingsScreen(
 
             HorizontalDivider()
 
-            // ── Reminders ────────────────────────────────────────────────
+            // ── Reminders ────────────────────────────────────────────────────
             Text(
                 "Rappels d'entraînement",
                 style = MaterialTheme.typography.titleSmall,
@@ -168,9 +219,9 @@ fun SettingsScreen(
 
             HorizontalDivider()
 
-            // ── General ──────────────────────────────────────────────────
+            // ── Data management ──────────────────────────────────────────────
             Text(
-                "Général",
+                "Données",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -186,6 +237,19 @@ fun SettingsScreen(
                 },
             )
 
+            SettingsItem(
+                icon = Icons.Filled.FileUpload,
+                title = "Importer mes données",
+                subtitle = when (importState) {
+                    is ImportState.Importing -> "Import en cours…"
+                    else -> "Restaurer depuis un fichier de sauvegarde"
+                },
+                enabled = importState !is ImportState.Importing,
+                onClick = {
+                    openDocumentLauncher.launch(arrayOf("application/json", "*/*"))
+                },
+            )
+
             HorizontalDivider()
 
             Text(
@@ -196,7 +260,7 @@ fun SettingsScreen(
             SettingsItem(
                 icon = Icons.Filled.Info,
                 title = "Version",
-                subtitle = "Kalos 1.8.0",
+                subtitle = "Kalos 1.9.0",
                 enabled = false,
             )
         }

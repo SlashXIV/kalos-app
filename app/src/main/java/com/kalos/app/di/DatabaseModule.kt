@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.kalos.app.core.database.KalosDatabase
 import com.kalos.app.core.database.dao.ExportDao
+import com.kalos.app.core.database.dao.ImportDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,4 +32,5 @@ object DatabaseModule {
     @Provides fun provideProgramDao(db: KalosDatabase) = db.programDao()
     @Provides fun provideWaterIntakeDao(db: KalosDatabase) = db.waterIntakeDao()
     @Provides fun provideExportDao(db: KalosDatabase): ExportDao = db.exportDao()
+    @Provides fun provideImportDao(db: KalosDatabase): ImportDao = db.importDao()
 }

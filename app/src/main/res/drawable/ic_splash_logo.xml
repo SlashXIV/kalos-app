@@ -1,19 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Splash screen icon — Android alloue 240dp (circulaire masqué sur API 31+)
-    windowSplashScreenIconBackgroundColor = #3D414B → cercle couleur carte
-    Artwork K centré à 70% du diamètre du cercle → 168dp dans 240dp
-    Inset = (240-168)/2 = 36dp de chaque côté
-    Résultat : "carte circulaire" avec K blanc, cohérent avec l'icône launcher
+    Splash icon — même bitmap pré-paddé que le foreground launcher
+    Dans le contexte 240dp splash : artwork à 64% = 154dp, centré dans le cercle
+    Coins du K à ~109dp du centre < 120dp rayon → toujours visibles
+    windowSplashScreenIconBackgroundColor = splash_background (#09090F)
+    → fond cercle = fond splash → invisible → K blanc flotte directement sur le fond app
 -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:left="36dp"
-        android:right="36dp"
-        android:top="36dp"
-        android:bottom="36dp">
-        <bitmap
-            android:src="@drawable/ic_launcher_artwork"
-            android:gravity="fill" />
-    </item>
-</layer-list>
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/ic_launcher_foreground_padded"
+    android:gravity="fill" />

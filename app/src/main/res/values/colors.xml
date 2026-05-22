@@ -2,6 +2,9 @@
 <resources>
     <color name="splash_background">#09090F</color>
     <color name="kalos_green">#1B5E20</color>
-    <!-- Couleur exacte de la carte logo (extraite du PNG) — utilisée pour ic_launcher_background et windowSplashScreenIconBackgroundColor -->
-    <color name="icon_card_color">#3D414B</color>
+    <!--
+        Fond icône : #0D0D1A (navy très sombre — plus de profondeur que le noir pur)
+        Utilisé par ic_launcher_background + windowSplashScreenIconBackgroundColor
+    -->
+    <color name="icon_card_color">#0D0D1A</color>
 </resources>

@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Background adaptive icon : #111120 (surface de l'app)
+    Cohérent avec MaterialTheme.colorScheme.surface de l'application
+    → fond navy sombre premium au lieu du gris neutre #3D414B déconnecté
+-->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <solid android:color="@color/icon_card_color" />
 </shape>

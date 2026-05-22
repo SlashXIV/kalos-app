@@ -77,9 +77,9 @@ class CustomFoodViewModel @Inject constructor(
     }
 
     val isValid: Boolean get() = with(_state.value) {
-        name.isNotBlank() && kcal.toFloatOrNull() != null &&
-                protein.toFloatOrNull() != null && carbs.toFloatOrNull() != null &&
-                fat.toFloatOrNull() != null
+        name.isNotBlank() && kcal.parseFloat() != null &&
+                protein.parseFloat() != null && carbs.parseFloat() != null &&
+                fat.parseFloat() != null
     }
 
     fun save() {
@@ -95,12 +95,12 @@ class CustomFoodViewModel @Inject constructor(
             foodRepository.save(
                 Food(
                     name = s.name.trim(), brand = s.brand.trim(), category = s.category,
-                    kcalPer100g = s.kcal.toFloatOrNull() ?: 0f,
-                    proteinPer100g = s.protein.toFloatOrNull() ?: 0f,
-                    carbsPer100g = s.carbs.toFloatOrNull() ?: 0f,
-                    fatPer100g = s.fat.toFloatOrNull() ?: 0f,
-                    fiberPer100g = s.fiber.toFloatOrNull() ?: 0f,
-                    defaultServingG = s.serving.toFloatOrNull() ?: 100f,
+                    kcalPer100g = s.kcal.parseFloat() ?: 0f,
+                    proteinPer100g = s.protein.parseFloat() ?: 0f,
+                    carbsPer100g = s.carbs.parseFloat() ?: 0f,
+                    fatPer100g = s.fat.parseFloat() ?: 0f,
+                    fiberPer100g = s.fiber.parseFloat() ?: 0f,
+                    defaultServingG = s.serving.parseFloat() ?: 100f,
                     servingUnit = s.unit,
                     isCustom = true,
                     tags = tags,
@@ -110,3 +110,6 @@ class CustomFoodViewModel @Inject constructor(
         }
     }
 }
+
+// Accepts both "7.5" and "7,5" (French decimal separator)
+private fun String.parseFloat(): Float? = replace(',', '.').toFloatOrNull()

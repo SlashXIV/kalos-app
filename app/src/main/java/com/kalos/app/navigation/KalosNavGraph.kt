@@ -21,6 +21,7 @@ import com.kalos.app.feature.nutrition.search.FoodSearchScreen
 import com.kalos.app.feature.onboarding.*
 import com.kalos.app.feature.profile.EditGoalsScreen
 import com.kalos.app.feature.profile.EditProfileScreen
+import com.kalos.app.feature.profile.NotificationsScreen
 import com.kalos.app.feature.profile.ProfileScreen
 import com.kalos.app.feature.profile.SettingsScreen
 import com.kalos.app.feature.workout.WorkoutScreen
@@ -168,6 +169,7 @@ fun KalosNavGraph() {
             composable(Screen.EditProfile.route) { EditProfileScreen(navController) }
             composable(Screen.EditGoals.route) { EditGoalsScreen(navController) }
             composable(Screen.Settings.route) { SettingsScreen(navController) }
+            composable(Screen.Notifications.route) { NotificationsScreen(navController) }
         }
     }
 }

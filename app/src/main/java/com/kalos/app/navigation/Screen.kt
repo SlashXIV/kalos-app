@@ -59,6 +59,7 @@ sealed class Screen(val route: String) {
     object EditProfile : Screen("profile/edit")
     object EditGoals : Screen("profile/goals")
     object Settings : Screen("profile/settings")
+    object Notifications : Screen("profile/notifications")
 }
 
 data class BottomNavItem(

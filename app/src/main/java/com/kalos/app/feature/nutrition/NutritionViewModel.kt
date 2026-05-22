@@ -46,8 +46,8 @@ class NutritionViewModel @Inject constructor(
         _date.flatMapLatest { mealRepository.getMealsForDate(it) },
         userRepository.observeGoal(),
         _date,
-        foodRepository.getAll(),
-        dietaryPrefsStore.filtersFlow,
+        foodRepository.getAll().distinctUntilChanged(),
+        dietaryPrefsStore.filtersFlow.distinctUntilChanged(),
     ) { meals: List<MealEntry>, goal: NutritionGoal?, currentDate: String, allFoods: List<Food>, filters: Set<DietaryFilter> ->
         val safeGoal = goal ?: NutritionGoal()
         val totalKcal = meals.sumOf { it.totalKcal.toDouble() }.toFloat()

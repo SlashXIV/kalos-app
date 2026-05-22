@@ -155,10 +155,12 @@ private fun CalendarGrid(
     val daysInMonth = month.lengthOfMonth()
     val today = LocalDate.now()
 
-    val cells = buildList<Int?> {
-        repeat(dayOfWeekOffset) { add(null) }
-        for (d in 1..daysInMonth) add(d)
-        while (size % 7 != 0) add(null)
+    val cells = remember(month) {
+        buildList<Int?> {
+            repeat(dayOfWeekOffset) { add(null) }
+            for (d in 1..daysInMonth) add(d)
+            while (size % 7 != 0) add(null)
+        }
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {

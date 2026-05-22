@@ -9,7 +9,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -132,6 +135,14 @@ fun FoodSearchScreen(
                 onServingModeChange = viewModel::onServingModeChange,
                 onAdd = { viewModel.addToMeal(mealType, date) },
                 onDismiss = viewModel::dismissSheet,
+                dailyKcal = state.dailyKcal,
+                dailyProtein = state.dailyProtein,
+                dailyCarbs = state.dailyCarbs,
+                dailyFat = state.dailyFat,
+                goalKcal = state.goalKcal,
+                goalProtein = state.goalProtein,
+                goalCarbs = state.goalCarbs,
+                goalFat = state.goalFat,
             )
         }
     }
@@ -159,6 +170,14 @@ private fun FoodDetailSheet(
     onServingModeChange: (ServingMode) -> Unit,
     onAdd: () -> Unit,
     onDismiss: () -> Unit,
+    dailyKcal: Float = 0f,
+    dailyProtein: Float = 0f,
+    dailyCarbs: Float = 0f,
+    dailyFat: Float = 0f,
+    goalKcal: Float = 0f,
+    goalProtein: Float = 0f,
+    goalCarbs: Float = 0f,
+    goalFat: Float = 0f,
 ) {
     val hasUnitServing = food.servingUnit != "g"
 
@@ -184,7 +203,6 @@ private fun FoodDetailSheet(
             Text(food.brand, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        // Unit/gram toggle (only for foods with a non-gram serving unit)
         if (hasUnitServing) {
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                 SegmentedButton(
@@ -232,11 +250,22 @@ private fun FoodDetailSheet(
             )
         }
 
+        // This food's contribution
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             MacroStat("Calories", "${kcal.roundToInt()} kcal")
             MacroStat("Protéines", "${protein.roundToInt()}g")
             MacroStat("Glucides", "${carbs.roundToInt()}g")
             MacroStat("Lipides", "${fat.roundToInt()}g")
+        }
+
+        // Projected totals preview (shown only when goals are set and there's a meaningful amount)
+        if (goalKcal > 0f && amountFloat > 0f) {
+            ProjectedNutritionStrip(
+                projKcal = dailyKcal + kcal, projProtein = dailyProtein + protein,
+                projCarbs = dailyCarbs + carbs, projFat = dailyFat + fat,
+                goalKcal = goalKcal, goalProtein = goalProtein,
+                goalCarbs = goalCarbs, goalFat = goalFat,
+            )
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -249,6 +278,60 @@ private fun FoodDetailSheet(
                 Text("Ajouter")
             }
         }
+    }
+}
+
+@Composable
+private fun ProjectedNutritionStrip(
+    projKcal: Float,
+    projProtein: Float,
+    projCarbs: Float,
+    projFat: Float,
+    goalKcal: Float,
+    goalProtein: Float,
+    goalCarbs: Float,
+    goalFat: Float,
+) {
+    Surface(
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                "Après ajout",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                ProjectedMacro(label = "kcal", projected = projKcal, goal = goalKcal)
+                ProjectedMacro(label = "prot.", projected = projProtein, goal = goalProtein)
+                ProjectedMacro(label = "gluc.", projected = projCarbs, goal = goalCarbs)
+                ProjectedMacro(label = "lip.", projected = projFat, goal = goalFat)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProjectedMacro(label: String, projected: Float, goal: Float) {
+    val ratio = if (goal > 0f) projected / goal else 0f
+    val valueColor = when {
+        ratio > 1.0f -> MaterialTheme.colorScheme.error
+        ratio > 0.9f -> MaterialTheme.colorScheme.tertiary
+        else -> MaterialTheme.colorScheme.onSurface
+    }
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            "${projected.roundToInt()}",
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = valueColor,
+        )
+        Text(
+            "/ ${goal.roundToInt()} $label",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

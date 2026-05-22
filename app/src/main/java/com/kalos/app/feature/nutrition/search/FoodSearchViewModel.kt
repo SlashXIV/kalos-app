@@ -6,13 +6,16 @@ import androidx.lifecycle.viewModelScope
 import com.kalos.app.core.domain.model.Food
 import com.kalos.app.core.domain.model.MealItem
 import com.kalos.app.core.domain.model.MealType
+import com.kalos.app.core.domain.model.NutritionGoal
 import com.kalos.app.core.domain.repository.FoodRepository
 import com.kalos.app.core.domain.repository.MealRepository
+import com.kalos.app.core.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 enum class ServingMode { GRAMS, UNITS }
@@ -28,6 +31,15 @@ data class FoodSearchUiState(
     val servingCount: String = "1",
     val isLoading: Boolean = false,
     val addedSuccessfully: Boolean = false,
+    // Daily context for nutritional preview
+    val dailyKcal: Float = 0f,
+    val dailyProtein: Float = 0f,
+    val dailyCarbs: Float = 0f,
+    val dailyFat: Float = 0f,
+    val goalKcal: Float = 0f,
+    val goalProtein: Float = 0f,
+    val goalCarbs: Float = 0f,
+    val goalFat: Float = 0f,
 )
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
@@ -36,7 +48,10 @@ class FoodSearchViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val foodRepository: FoodRepository,
     private val mealRepository: MealRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
+
+    private val searchDate = savedStateHandle.get<String>("date") ?: LocalDate.now().toString()
 
     private val _state = MutableStateFlow(FoodSearchUiState())
     val state: StateFlow<FoodSearchUiState> = _state
@@ -44,13 +59,12 @@ class FoodSearchViewModel @Inject constructor(
     private val _query = MutableStateFlow("")
 
     init {
-        // Pre-fill query from nav arg (set by suggestion tap)
         val startQuery = savedStateHandle.get<String>("query").orEmpty()
         if (startQuery.isNotEmpty()) {
             _state.update { it.copy(query = startQuery, isLoading = true) }
             _query.value = startQuery
         }
-        // Debounced search
+
         viewModelScope.launch {
             _query
                 .debounce(300)
@@ -58,13 +72,35 @@ class FoodSearchViewModel @Inject constructor(
                 .flatMapLatest { q -> foodRepository.search(q) }
                 .collect { results -> _state.update { it.copy(results = results, isLoading = false) } }
         }
-        // Load recent
+
         viewModelScope.launch {
             foodRepository.getRecent().collect { recent -> _state.update { it.copy(recent = recent) } }
         }
-        // Load favorites
+
         viewModelScope.launch {
             foodRepository.getFavorites().collect { favs -> _state.update { it.copy(favorites = favs) } }
+        }
+
+        // Observe daily totals + goal for nutritional preview
+        viewModelScope.launch {
+            combine(
+                mealRepository.getMealsForDate(searchDate),
+                userRepository.observeGoal(),
+            ) { meals, goal ->
+                val safeGoal = goal ?: NutritionGoal()
+                _state.update { s ->
+                    s.copy(
+                        dailyKcal = meals.sumOf { it.totalKcal.toDouble() }.toFloat(),
+                        dailyProtein = meals.sumOf { it.totalProtein.toDouble() }.toFloat(),
+                        dailyCarbs = meals.sumOf { it.totalCarbs.toDouble() }.toFloat(),
+                        dailyFat = meals.sumOf { it.totalFat.toDouble() }.toFloat(),
+                        goalKcal = safeGoal.kcal.toFloat(),
+                        goalProtein = safeGoal.proteinG.toFloat(),
+                        goalCarbs = safeGoal.carbsG.toFloat(),
+                        goalFat = safeGoal.fatG.toFloat(),
+                    )
+                }
+            }.collect()
         }
     }
 

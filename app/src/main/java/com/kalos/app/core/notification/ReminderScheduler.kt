@@ -18,6 +18,8 @@ class ReminderScheduler @Inject constructor(
     fun isProgramEnabled(id: Long) = prefs.getBoolean("reminder_${id}_enabled", false)
     fun isProgramDayOf(id: Long) = prefs.getBoolean("reminder_${id}_day_of", true)
     fun isProgramDayBefore(id: Long) = prefs.getBoolean("reminder_${id}_day_before", false)
+    fun getNotifHour(): Int = prefs.getInt("notif_hour", 8)
+    fun setNotifHour(hour: Int) { prefs.edit().putInt("notif_hour", hour).apply(); schedule() }
 
     fun setProgramEnabled(id: Long, v: Boolean) {
         prefs.edit().putBoolean("reminder_${id}_enabled", v).apply()
@@ -37,7 +39,7 @@ class ReminderScheduler @Inject constructor(
     fun schedule() {
         NotificationHelper.createChannel(context)
         val request = PeriodicWorkRequestBuilder<WorkoutReminderWorker>(1, TimeUnit.DAYS)
-            .setInitialDelay(minutesUntilNextMorning(), TimeUnit.MINUTES)
+            .setInitialDelay(minutesUntilNextTarget(), TimeUnit.MINUTES)
             .setConstraints(Constraints.Builder().setRequiresBatteryNotLow(false).build())
             .build()
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
@@ -51,9 +53,10 @@ class ReminderScheduler @Inject constructor(
         WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
     }
 
-    private fun minutesUntilNextMorning(): Long {
+    private fun minutesUntilNextTarget(): Long {
         val now = LocalDateTime.now()
-        val target = now.toLocalDate().atTime(8, 0).let {
+        val hour = getNotifHour()
+        val target = now.toLocalDate().atTime(hour, 0).let {
             if (now.isBefore(it)) it else it.plusDays(1)
         }
         return ChronoUnit.MINUTES.between(now, target).coerceAtLeast(1)

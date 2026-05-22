@@ -21,17 +21,29 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.data.DietaryPreferencesStore
 import com.kalos.app.core.domain.model.DietaryFilter
+import com.kalos.app.core.notification.ReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val prefsStore: DietaryPreferencesStore,
+    private val reminderScheduler: ReminderScheduler,
 ) : ViewModel() {
     val filters: StateFlow<Set<DietaryFilter>> = prefsStore.filtersFlow
     fun toggle(filter: DietaryFilter, enabled: Boolean) = prefsStore.setFilter(filter, enabled)
+
+    private val _notifHour = MutableStateFlow(reminderScheduler.getNotifHour())
+    val notifHour: StateFlow<Int> = _notifHour.asStateFlow()
+
+    fun setNotifHour(hour: Int) {
+        reminderScheduler.setNotifHour(hour)
+        _notifHour.value = hour
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,6 +124,47 @@ fun SettingsScreen(
                 TextButton(onClick = { importViewModel.onCancelImport() }) {
                     Text("Annuler")
                 }
+            },
+        )
+    }
+
+    val notifHour by viewModel.notifHour.collectAsStateWithLifecycle()
+    var showHourDialog by remember { mutableStateOf(false) }
+
+    if (showHourDialog) {
+        var sliderHour by remember { mutableFloatStateOf(notifHour.toFloat()) }
+        AlertDialog(
+            onDismissRequest = { showHourDialog = false },
+            title = { Text("Heure des rappels") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text(
+                            "${sliderHour.toInt()}h00",
+                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                        )
+                    }
+                    Slider(
+                        value = sliderHour,
+                        onValueChange = { sliderHour = it },
+                        valueRange = 6f..22f,
+                        steps = 15,
+                    )
+                    Text(
+                        "S'applique à tous les rappels d'entraînement",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.setNotifHour(sliderHour.toInt())
+                    showHourDialog = false
+                }) { Text("Valider") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showHourDialog = false }) { Text("Annuler") }
             },
         )
     }
@@ -199,17 +252,24 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
+            SettingsItem(
+                icon = Icons.Filled.Notifications,
+                title = "Heure des rappels",
+                subtitle = "${notifHour}h00 — activez les rappels depuis la fiche programme",
+                onClick = { showHourDialog = true },
+            )
+
             ElevatedCard(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    Icon(Icons.Filled.Notifications, null, tint = MaterialTheme.colorScheme.primary)
+                    Icon(Icons.Filled.Info, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                     Column(Modifier.weight(1f)) {
-                        Text("Configuration par programme", style = MaterialTheme.typography.bodyLarge)
+                        Text("Activation par programme", style = MaterialTheme.typography.bodyLarge)
                         Text(
-                            "Activez et configurez les rappels depuis la fiche de chaque programme",
+                            "Activez et configurez les rappels depuis la fiche de chaque programme d'entraînement",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -260,7 +320,7 @@ fun SettingsScreen(
             SettingsItem(
                 icon = Icons.Filled.Info,
                 title = "Version",
-                subtitle = "Kalos 1.9.2",
+                subtitle = "Kalos 2.1.0",
                 enabled = false,
             )
         }

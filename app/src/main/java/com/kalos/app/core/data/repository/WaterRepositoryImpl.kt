@@ -20,6 +20,9 @@ class WaterRepositoryImpl @Inject constructor(
     override fun observeTodayIntake(): Flow<Int> =
         dao.observeForDate(LocalDate.now().toString()).map { it ?: 0 }
 
+    override fun observeWaterForDate(date: String): Flow<Int> =
+        dao.observeForDate(date).map { it ?: 0 }
+
     override fun getGoalMl(): Int = prefs.getInt("goal_ml", 2000)
 
     override suspend fun addWater(amountMl: Int) {

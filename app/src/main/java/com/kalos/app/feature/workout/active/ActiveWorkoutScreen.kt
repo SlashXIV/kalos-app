@@ -148,7 +148,7 @@ fun ActiveWorkoutScreen(
 
             AnimatedVisibility(visible = state.isResting) {
                 Surface(
-                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    color = MaterialTheme.colorScheme.primaryContainer,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Row(
@@ -161,11 +161,11 @@ fun ActiveWorkoutScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Icon(Icons.Filled.Timer, null, modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer)
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer)
                             Text("Repos : ${state.restSecsLeft}s",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer)
+                                color = MaterialTheme.colorScheme.onPrimaryContainer)
                         }
                         TextButton(onClick = viewModel::skipRest) {
                             Text("Passer")

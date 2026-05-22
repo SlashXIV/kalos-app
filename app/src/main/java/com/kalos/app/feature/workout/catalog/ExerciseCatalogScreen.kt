@@ -88,6 +88,16 @@ fun ExerciseCatalogScreen(
                         selected = state.selectedMuscle == muscle,
                         onClick = { viewModel.onMuscleChange(muscle) },
                         label = { Text(muscle, style = MaterialTheme.typography.labelSmall) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            enabled = true,
+                            selected = state.selectedMuscle == muscle,
+                            selectedBorderColor = MaterialTheme.colorScheme.primary,
+                            borderColor = MaterialTheme.colorScheme.outline,
+                        ),
                     )
                 }
             }
@@ -101,6 +111,16 @@ fun ExerciseCatalogScreen(
                         selected = state.selectedType == type,
                         onClick = { viewModel.onTypeChange(type) },
                         label = { Text(type, style = MaterialTheme.typography.labelSmall) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            enabled = true,
+                            selected = state.selectedType == type,
+                            selectedBorderColor = MaterialTheme.colorScheme.primary,
+                            borderColor = MaterialTheme.colorScheme.outline,
+                        ),
                     )
                 }
             }

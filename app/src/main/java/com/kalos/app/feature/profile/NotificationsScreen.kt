@@ -128,7 +128,16 @@ fun NotificationsScreen(
                             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                         )
                     }
-                    Slider(value = sliderHour, onValueChange = { sliderHour = it }, valueRange = 6f..22f, steps = 15)
+                    Slider(
+                        value = sliderHour,
+                        onValueChange = { sliderHour = it },
+                        valueRange = 6f..22f,
+                        steps = 15,
+                        colors = SliderDefaults.colors(
+                            thumbColor = MaterialTheme.colorScheme.primary,
+                            activeTrackColor = MaterialTheme.colorScheme.primary,
+                        ),
+                    )
                     Text(
                         "S'applique à toutes les séances planifiées",
                         style = MaterialTheme.typography.labelSmall,
@@ -252,7 +261,7 @@ fun NotificationsScreen(
 
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
                 ),
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.fillMaxWidth(),
@@ -266,7 +275,7 @@ fun NotificationsScreen(
                         Icons.Filled.Info,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp).padding(top = 2.dp),
-                        tint = MaterialTheme.colorScheme.secondary,
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                     Text(
                         "Pour configurer le rappel jour J ou la veille d'une séance, " +
@@ -409,6 +418,16 @@ private fun SmartRemindersCard(state: NotificationsUiState, viewModel: Notificat
                                 selected = state.inactivityDays == days,
                                 onClick = { viewModel.setInactivityDays(days) },
                                 label = { Text("$days j", style = MaterialTheme.typography.labelSmall) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                ),
+                                border = FilterChipDefaults.filterChipBorder(
+                                    enabled = true,
+                                    selected = state.inactivityDays == days,
+                                    selectedBorderColor = MaterialTheme.colorScheme.primary,
+                                    borderColor = MaterialTheme.colorScheme.outline,
+                                ),
                             )
                         }
                         Text(
@@ -450,6 +469,10 @@ private fun SmartRemindersCard(state: NotificationsUiState, viewModel: Notificat
                     valueRange = 6f..22f,
                     steps = 15,
                     modifier = Modifier.fillMaxWidth(),
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                    ),
                 )
                 Text(
                     "Envoyés une fois par jour à l'heure choisie",

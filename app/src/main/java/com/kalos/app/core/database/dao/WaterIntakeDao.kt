@@ -16,9 +16,7 @@ interface WaterIntakeDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertIfAbsent(entity: WaterIntakeEntity)
 
-    @Query("UPDATE water_intake SET totalMl = totalMl + :amount WHERE date = :date")
-    suspend fun increment(date: String, amount: Int)
-
-    @Query("UPDATE water_intake SET totalMl = MAX(0, totalMl - :amount) WHERE date = :date")
-    suspend fun decrement(date: String, amount: Int)
+    // Handles both additions (positive) and corrections (negative). Floors at 0.
+    @Query("UPDATE water_intake SET totalMl = MAX(0, totalMl + :amount) WHERE date = :date")
+    suspend fun adjust(date: String, amount: Int)
 }

@@ -23,9 +23,11 @@ class WaterRepositoryImpl @Inject constructor(
     override fun getGoalMl(): Int = prefs.getInt("goal_ml", 2000)
 
     override suspend fun addWater(amountMl: Int) {
+        if (amountMl == 0) return
         val today = LocalDate.now().toString()
-        dao.insertIfAbsent(WaterIntakeEntity(date = today, totalMl = 0))
-        dao.increment(today, amountMl)
+        // Ensure the row exists before adjusting (only needed for positive additions)
+        if (amountMl > 0) dao.insertIfAbsent(WaterIntakeEntity(date = today, totalMl = 0))
+        dao.adjust(today, amountMl)
     }
 
     override fun setGoalMl(goalMl: Int) {

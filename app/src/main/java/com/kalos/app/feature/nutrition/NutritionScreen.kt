@@ -377,8 +377,9 @@ private fun HydrationCard(
             title = "Quantité personnalisée",
             initialValue = "",
             suffix = "ml",
+            hint = "Valeur négative pour corriger (ex : -250)",
             onConfirm = { v ->
-                v.toIntOrNull()?.let { if (it > 0) onAdd(it) }
+                v.toIntOrNull()?.let { if (it != 0) onAdd(it) }
                 showCustomDialog = false
             },
             onDismiss = { showCustomDialog = false },
@@ -391,6 +392,7 @@ private fun WaterAmountDialog(
     title: String,
     initialValue: String,
     suffix: String,
+    hint: String? = null,
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -399,14 +401,23 @@ private fun WaterAmountDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
-            OutlinedTextField(
-                value = value,
-                onValueChange = { value = it },
-                suffix = { Text(suffix) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                OutlinedTextField(
+                    value = value,
+                    onValueChange = { value = it },
+                    suffix = { Text(suffix) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                if (hint != null) {
+                    Text(
+                        hint,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(value) }) { Text("Valider") }

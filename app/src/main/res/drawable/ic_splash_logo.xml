@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/ic_launcher_kalos"
-    android:gravity="center"
-    android:tileMode="disabled" />
+<!--
+    Splash screen icon — Android alloue 240dp pour cette icône (circulairement masquée sur API 31+)
+    On veut le logo à ~60% du diamètre du cercle → 144dp
+    Inset = (240 - 144) / 2 = 48dp de chaque côté
+    Avec windowSplashScreenIconBackgroundColor = fond app → le cercle est invisible, logo flotte
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:left="48dp"
+        android:right="48dp"
+        android:top="48dp"
+        android:bottom="48dp">
+        <bitmap
+            android:src="@drawable/ic_launcher_kalos"
+            android:gravity="fill" />
+    </item>
+</layer-list>

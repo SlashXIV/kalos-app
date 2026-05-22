@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android 12+ (API 31+) : surcharge du splash screen
+    windowSplashScreenIconBackgroundColor : fond du cercle icône = fond app
+    → cercle invisible, logo flotte proprement sur le fond uni
+-->
+<resources>
+    <style name="Theme.Kalos" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/splash_background</item>
+        <item name="postSplashScreenTheme">@style/Theme.Kalos.NoActionBar</item>
+    </style>
+
+    <style name="Theme.Kalos.NoActionBar" parent="android:Theme.Material.NoActionBar" />
+</resources>

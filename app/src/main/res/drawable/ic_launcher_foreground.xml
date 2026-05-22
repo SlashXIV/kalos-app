@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/ic_launcher_kalos"
-    android:gravity="fill"
-    android:tileMode="disabled" />
+<!--
+    Adaptive icon foreground — canvas total : 108dp
+    Safe zone (toujours visible) : 72dp centré (inset min 18dp de chaque côté)
+    On utilise 22dp → logo occupe 64dp dans la safe zone, avec 4dp de marge confortable
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:left="22dp"
+        android:right="22dp"
+        android:top="22dp"
+        android:bottom="22dp">
+        <bitmap
+            android:src="@drawable/ic_launcher_kalos"
+            android:gravity="fill" />
+    </item>
+</layer-list>

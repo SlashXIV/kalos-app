@@ -31,11 +31,13 @@ class ProgramRepositoryImpl @Inject constructor(
         val workoutEntities = dao.getWorkoutsForProgramOnce(entity.id)
         val workouts = workoutEntities.mapNotNull { pw ->
             val t = templateDao.getById(pw.templateId) ?: return@mapNotNull null
+            val count = templateDao.countExercisesForTemplate(pw.templateId)
             ProgramWorkout(
                 id = pw.id, programId = pw.programId,
                 template = WorkoutTemplate(
                     id = t.id, name = t.name, description = t.description,
                     estimatedDurationMin = t.estimatedDurationMin,
+                    exerciseCount = count,
                 ),
                 dayOfWeek = pw.dayOfWeek, weekNumber = pw.weekNumber,
             )

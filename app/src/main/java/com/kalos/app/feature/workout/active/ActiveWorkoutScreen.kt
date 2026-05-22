@@ -52,7 +52,7 @@ fun ActiveWorkoutScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour")
                     }
                 },
                 actions = {

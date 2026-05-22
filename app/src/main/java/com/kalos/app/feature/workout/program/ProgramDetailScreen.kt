@@ -25,6 +25,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class ProgramNotifState(
+    val enabled: Boolean = false,
+    val dayOf: Boolean = true,
+    val dayBefore: Boolean = false,
+)
+
 @HiltViewModel
 class ProgramDetailViewModel @Inject constructor(
     private val programRepository: ProgramRepository,
@@ -34,8 +40,18 @@ class ProgramDetailViewModel @Inject constructor(
     private val _program = MutableStateFlow<TrainingProgram?>(null)
     val program: StateFlow<TrainingProgram?> = _program
 
+    private val _notif = MutableStateFlow(ProgramNotifState())
+    val notif: StateFlow<ProgramNotifState> = _notif
+
     fun load(id: Long) {
-        viewModelScope.launch { _program.value = programRepository.getById(id) }
+        viewModelScope.launch {
+            _program.value = programRepository.getById(id)
+            _notif.value = ProgramNotifState(
+                enabled = reminderScheduler.isProgramEnabled(id),
+                dayOf = reminderScheduler.isProgramDayOf(id),
+                dayBefore = reminderScheduler.isProgramDayBefore(id),
+            )
+        }
     }
 
     fun activate() {
@@ -45,6 +61,24 @@ class ProgramDetailViewModel @Inject constructor(
             reminderScheduler.schedule()
             _program.value = _program.value?.copy(isActive = true)
         }
+    }
+
+    fun setNotifEnabled(v: Boolean) {
+        val id = _program.value?.id ?: return
+        reminderScheduler.setProgramEnabled(id, v)
+        _notif.value = _notif.value.copy(enabled = v)
+    }
+
+    fun setNotifDayOf(v: Boolean) {
+        val id = _program.value?.id ?: return
+        reminderScheduler.setProgramDayOf(id, v)
+        _notif.value = _notif.value.copy(dayOf = v)
+    }
+
+    fun setNotifDayBefore(v: Boolean) {
+        val id = _program.value?.id ?: return
+        reminderScheduler.setProgramDayBefore(id, v)
+        _notif.value = _notif.value.copy(dayBefore = v)
     }
 }
 
@@ -56,6 +90,7 @@ fun ProgramDetailScreen(
     viewModel: ProgramDetailViewModel = hiltViewModel(),
 ) {
     val program by viewModel.program.collectAsStateWithLifecycle()
+    val notif by viewModel.notif.collectAsStateWithLifecycle()
     LaunchedEffect(programId) { viewModel.load(programId) }
 
     Scaffold(
@@ -64,7 +99,7 @@ fun ProgramDetailScreen(
                 title = { Text(program?.name ?: "Programme") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour")
                     }
                 },
                 actions = {
@@ -123,7 +158,86 @@ fun ProgramDetailScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
+
+            item {
+                NotifSettingsCard(
+                    notif = notif,
+                    onEnabled = viewModel::setNotifEnabled,
+                    onDayOf = viewModel::setNotifDayOf,
+                    onDayBefore = viewModel::setNotifDayBefore,
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun NotifSettingsCard(
+    notif: ProgramNotifState,
+    onEnabled: (Boolean) -> Unit,
+    onDayOf: (Boolean) -> Unit,
+    onDayBefore: (Boolean) -> Unit,
+) {
+    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Icon(
+                    Icons.Filled.Notifications,
+                    null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Text("Rappels", style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+                Switch(checked = notif.enabled, onCheckedChange = onEnabled)
+            }
+
+            if (notif.enabled) {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                NotifToggleRow(
+                    label = "Le jour même",
+                    sublabel = "Notification le matin des jours de séance",
+                    checked = notif.dayOf,
+                    onCheckedChange = onDayOf,
+                )
+                NotifToggleRow(
+                    label = "La veille",
+                    sublabel = "Rappel la veille d'une séance planifiée",
+                    checked = notif.dayBefore,
+                    onCheckedChange = onDayBefore,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NotifToggleRow(
+    label: String,
+    sublabel: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(label, style = MaterialTheme.typography.bodyMedium)
+            Text(sublabel,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
 
@@ -156,7 +270,7 @@ private fun ProgramWorkoutRow(pw: ProgramWorkout, days: List<String>) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        Text(pw.template?.let { "${it.exercises.size} ex." } ?: "",
+        Text(pw.template?.let { if (it.exerciseCount > 0) "${it.exerciseCount} ex." else "" } ?: "",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
     }

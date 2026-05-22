@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -29,7 +31,7 @@ fun ProgramsScreen(
                 title = { Text("Programmes") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour")
                     }
                 }
             )
@@ -63,7 +65,7 @@ private fun ProgramsContent(
             EmptyState(
                 title = "Aucun programme",
                 subtitle = "Les programmes d'entraînement apparaîtront ici",
-                icon = Icons.Filled.MenuBook,
+                icon = Icons.AutoMirrored.Filled.MenuBook,
             )
         }
     } else {

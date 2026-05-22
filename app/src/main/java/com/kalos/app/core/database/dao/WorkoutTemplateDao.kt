@@ -23,6 +23,9 @@ interface WorkoutTemplateDao {
     suspend fun delete(template: WorkoutTemplateEntity)
 
     // Template exercises
+    @Query("SELECT COUNT(*) FROM workout_template_exercise WHERE templateId = :templateId")
+    suspend fun countExercisesForTemplate(templateId: Long): Int
+
     @Query("SELECT * FROM workout_template_exercise WHERE templateId = :templateId ORDER BY orderIndex ASC")
     fun getExercisesForTemplate(templateId: Long): Flow<List<WorkoutTemplateExEntity>>
 

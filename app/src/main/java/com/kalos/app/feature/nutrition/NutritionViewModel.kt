@@ -6,6 +6,7 @@ import com.kalos.app.core.domain.model.*
 import com.kalos.app.core.domain.repository.MealRepository
 import com.kalos.app.core.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -22,6 +23,7 @@ data class NutritionUiState(
     val isLoading: Boolean = true,
 )
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class NutritionViewModel @Inject constructor(
     private val mealRepository: MealRepository,

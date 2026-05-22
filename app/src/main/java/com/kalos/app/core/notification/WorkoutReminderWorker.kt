@@ -27,21 +27,23 @@ class WorkoutReminderWorker(
             applicationContext,
             WorkerEntryPoint::class.java,
         )
-        val programRepository = entryPoint.programRepository()
-        val program = programRepository.getActive().first() ?: return Result.success()
+        val program = entryPoint.programRepository().getActive().first() ?: return Result.success()
         if (program.workouts.isEmpty()) return Result.success()
+
+        val prefs = applicationContext.getSharedPreferences("kalos_prefs", Context.MODE_PRIVATE)
+        val enabled = prefs.getBoolean("reminder_${program.id}_enabled", false)
+        if (!enabled) return Result.success()
+
+        val dayOf = prefs.getBoolean("reminder_${program.id}_day_of", true)
+        val dayBefore = prefs.getBoolean("reminder_${program.id}_day_before", false)
 
         val today = LocalDate.now()
         val todayDow = today.dayOfWeek.value
         val tomorrowDow = today.plusDays(1).dayOfWeek.value
 
-        val dayOf = inputData.getBoolean(KEY_DAY_OF, true)
-        val dayBefore = inputData.getBoolean(KEY_DAY_BEFORE, false)
-
         if (dayOf) {
-            val todayWorkout = program.workouts.firstOrNull { it.dayOfWeek == todayDow }
-            if (todayWorkout != null) {
-                val name = todayWorkout.template?.name ?: "Séance"
+            program.workouts.firstOrNull { it.dayOfWeek == todayDow }?.let { pw ->
+                val name = pw.template?.name ?: "Séance"
                 NotificationHelper.postWorkoutReminder(
                     applicationContext,
                     "Séance aujourd'hui 💪",
@@ -52,9 +54,8 @@ class WorkoutReminderWorker(
         }
 
         if (dayBefore) {
-            val tomorrowWorkout = program.workouts.firstOrNull { it.dayOfWeek == tomorrowDow }
-            if (tomorrowWorkout != null) {
-                val name = tomorrowWorkout.template?.name ?: "Séance"
+            program.workouts.firstOrNull { it.dayOfWeek == tomorrowDow }?.let { pw ->
+                val name = pw.template?.name ?: "Séance"
                 NotificationHelper.postWorkoutReminder(
                     applicationContext,
                     "Rappel : séance demain",
@@ -68,8 +69,6 @@ class WorkoutReminderWorker(
     }
 
     companion object {
-        const val KEY_DAY_OF = "day_of"
-        const val KEY_DAY_BEFORE = "day_before"
         private const val NOTIF_ID_TODAY = 1001
         private const val NOTIF_ID_TOMORROW = 1002
     }

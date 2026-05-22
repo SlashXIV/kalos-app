@@ -13,32 +13,33 @@ import javax.inject.Singleton
 class ReminderScheduler @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
-    private val prefs by lazy {
-        context.getSharedPreferences("kalos_prefs", Context.MODE_PRIVATE)
+    val prefs by lazy { context.getSharedPreferences("kalos_prefs", Context.MODE_PRIVATE) }
+
+    fun isProgramEnabled(id: Long) = prefs.getBoolean("reminder_${id}_enabled", false)
+    fun isProgramDayOf(id: Long) = prefs.getBoolean("reminder_${id}_day_of", true)
+    fun isProgramDayBefore(id: Long) = prefs.getBoolean("reminder_${id}_day_before", false)
+
+    fun setProgramEnabled(id: Long, v: Boolean) {
+        prefs.edit().putBoolean("reminder_${id}_enabled", v).apply()
+        schedule()
+    }
+
+    fun setProgramDayOf(id: Long, v: Boolean) {
+        prefs.edit().putBoolean("reminder_${id}_day_of", v).apply()
+        schedule()
+    }
+
+    fun setProgramDayBefore(id: Long, v: Boolean) {
+        prefs.edit().putBoolean("reminder_${id}_day_before", v).apply()
+        schedule()
     }
 
     fun schedule() {
-        val dayOf = prefs.getBoolean(PREF_DAY_OF, true)
-        val dayBefore = prefs.getBoolean(PREF_DAY_BEFORE, false)
-
-        if (!dayOf && !dayBefore) {
-            cancel()
-            return
-        }
-
         NotificationHelper.createChannel(context)
-
-        val data = workDataOf(
-            WorkoutReminderWorker.KEY_DAY_OF to dayOf,
-            WorkoutReminderWorker.KEY_DAY_BEFORE to dayBefore,
-        )
-        val initialDelay = minutesUntilNextMorning()
         val request = PeriodicWorkRequestBuilder<WorkoutReminderWorker>(1, TimeUnit.DAYS)
-            .setInitialDelay(initialDelay, TimeUnit.MINUTES)
-            .setInputData(data)
+            .setInitialDelay(minutesUntilNextMorning(), TimeUnit.MINUTES)
             .setConstraints(Constraints.Builder().setRequiresBatteryNotLow(false).build())
             .build()
-
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             WORK_NAME,
             ExistingPeriodicWorkPolicy.UPDATE,
@@ -50,29 +51,15 @@ class ReminderScheduler @Inject constructor(
         WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
     }
 
-    fun setDayOf(enabled: Boolean) {
-        prefs.edit().putBoolean(PREF_DAY_OF, enabled).apply()
-        schedule()
-    }
-
-    fun setDayBefore(enabled: Boolean) {
-        prefs.edit().putBoolean(PREF_DAY_BEFORE, enabled).apply()
-        schedule()
-    }
-
-    fun isDayOfEnabled(): Boolean = prefs.getBoolean(PREF_DAY_OF, true)
-    fun isDayBeforeEnabled(): Boolean = prefs.getBoolean(PREF_DAY_BEFORE, false)
-
     private fun minutesUntilNextMorning(): Long {
         val now = LocalDateTime.now()
-        val target8AM = now.toLocalDate().atTime(8, 0)
-        val target = if (now.isBefore(target8AM)) target8AM else target8AM.plusDays(1)
+        val target = now.toLocalDate().atTime(8, 0).let {
+            if (now.isBefore(it)) it else it.plusDays(1)
+        }
         return ChronoUnit.MINUTES.between(now, target).coerceAtLeast(1)
     }
 
     companion object {
         private const val WORK_NAME = "kalos_workout_reminder"
-        const val PREF_DAY_OF = "reminder_day_of"
-        const val PREF_DAY_BEFORE = "reminder_day_before"
     }
 }

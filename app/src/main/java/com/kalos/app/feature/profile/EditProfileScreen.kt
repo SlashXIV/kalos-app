@@ -105,7 +105,7 @@ fun EditProfileScreen(
                 title = { Text("Modifier le profil") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour")
                     }
                 },
                 actions = {

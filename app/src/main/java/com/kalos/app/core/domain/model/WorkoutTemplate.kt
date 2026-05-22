@@ -6,6 +6,7 @@ data class WorkoutTemplate(
     val description: String = "",
     val estimatedDurationMin: Int = 60,
     val exercises: List<TemplateExercise> = emptyList(),
+    val exerciseCount: Int = exercises.size,
     val createdAt: Long = System.currentTimeMillis(),
 )
 

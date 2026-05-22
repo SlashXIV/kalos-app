@@ -56,7 +56,7 @@ fun WorkoutSummaryScreen(
                     IconButton(onClick = {
                         navController.popBackStack(Screen.Workout.route, false)
                     }) {
-                        Icon(Icons.Filled.ArrowBack, "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour")
                     }
                 }
             )

@@ -135,7 +135,7 @@ fun EditGoalsScreen(
                 title = { Text("Objectifs nutritionnels") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour")
                     }
                 },
                 actions = {

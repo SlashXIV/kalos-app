@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Splash screen icon — Android alloue 240dp pour cette icône (circulairement masquée sur API 31+)
-    On veut le logo à ~60% du diamètre du cercle → 144dp
-    Inset = (240 - 144) / 2 = 48dp de chaque côté
-    Avec windowSplashScreenIconBackgroundColor = fond app → le cercle est invisible, logo flotte
+    Splash screen icon — Android alloue 240dp (circulaire masqué sur API 31+)
+    windowSplashScreenIconBackgroundColor = #3D414B → cercle couleur carte
+    Artwork K centré à 70% du diamètre du cercle → 168dp dans 240dp
+    Inset = (240-168)/2 = 36dp de chaque côté
+    Résultat : "carte circulaire" avec K blanc, cohérent avec l'icône launcher
 -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:left="48dp"
-        android:right="48dp"
-        android:top="48dp"
-        android:bottom="48dp">
+        android:left="36dp"
+        android:right="36dp"
+        android:top="36dp"
+        android:bottom="36dp">
         <bitmap
-            android:src="@drawable/ic_launcher_kalos"
+            android:src="@drawable/ic_launcher_artwork"
             android:gravity="fill" />
     </item>
 </layer-list>

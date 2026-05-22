@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Android 12+ (API 31+) : surcharge du splash screen
-    windowSplashScreenIconBackgroundColor : fond du cercle icône = fond app
-    → cercle invisible, logo flotte proprement sur le fond uni
+    Android 12+ (API 31+) splash screen
+    windowSplashScreenIconBackgroundColor = #3D414B (couleur carte du logo)
+    → le cercle système prend la couleur de la carte
+    → l'artwork blanc K flotte dans un cercle coloré sur fond app (#09090F)
+    → rendu premium : on voit l'icône circulaire Kalos, pas un carré flottant
 -->
 <resources>
     <style name="Theme.Kalos" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/splash_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
-        <item name="android:windowSplashScreenIconBackgroundColor">@color/splash_background</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/icon_card_color</item>
         <item name="postSplashScreenTheme">@style/Theme.Kalos.NoActionBar</item>
     </style>
 

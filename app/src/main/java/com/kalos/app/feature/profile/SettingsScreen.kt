@@ -1,5 +1,7 @@
 package com.kalos.app.feature.profile
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -21,6 +23,7 @@ import com.kalos.app.core.data.DietaryPreferencesStore
 import com.kalos.app.core.domain.model.DietaryFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,8 +39,30 @@ class SettingsViewModel @Inject constructor(
 fun SettingsScreen(
     navController: NavController,
     viewModel: SettingsViewModel = hiltViewModel(),
+    exportViewModel: ExportViewModel = hiltViewModel(),
 ) {
     val activeFilters by viewModel.filters.collectAsStateWithLifecycle()
+    val exportState by exportViewModel.state.collectAsStateWithLifecycle()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val createDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json"),
+    ) { uri -> uri?.let { exportViewModel.onUriSelected(it) } }
+
+    LaunchedEffect(exportState) {
+        when (val s = exportState) {
+            is ExportState.Success -> {
+                snackbarHostState.showSnackbar("Sauvegarde enregistrée avec succès")
+                exportViewModel.resetState()
+            }
+            is ExportState.Error -> {
+                snackbarHostState.showSnackbar("Erreur : ${s.message}")
+                exportViewModel.resetState()
+            }
+            else -> {}
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -49,7 +74,8 @@ fun SettingsScreen(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -152,8 +178,12 @@ fun SettingsScreen(
             SettingsItem(
                 icon = Icons.Filled.FileDownload,
                 title = "Exporter mes données",
-                subtitle = "Bientôt disponible",
-                enabled = false,
+                subtitle = if (exportState is ExportState.Writing) "Export en cours…"
+                           else "Sauvegarde JSON locale",
+                enabled = exportState !is ExportState.Writing,
+                onClick = {
+                    createDocumentLauncher.launch("kalos-backup-${LocalDate.now()}.json")
+                },
             )
 
             HorizontalDivider()
@@ -166,7 +196,7 @@ fun SettingsScreen(
             SettingsItem(
                 icon = Icons.Filled.Info,
                 title = "Version",
-                subtitle = "Kalos 1.7.0",
+                subtitle = "Kalos 1.8.0",
                 enabled = false,
             )
         }

@@ -3,6 +3,7 @@ package com.kalos.app.core.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.kalos.app.core.database.dao.*
+import com.kalos.app.core.database.dao.ExportDao
 import com.kalos.app.core.database.entity.*
 
 @Database(
@@ -35,4 +36,5 @@ abstract class KalosDatabase : RoomDatabase() {
     abstract fun workoutLogDao(): WorkoutLogDao
     abstract fun programDao(): ProgramDao
     abstract fun waterIntakeDao(): WaterIntakeDao
+    abstract fun exportDao(): ExportDao
 }

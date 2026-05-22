@@ -3,6 +3,7 @@ package com.kalos.app.di
 import android.content.Context
 import androidx.room.Room
 import com.kalos.app.core.database.KalosDatabase
+import com.kalos.app.core.database.dao.ExportDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,4 +30,5 @@ object DatabaseModule {
     @Provides fun provideWorkoutLogDao(db: KalosDatabase) = db.workoutLogDao()
     @Provides fun provideProgramDao(db: KalosDatabase) = db.programDao()
     @Provides fun provideWaterIntakeDao(db: KalosDatabase) = db.waterIntakeDao()
+    @Provides fun provideExportDao(db: KalosDatabase): ExportDao = db.exportDao()
 }

@@ -21,8 +21,9 @@ import com.kalos.app.core.database.entity.*
         WorkoutLogSetEntity::class,
         TrainingProgramEntity::class,
         ProgramWorkoutEntity::class,
+        WaterIntakeEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = false,
 )
 abstract class KalosDatabase : RoomDatabase() {
@@ -33,4 +34,5 @@ abstract class KalosDatabase : RoomDatabase() {
     abstract fun workoutTemplateDao(): WorkoutTemplateDao
     abstract fun workoutLogDao(): WorkoutLogDao
     abstract fun programDao(): ProgramDao
+    abstract fun waterIntakeDao(): WaterIntakeDao
 }

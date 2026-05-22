@@ -17,4 +17,5 @@ abstract class RepositoryModule {
     @Binds @Singleton abstract fun bindExerciseRepository(impl: ExerciseRepositoryImpl): ExerciseRepository
     @Binds @Singleton abstract fun bindWorkoutRepository(impl: WorkoutRepositoryImpl): WorkoutRepository
     @Binds @Singleton abstract fun bindProgramRepository(impl: ProgramRepositoryImpl): ProgramRepository
+    @Binds @Singleton abstract fun bindWaterRepository(impl: WaterRepositoryImpl): WaterRepository
 }

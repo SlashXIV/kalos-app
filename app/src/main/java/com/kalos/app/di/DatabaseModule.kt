@@ -28,4 +28,5 @@ object DatabaseModule {
     @Provides fun provideWorkoutTemplateDao(db: KalosDatabase) = db.workoutTemplateDao()
     @Provides fun provideWorkoutLogDao(db: KalosDatabase) = db.workoutLogDao()
     @Provides fun provideProgramDao(db: KalosDatabase) = db.programDao()
+    @Provides fun provideWaterIntakeDao(db: KalosDatabase) = db.waterIntakeDao()
 }

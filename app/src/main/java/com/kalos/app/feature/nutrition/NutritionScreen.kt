@@ -3,6 +3,7 @@ package com.kalos.app.feature.nutrition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -11,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -32,8 +34,10 @@ import kotlin.math.roundToInt
 fun NutritionScreen(
     navController: NavController,
     viewModel: NutritionViewModel = hiltViewModel(),
+    waterViewModel: WaterViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val waterState by waterViewModel.uiState.collectAsStateWithLifecycle()
 
     val dateLabel = remember(state.date) {
         val d = LocalDate.parse(state.date)
@@ -126,6 +130,15 @@ fun NutritionScreen(
                         )
                     }
                 }
+            }
+
+            // Hydration card
+            item(key = "hydration") {
+                HydrationCard(
+                    state = waterState,
+                    onAdd = waterViewModel::addWater,
+                    onSetGoal = waterViewModel::setGoal,
+                )
             }
 
             // Meal sections
@@ -229,6 +242,182 @@ private fun MealSection(
         }
     }
 }
+
+// ─── Hydration ────────────────────────────────────────────────────────────────
+
+@Composable
+private fun HydrationCard(
+    state: WaterUiState,
+    onAdd: (Int) -> Unit,
+    onSetGoal: (Int) -> Unit,
+) {
+    var showGoalDialog by remember { mutableStateOf(false) }
+    var showCustomDialog by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = MaterialTheme.shapes.large,
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Icon(
+                        Icons.Filled.WaterDrop,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = if (state.isGoalReached) MaterialTheme.colorScheme.primary
+                               else MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
+                    )
+                    Text(
+                        "Hydratation",
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                    )
+                    if (state.isGoalReached) {
+                        Icon(
+                            Icons.Filled.CheckCircle,
+                            contentDescription = "Objectif atteint",
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+                IconButton(
+                    onClick = { showGoalDialog = true },
+                    modifier = Modifier.size(28.dp),
+                ) {
+                    Icon(
+                        Icons.Filled.Edit,
+                        contentDescription = "Modifier l'objectif",
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            // Progress
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        state.displayTotal,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = if (state.isGoalReached) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        "/ ${state.displayGoal}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                LinearProgressIndicator(
+                    progress = { state.progress },
+                    modifier = Modifier.fillMaxWidth().height(6.dp).clip(MaterialTheme.shapes.small),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
+            }
+
+            // Quick-add buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                listOf(250, 500, 750).forEach { ml ->
+                    OutlinedButton(
+                        onClick = { onAdd(ml) },
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+                        border = ButtonDefaults.outlinedButtonBorder.copy(
+                            width = 1.dp,
+                        ),
+                    ) {
+                        Text("+${ml}ml", style = MaterialTheme.typography.labelMedium)
+                    }
+                }
+                FilledTonalButton(
+                    onClick = { showCustomDialog = true },
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
+                ) {
+                    Text("Autre", style = MaterialTheme.typography.labelMedium)
+                }
+            }
+        }
+    }
+
+    if (showGoalDialog) {
+        WaterAmountDialog(
+            title = "Objectif quotidien",
+            initialValue = state.goalMl.toString(),
+            suffix = "ml",
+            onConfirm = { v ->
+                v.toIntOrNull()?.let { onSetGoal(it) }
+                showGoalDialog = false
+            },
+            onDismiss = { showGoalDialog = false },
+        )
+    }
+
+    if (showCustomDialog) {
+        WaterAmountDialog(
+            title = "Quantité personnalisée",
+            initialValue = "",
+            suffix = "ml",
+            onConfirm = { v ->
+                v.toIntOrNull()?.let { if (it > 0) onAdd(it) }
+                showCustomDialog = false
+            },
+            onDismiss = { showCustomDialog = false },
+        )
+    }
+}
+
+@Composable
+private fun WaterAmountDialog(
+    title: String,
+    initialValue: String,
+    suffix: String,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var value by remember { mutableStateOf(initialValue) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            OutlinedTextField(
+                value = value,
+                onValueChange = { value = it },
+                suffix = { Text(suffix) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(value) }) { Text("Valider") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Annuler") }
+        },
+    )
+}
+
+// ─── Suggestions ──────────────────────────────────────────────────────────────
 
 @Composable
 private fun SuggestionsCard(

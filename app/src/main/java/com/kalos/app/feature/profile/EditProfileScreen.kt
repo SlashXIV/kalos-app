@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.*
 import com.kalos.app.core.domain.repository.UserRepository
+import com.kalos.app.core.domain.usecase.CalculateMacroGoalsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -41,14 +42,18 @@ data class EditProfileState(
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
+    private val calculateMacroGoals: CalculateMacroGoalsUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(EditProfileState())
     val state: StateFlow<EditProfileState> = _state
 
+    private var originalFitnessGoal: FitnessGoal? = null
+
     init {
         viewModelScope.launch {
             userRepository.getProfile()?.let { p ->
+                originalFitnessGoal = p.goal
                 _state.update {
                     it.copy(
                         name = p.name, age = p.age.toString(), sex = p.sex,
@@ -74,16 +79,24 @@ class EditProfileViewModel @Inject constructor(
         val s = _state.value
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
-            userRepository.saveProfile(
-                UserProfile(
-                    name = s.name.trim(), age = s.age.toIntOrNull() ?: 25,
-                    sex = s.sex, heightCm = s.heightCm.toFloatOrNull() ?: 175f,
-                    weightKg = s.weightKg.toFloatOrNull() ?: 75f,
-                    targetWeightKg = s.targetWeightKg.toFloatOrNull() ?: 70f,
-                    activityLevel = s.activityLevel, goal = s.goal,
-                    onboardingCompleted = true,
-                )
+            val profile = UserProfile(
+                name = s.name.trim(), age = s.age.toIntOrNull() ?: 25,
+                sex = s.sex, heightCm = s.heightCm.toFloatOrNull() ?: 175f,
+                weightKg = s.weightKg.toFloatOrNull() ?: 75f,
+                targetWeightKg = s.targetWeightKg.toFloatOrNull() ?: 70f,
+                activityLevel = s.activityLevel, goal = s.goal,
+                onboardingCompleted = true,
             )
+            userRepository.saveProfile(profile)
+
+            // Resync nutrition goal when the fitness objective or activity level changed,
+            // or when no custom goal exists yet.
+            val fitnessGoalChanged = s.goal != originalFitnessGoal
+            val existingGoal = userRepository.getGoal()
+            if (fitnessGoalChanged || existingGoal == null || !existingGoal.isCustom) {
+                userRepository.saveGoal(calculateMacroGoals(profile))
+            }
+
             _state.update { it.copy(isSaving = false, savedSuccessfully = true) }
         }
     }

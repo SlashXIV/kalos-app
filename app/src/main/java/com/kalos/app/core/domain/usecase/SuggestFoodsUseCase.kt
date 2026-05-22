@@ -1,5 +1,6 @@
 package com.kalos.app.core.domain.usecase
 
+import com.kalos.app.core.domain.model.DietaryFilter
 import com.kalos.app.core.domain.model.Food
 import com.kalos.app.core.domain.model.NutritionGoal
 import javax.inject.Inject
@@ -24,6 +25,7 @@ class SuggestFoodsUseCase @Inject constructor() {
         consumedProtein: Float,
         consumedCarbs: Float,
         consumedFat: Float,
+        dietaryFilters: Set<DietaryFilter> = emptySet(),
     ): List<FoodSuggestion> {
         val remKcal = max(0f, goal.kcal - consumedKcal)
         val remProtein = max(0f, goal.proteinG - consumedProtein)
@@ -35,12 +37,13 @@ class SuggestFoodsUseCase @Inject constructor() {
         val remMacroKcal = remProtein * 4f + remCarbs * 4f + remFat * 9f
         if (remMacroKcal < 1f) return emptyList()
 
-        // Macro weights = proportional to their remaining kcal contribution
+        // Macro weights proportional to remaining kcal contribution of each macro
         val wProtein = remProtein * 4f / remMacroKcal
         val wCarbs = remCarbs * 4f / remMacroKcal
         val wFat = remFat * 9f / remMacroKcal
 
         return foods
+            .filter { FoodTagger.passes(it, dietaryFilters) }
             .map { food ->
                 val serving = food.defaultServingG
                 val fKcal = food.kcalForAmount(serving)
@@ -53,8 +56,10 @@ class SuggestFoodsUseCase @Inject constructor() {
                 val covCarbs = min(fCarbs / max(remCarbs, 0.1f), 1f)
                 val covFat = min(fFat / max(remFat, 0.1f), 1f)
 
-                var score = covProtein * wProtein + covCarbs * wCarbs + covFat * wFat
-                // Heavily penalize foods that would overshoot remaining calories
+                var score = (covProtein * wProtein + covCarbs * wCarbs + covFat * wFat) *
+                    FoodTagger.qualityMultiplier(food)
+
+                // Penalise foods that would overshoot remaining calories
                 if (fKcal > remKcal * 1.1f) score *= 0.2f
 
                 FoodSuggestion(

@@ -23,11 +23,19 @@ enum class ActivityLevel(val label: String, val multiplier: Float) {
     VERY_ACTIVE("Extrêmement actif", 1.9f),
 }
 
-enum class FitnessGoal(val label: String, val kcalDelta: Int) {
-    LOSE_AGGRESSIVE("Sèche agressive (−750 kcal)", -750),
-    LOSE_FAST("Perte rapide (−500 kcal)", -500),
-    LOSE_SLOW("Perte progressive (−250 kcal)", -250),
-    MAINTAIN("Maintien", 0),
-    GAIN_LEAN("Prise de masse légère (+250 kcal)", +250),
-    GAIN_FAST("Prise de masse (+500 kcal)", +500),
+enum class FitnessGoal(
+    val label: String,
+    val kcalDelta: Int,
+    /** Protein target in g per kg of body weight */
+    val proteinPerKg: Float,
+    /** Fat target in g per kg of body weight */
+    val fatPerKg: Float,
+) {
+    // Higher protein during deficits to preserve muscle; lower fat leaves room for carbs
+    LOSE_AGGRESSIVE("Sèche agressive (−750 kcal)", -750, 2.2f, 0.8f),
+    LOSE_FAST("Perte rapide (−500 kcal)",          -500, 2.0f, 0.9f),
+    LOSE_SLOW("Perte progressive (−250 kcal)",     -250, 1.9f, 1.0f),
+    MAINTAIN("Maintien",                              0, 1.8f, 1.0f),
+    GAIN_LEAN("Prise de masse légère (+250 kcal)", +250, 1.8f, 1.1f),
+    GAIN_FAST("Prise de masse (+500 kcal)",        +500, 1.8f, 1.2f),
 }

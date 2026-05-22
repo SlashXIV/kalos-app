@@ -45,6 +45,14 @@ data class EditGoalsState(
     val goalDelta: Int = 0,
     val activityLabel: String = "",
     val goalLabel: String = "",
+    // Macro breakdown detail
+    val bWeightKg: Float = 0f,
+    val bProteinPerKg: Float = 0f,
+    val bFatPerKg: Float = 0f,
+    val bProteinG: Int = 0,
+    val bFatG: Int = 0,
+    val bCarbsG: Int = 0,
+    val bTargetKcal: Int = 0,
 )
 
 @HiltViewModel
@@ -96,6 +104,13 @@ class EditGoalsViewModel @Inject constructor(
                     goalDelta = profile.goal.kcalDelta,
                     activityLabel = profile.activityLevel.label,
                     goalLabel = profile.goal.label,
+                    bWeightKg = profile.weightKg,
+                    bProteinPerKg = profile.goal.proteinPerKg,
+                    bFatPerKg = profile.goal.fatPerKg,
+                    bProteinG = goal.proteinG,
+                    bFatG = goal.fatG,
+                    bCarbsG = goal.carbsG,
+                    bTargetKcal = goal.kcal,
                 )
             }
         }
@@ -183,6 +198,7 @@ fun EditGoalsScreen(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
+                        // — Calorie target breakdown —
                         Text(
                             "Détail du calcul",
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
@@ -203,11 +219,43 @@ fun EditGoalsScreen(
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
                             Text(
-                                "${state.kcal} kcal",
+                                "${state.bTargetKcal} kcal",
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.primary,
                             )
                         }
+
+                        // — Macro distribution breakdown —
+                        HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                        Text(
+                            "Répartition automatique des macros",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        val wKg = state.bWeightKg
+                        MacroBreakdownRow(
+                            label = "Protéines",
+                            formula = "${"%.1f".format(state.bProteinPerKg)}g/kg × ${wKg.toInt()}kg",
+                            grams = state.bProteinG,
+                            kcal = state.bProteinG * 4,
+                            kcalPerG = 4,
+                        )
+                        MacroBreakdownRow(
+                            label = "Lipides",
+                            formula = "${"%.1f".format(state.bFatPerKg)}g/kg × ${wKg.toInt()}kg",
+                            grams = state.bFatG,
+                            kcal = state.bFatG * 9,
+                            kcalPerG = 9,
+                        )
+                        val carbsKcal = state.bTargetKcal - state.bProteinG * 4 - state.bFatG * 9
+                        MacroBreakdownRow(
+                            label = "Glucides",
+                            formula = "reste = $carbsKcal kcal",
+                            grams = state.bCarbsG,
+                            kcal = carbsKcal,
+                            kcalPerG = 4,
+                        )
+
                         Text(
                             "Vous pouvez ajuster librement les valeurs ci-dessous.",
                             style = MaterialTheme.typography.labelSmall,
@@ -232,6 +280,9 @@ fun EditGoalsScreen(
             }
             GoalField("Lipides (g)", state.fat, viewModel::onFatChange)
 
+            // Always-visible energy equivalences reminder
+            EnergyEquivalencesRow()
+
             Spacer(Modifier.height(4.dp))
             Button(
                 onClick = viewModel::save,
@@ -242,6 +293,55 @@ fun EditGoalsScreen(
                 else Text("Enregistrer")
             }
         }
+    }
+}
+
+@Composable
+private fun EnergyEquivalencesRow() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            "1g protéine = 4 kcal  ·  1g glucide = 4 kcal  ·  1g lipide = 9 kcal",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+        )
+    }
+}
+
+@Composable
+private fun MacroBreakdownRow(
+    label: String,
+    formula: String,
+    grams: Int,
+    kcal: Int,
+    kcalPerG: Int,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                label,
+                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                formula,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Text(
+            "${grams}g  →  ${kcal} kcal",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 

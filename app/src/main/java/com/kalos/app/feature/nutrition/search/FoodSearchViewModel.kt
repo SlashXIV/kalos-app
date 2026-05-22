@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+enum class ServingMode { GRAMS, UNITS }
+
 data class FoodSearchUiState(
     val query: String = "",
     val results: List<Food> = emptyList(),
@@ -21,6 +23,8 @@ data class FoodSearchUiState(
     val favorites: List<Food> = emptyList(),
     val selectedFood: Food? = null,
     val amountG: String = "100",
+    val servingMode: ServingMode = ServingMode.GRAMS,
+    val servingCount: String = "1",
     val isLoading: Boolean = false,
     val addedSuccessfully: Boolean = false,
 )
@@ -62,16 +66,32 @@ class FoodSearchViewModel @Inject constructor(
     }
 
     fun selectFood(food: Food) {
-        _state.update { it.copy(selectedFood = food, amountG = food.defaultServingG.toInt().toString()) }
+        val defaultMode = if (food.servingUnit != "g") ServingMode.UNITS else ServingMode.GRAMS
+        _state.update {
+            it.copy(
+                selectedFood = food,
+                amountG = food.defaultServingG.toInt().toString(),
+                servingMode = defaultMode,
+                servingCount = "1",
+            )
+        }
     }
 
     fun onAmountChange(v: String) { _state.update { it.copy(amountG = v) } }
+    fun onServingCountChange(v: String) { _state.update { it.copy(servingCount = v) } }
+    fun onServingModeChange(mode: ServingMode) { _state.update { it.copy(servingMode = mode) } }
 
     fun dismissSheet() { _state.update { it.copy(selectedFood = null, amountG = "100") } }
 
     fun addToMeal(mealType: String, date: String) {
         val food = _state.value.selectedFood ?: return
-        val amount = _state.value.amountG.toFloatOrNull() ?: return
+        val amount = when (_state.value.servingMode) {
+            ServingMode.UNITS -> {
+                val count = _state.value.servingCount.toFloatOrNull() ?: return
+                count * food.defaultServingG
+            }
+            ServingMode.GRAMS -> _state.value.amountG.toFloatOrNull() ?: return
+        }
         viewModelScope.launch {
             val entryId = mealRepository.getOrCreateMealEntry(date, MealType.valueOf(mealType))
             mealRepository.addItemToMeal(

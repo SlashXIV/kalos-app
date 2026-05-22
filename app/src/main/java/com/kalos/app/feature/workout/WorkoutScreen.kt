@@ -29,6 +29,7 @@ fun WorkoutScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Séances", "Programmes", "Historique")
+    var templateToDelete by remember { mutableStateOf<WorkoutTemplate?>(null) }
 
     Scaffold(
         topBar = {
@@ -69,11 +70,31 @@ fun WorkoutScreen(
                     templates = state.templates,
                     onStart = { navController.navigate(Screen.ActiveWorkout.route(it)) },
                     onEdit = { navController.navigate(Screen.WorkoutBuilder.edit(it)) },
+                    onDelete = { template -> templateToDelete = template },
                 )
                 1 -> ProgramsTabContent(navController = navController)
                 2 -> WorkoutHistoryTabContent()
             }
         }
+    }
+
+    templateToDelete?.let { template ->
+        AlertDialog(
+            onDismissRequest = { templateToDelete = null },
+            title = { Text("Supprimer la séance") },
+            text = { Text("Voulez-vous vraiment supprimer « ${template.name} » ? Cette action est irréversible.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteTemplate(template)
+                        templateToDelete = null
+                    }
+                ) { Text("Supprimer", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { templateToDelete = null }) { Text("Annuler") }
+            },
+        )
     }
 }
 
@@ -82,6 +103,7 @@ private fun WorkoutsTab(
     templates: List<WorkoutTemplate>,
     onStart: (Long) -> Unit,
     onEdit: (Long) -> Unit,
+    onDelete: (WorkoutTemplate) -> Unit,
 ) {
     if (templates.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -101,6 +123,7 @@ private fun WorkoutsTab(
                     template = template,
                     onStart = { onStart(template.id) },
                     onEdit = { onEdit(template.id) },
+                    onDelete = { onDelete(template) },
                 )
             }
         }

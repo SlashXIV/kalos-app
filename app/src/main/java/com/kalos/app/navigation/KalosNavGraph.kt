@@ -14,7 +14,6 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.kalos.app.core.ui.component.KalosBottomNavBar
 import com.kalos.app.feature.calendar.CalendarScreen
-import com.kalos.app.feature.home.HomeScreen
 import com.kalos.app.feature.nutrition.NutritionScreen
 import com.kalos.app.feature.nutrition.custom.CustomFoodScreen
 import com.kalos.app.feature.nutrition.history.NutritionHistoryScreen
@@ -64,7 +63,7 @@ fun KalosNavGraph() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = Screen.Nutrition.route,
             modifier = Modifier.padding(innerPadding),
             enterTransition = { fadeIn(tween(200)) + slideInHorizontally(tween(200)) { it / 4 } },
             exitTransition = { fadeOut(tween(200)) },
@@ -72,7 +71,6 @@ fun KalosNavGraph() {
             popExitTransition = { fadeOut(tween(200)) + slideOutHorizontally(tween(200)) { it / 4 } },
         ) {
             // Main tabs
-            composable(Screen.Home.route) { HomeScreen(navController) }
             composable(Screen.Nutrition.route) { NutritionScreen(navController) }
             composable(Screen.Workout.route) { WorkoutScreen(navController) }
             composable(Screen.Calendar.route) { CalendarScreen(navController) }

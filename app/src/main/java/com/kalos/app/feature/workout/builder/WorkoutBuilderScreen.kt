@@ -23,9 +23,22 @@ fun WorkoutBuilderScreen(
     viewModel: WorkoutBuilderViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val currentEntry = navController.currentBackStackEntry
 
     LaunchedEffect(templateId) { viewModel.loadTemplate(templateId) }
     LaunchedEffect(state.savedId) { if (state.savedId != null) navController.popBackStack() }
+
+    // Receive exercise selected from the catalog
+    LaunchedEffect(currentEntry) {
+        currentEntry?.savedStateHandle?.let { handle ->
+            handle.getStateFlow<Long?>("added_exercise_id", null).collect { exerciseId ->
+                if (exerciseId != null) {
+                    viewModel.addExerciseById(exerciseId)
+                    handle.remove<Long>("added_exercise_id")
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {

@@ -2,58 +2,35 @@ package com.kalos.app.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Brand
-val KalosGreen = Color(0xFF1B5E20)
-val KalosGreenLight = Color(0xFF2E7D32)
-val KalosGreenSurface = Color(0xFFE8F5E9)
-val KalosOrange = Color(0xFFFF6D00)
-val KalosOrangeLight = Color(0xFFFF8F00)
-val KalosOrangeSurface = Color(0xFFFFF3E0)
+// ── Brand ────────────────────────────────────────────────────────────────────
+val PrimaryGreen              = Color(0xFF34D399)   // Emerald 400 — vivid on dark
+val PrimaryGreenDark          = Color(0xFF065F46)   // Emerald 900 — container
+val AccentOrange              = Color(0xFFFB923C)   // Orange 400 — refined accent
+val AccentOrangeDark          = Color(0xFF431407)   // Dark orange — container
 
-// Light theme
-val md_theme_light_primary = KalosGreen
-val md_theme_light_onPrimary = Color(0xFFFFFFFF)
-val md_theme_light_primaryContainer = Color(0xFFA5D6A7)
-val md_theme_light_onPrimaryContainer = Color(0xFF003909)
-val md_theme_light_secondary = KalosOrange
-val md_theme_light_onSecondary = Color(0xFFFFFFFF)
-val md_theme_light_secondaryContainer = Color(0xFFFFDDB3)
-val md_theme_light_onSecondaryContainer = Color(0xFF2B1700)
-val md_theme_light_tertiary = Color(0xFF00695C)
-val md_theme_light_onTertiary = Color(0xFFFFFFFF)
-val md_theme_light_background = Color(0xFFFAFAFA)
-val md_theme_light_onBackground = Color(0xFF1A1C1A)
-val md_theme_light_surface = Color(0xFFFFFFFF)
-val md_theme_light_onSurface = Color(0xFF1A1C1A)
-val md_theme_light_surfaceVariant = Color(0xFFDCE5DC)
-val md_theme_light_onSurfaceVariant = Color(0xFF404943)
-val md_theme_light_outline = Color(0xFF707973)
-val md_theme_light_error = Color(0xFFBA1A1A)
-val md_theme_light_onError = Color(0xFFFFFFFF)
+// ── Macro colors ──────────────────────────────────────────────────────────────
+val ColorProtein              = Color(0xFF818CF8)   // Indigo 400
+val ColorCarbs                = Color(0xFFFBBF24)   // Amber 400
+val ColorFat                  = Color(0xFFF87171)   // Rose 400
+val ColorCalories             = PrimaryGreen
 
-// Dark theme
-val md_theme_dark_primary = Color(0xFF81C784)
-val md_theme_dark_onPrimary = Color(0xFF003909)
-val md_theme_dark_primaryContainer = Color(0xFF1B5E20)
-val md_theme_dark_onPrimaryContainer = Color(0xFFA5D6A7)
-val md_theme_dark_secondary = Color(0xFFFFB74D)
-val md_theme_dark_onSecondary = Color(0xFF2B1700)
-val md_theme_dark_secondaryContainer = Color(0xFFBF4600)
-val md_theme_dark_onSecondaryContainer = Color(0xFFFFDDB3)
-val md_theme_dark_tertiary = Color(0xFF80CBC4)
-val md_theme_dark_onTertiary = Color(0xFF003731)
-val md_theme_dark_background = Color(0xFF121212)
-val md_theme_dark_onBackground = Color(0xFFE2E3DE)
-val md_theme_dark_surface = Color(0xFF1E1E1E)
-val md_theme_dark_onSurface = Color(0xFFE2E3DE)
-val md_theme_dark_surfaceVariant = Color(0xFF404943)
-val md_theme_dark_onSurfaceVariant = Color(0xFFC0C9C1)
-val md_theme_dark_outline = Color(0xFF8A938C)
-val md_theme_dark_error = Color(0xFFFFB4AB)
-val md_theme_dark_onError = Color(0xFF690005)
-
-// Macro colors (used for progress bars)
-val ColorProtein = Color(0xFF42A5F5)   // blue
-val ColorCarbs = Color(0xFFFFCA28)     // amber
-val ColorFat = Color(0xFFEF5350)       // red
-val ColorCalories = KalosOrange
+// ── Dark theme (app always forces dark) ───────────────────────────────────────
+val md_theme_dark_primary              = PrimaryGreen
+val md_theme_dark_onPrimary            = Color(0xFF022C22)
+val md_theme_dark_primaryContainer     = PrimaryGreenDark
+val md_theme_dark_onPrimaryContainer   = Color(0xFFA7F3D0)
+val md_theme_dark_secondary            = AccentOrange
+val md_theme_dark_onSecondary          = Color(0xFF1C0900)
+val md_theme_dark_secondaryContainer   = AccentOrangeDark
+val md_theme_dark_onSecondaryContainer = Color(0xFFFFDCC2)
+val md_theme_dark_tertiary             = Color(0xFF60A5FA)
+val md_theme_dark_onTertiary           = Color(0xFF001736)
+val md_theme_dark_background           = Color(0xFF09090F)
+val md_theme_dark_onBackground         = Color(0xFFEAEAF5)
+val md_theme_dark_surface              = Color(0xFF111120)
+val md_theme_dark_onSurface            = Color(0xFFEAEAF5)
+val md_theme_dark_surfaceVariant       = Color(0xFF1A1A30)
+val md_theme_dark_onSurfaceVariant     = Color(0xFF8A8AAC)
+val md_theme_dark_outline              = Color(0xFF2E2E50)
+val md_theme_dark_error                = Color(0xFFFF6B6B)
+val md_theme_dark_onError              = Color(0xFF2D0000)

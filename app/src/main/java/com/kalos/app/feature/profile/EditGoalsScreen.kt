@@ -18,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.NutritionGoal
 import com.kalos.app.core.domain.repository.UserRepository
+import com.kalos.app.core.domain.usecase.CalculateMacroGoalsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -28,6 +29,7 @@ data class EditGoalsState(
     val protein: String = "150",
     val carbs: String = "200",
     val fat: String = "67",
+    val hasProfile: Boolean = false,
     val isSaving: Boolean = false,
     val savedSuccessfully: Boolean = false,
 )
@@ -35,6 +37,7 @@ data class EditGoalsState(
 @HiltViewModel
 class EditGoalsViewModel @Inject constructor(
     private val userRepository: UserRepository,
+    private val calculateMacroGoals: CalculateMacroGoalsUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(EditGoalsState())
@@ -42,14 +45,16 @@ class EditGoalsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            val profile = userRepository.getProfile()
             userRepository.getGoal()?.let { g ->
                 _state.update {
                     it.copy(
                         kcal = g.kcal.toString(), protein = g.proteinG.toString(),
                         carbs = g.carbsG.toString(), fat = g.fatG.toString(),
+                        hasProfile = profile != null,
                     )
                 }
-            }
+            } ?: _state.update { it.copy(hasProfile = profile != null) }
         }
     }
 
@@ -57,6 +62,21 @@ class EditGoalsViewModel @Inject constructor(
     fun onProteinChange(v: String) = _state.update { it.copy(protein = v) }
     fun onCarbsChange(v: String) = _state.update { it.copy(carbs = v) }
     fun onFatChange(v: String) = _state.update { it.copy(fat = v) }
+
+    fun autoCalculate() {
+        viewModelScope.launch {
+            val profile = userRepository.getProfile() ?: return@launch
+            val goal = calculateMacroGoals(profile)
+            _state.update {
+                it.copy(
+                    kcal = goal.kcal.toString(),
+                    protein = goal.proteinG.toString(),
+                    carbs = goal.carbsG.toString(),
+                    fat = goal.fatG.toString(),
+                )
+            }
+        }
+    }
 
     fun save() {
         val s = _state.value
@@ -114,6 +134,17 @@ fun EditGoalsScreen(
         ) {
             Text("Objectifs caloriques et macros quotidiens",
                 style = MaterialTheme.typography.titleSmall)
+
+            if (state.hasProfile) {
+                OutlinedButton(
+                    onClick = viewModel::autoCalculate,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Filled.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Calculer depuis mon profil")
+                }
+            }
 
             GoalField("Calories (kcal)", state.kcal, viewModel::onKcalChange)
             HorizontalDivider()

@@ -89,9 +89,22 @@ fun ExerciseCatalogScreen(
             } else {
                 LazyColumn {
                     items(state.exercises, key = { it.id }) { exercise ->
+                        val inBuilderContext = templateId > 0
                         ExerciseListItem(
                             exercise = exercise,
-                            onClick = { navController.navigate(Screen.ExerciseDetail.route(exercise.id)) },
+                            onClick = {
+                                if (inBuilderContext) {
+                                    navController.previousBackStackEntry
+                                        ?.savedStateHandle
+                                        ?.set("added_exercise_id", exercise.id)
+                                    navController.popBackStack()
+                                } else {
+                                    navController.navigate(Screen.ExerciseDetail.route(exercise.id))
+                                }
+                            },
+                            onInfoClick = if (inBuilderContext) {
+                                { navController.navigate(Screen.ExerciseDetail.route(exercise.id)) }
+                            } else null,
                         )
                         HorizontalDivider()
                     }

@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class FoodEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
+    val nameNormalized: String = "",
     val brand: String = "",
     val category: String = "Divers",
     val kcalPer100g: Float,

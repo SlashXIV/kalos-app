@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FoodDao {
-    @Query("SELECT * FROM food WHERE name LIKE '%' || :query || '%' OR brand LIKE '%' || :query || '%' ORDER BY isFavorite DESC, lastUsedAt DESC LIMIT 100")
+    @Query("SELECT * FROM food WHERE nameNormalized LIKE '%' || :query || '%' OR brand LIKE '%' || :query || '%' ORDER BY isFavorite DESC, lastUsedAt DESC LIMIT 100")
     fun search(query: String): Flow<List<FoodEntity>>
 
     @Query("SELECT * FROM food WHERE category = :category ORDER BY name ASC")

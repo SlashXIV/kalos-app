@@ -126,6 +126,10 @@ fun FoodSearchScreen(
                 food = state.selectedFood!!,
                 amount = state.amountG,
                 onAmountChange = viewModel::onAmountChange,
+                servingMode = state.servingMode,
+                servingCount = state.servingCount,
+                onServingCountChange = viewModel::onServingCountChange,
+                onServingModeChange = viewModel::onServingModeChange,
                 onAdd = { viewModel.addToMeal(mealType, date) },
                 onDismiss = viewModel::dismissSheet,
             )
@@ -143,15 +147,27 @@ private fun SectionHeader(title: String) {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FoodDetailSheet(
     food: Food,
     amount: String,
     onAmountChange: (String) -> Unit,
+    servingMode: ServingMode,
+    servingCount: String,
+    onServingCountChange: (String) -> Unit,
+    onServingModeChange: (ServingMode) -> Unit,
     onAdd: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val amountFloat = amount.toFloatOrNull() ?: 0f
+    val hasUnitServing = food.servingUnit != "g"
+
+    val amountFloat: Float = if (hasUnitServing && servingMode == ServingMode.UNITS) {
+        (servingCount.toFloatOrNull() ?: 0f) * food.defaultServingG
+    } else {
+        amount.toFloatOrNull() ?: 0f
+    }
+
     val kcal = food.kcalForAmount(amountFloat)
     val protein = food.proteinForAmount(amountFloat)
     val carbs = food.carbsForAmount(amountFloat)
@@ -168,15 +184,43 @@ private fun FoodDetailSheet(
             Text(food.brand, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        OutlinedTextField(
-            value = amount,
-            onValueChange = onAmountChange,
-            label = { Text("Quantité") },
-            suffix = { Text(food.servingUnit) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-        )
+        // Unit/gram toggle (only for foods with a non-gram serving unit)
+        if (hasUnitServing) {
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                SegmentedButton(
+                    selected = servingMode == ServingMode.UNITS,
+                    onClick = { onServingModeChange(ServingMode.UNITS) },
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                ) { Text(food.servingUnit.replaceFirstChar { it.uppercaseChar() }) }
+                SegmentedButton(
+                    selected = servingMode == ServingMode.GRAMS,
+                    onClick = { onServingModeChange(ServingMode.GRAMS) },
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                ) { Text("Grammes") }
+            }
+        }
+
+        if (hasUnitServing && servingMode == ServingMode.UNITS) {
+            OutlinedTextField(
+                value = servingCount,
+                onValueChange = onServingCountChange,
+                label = { Text("Nombre de ${food.servingUnit}") },
+                suffix = { Text("× ${food.defaultServingG.toInt()}g") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+        } else {
+            OutlinedTextField(
+                value = amount,
+                onValueChange = onAmountChange,
+                label = { Text("Quantité") },
+                suffix = { Text("g") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+        }
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             MacroStat("Calories", "${kcal.roundToInt()} kcal")

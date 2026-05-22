@@ -10,8 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.kalos.app.core.ui.theme.KalosGreen
-import com.kalos.app.core.ui.theme.KalosOrange
 import com.kalos.app.navigation.Screen
 
 @Composable
@@ -30,7 +28,7 @@ fun WelcomeScreen(navController: NavController) {
                 imageVector = Icons.Filled.FitnessCenter,
                 contentDescription = null,
                 modifier = Modifier.size(96.dp),
-                tint = KalosGreen,
+                tint = MaterialTheme.colorScheme.primary,
             )
             Spacer(Modifier.height(24.dp))
             Text(

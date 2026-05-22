@@ -66,7 +66,6 @@ data class BottomNavItem(
 )
 
 val bottomNavItems = listOf(
-    BottomNavItem(Screen.Home, "Accueil", Icons.Filled.Home),
     BottomNavItem(Screen.Nutrition, "Nutrition", Icons.Filled.Restaurant),
     BottomNavItem(Screen.Workout, "Sport", Icons.Filled.FitnessCenter),
     BottomNavItem(Screen.Calendar, "Calendrier", Icons.Filled.CalendarMonth),

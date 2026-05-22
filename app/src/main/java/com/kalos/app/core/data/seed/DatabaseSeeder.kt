@@ -5,6 +5,7 @@ import com.kalos.app.core.database.dao.ExerciseDao
 import com.kalos.app.core.database.dao.FoodDao
 import com.kalos.app.core.database.dao.ProgramDao
 import com.kalos.app.core.database.entity.ExerciseEntity
+import com.kalos.app.core.data.util.normalizeForSearch
 import com.kalos.app.core.database.entity.FoodEntity
 import com.kalos.app.core.database.entity.TrainingProgramEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -35,7 +36,8 @@ class DatabaseSeeder @Inject constructor(
         val seeds: List<SeedFood> = json.decodeFromString(raw)
         val entities = seeds.map { s ->
             FoodEntity(
-                name = s.name, brand = s.brand, category = s.category,
+                name = s.name, nameNormalized = s.name.normalizeForSearch(),
+                brand = s.brand, category = s.category,
                 kcalPer100g = s.kcal, proteinPer100g = s.protein,
                 carbsPer100g = s.carbs, fatPer100g = s.fat,
                 fiberPer100g = s.fiber, defaultServingG = s.serving, servingUnit = s.unit,

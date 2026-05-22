@@ -1,5 +1,6 @@
 package com.kalos.app.core.data.mapper
 
+import com.kalos.app.core.data.util.normalizeForSearch
 import com.kalos.app.core.database.entity.FoodEntity
 import com.kalos.app.core.domain.model.Food
 
@@ -23,6 +24,7 @@ fun FoodEntity.toDomain() = Food(
 fun Food.toEntity() = FoodEntity(
     id = id,
     name = name,
+    nameNormalized = name.normalizeForSearch(),
     brand = brand,
     category = category,
     kcalPer100g = kcalPer100g,

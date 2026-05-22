@@ -29,6 +29,7 @@ class ExerciseCatalogViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _query = MutableStateFlow("")
+    private val _displayQuery = MutableStateFlow("") // immediate, drives the text field
     private val _muscle = MutableStateFlow("")
     private val _type = MutableStateFlow("")
     private val _equipment = MutableStateFlow("")
@@ -46,12 +47,13 @@ class ExerciseCatalogViewModel @Inject constructor(
             exerciseRepository.filter(f.query, f.muscle, f.type, f.equipment)
         },
         filters,
+        _displayQuery,
         _muscleGroups,
         _equipmentTypes,
-    ) { exercises, f, muscles, equipment ->
+    ) { exercises, f, displayQuery, muscles, equipment ->
         CatalogUiState(
             exercises = exercises,
-            query = f.query,
+            query = displayQuery,
             selectedMuscle = f.muscle,
             selectedType = f.type,
             selectedEquipment = f.equipment,
@@ -72,10 +74,14 @@ class ExerciseCatalogViewModel @Inject constructor(
         }
     }
 
-    fun onQueryChange(v: String) { _query.value = v }
+    fun onQueryChange(v: String) {
+        _displayQuery.value = v
+        _query.value = v
+    }
     fun onMuscleChange(v: String) { _muscle.value = if (_muscle.value == v) "" else v }
     fun onTypeChange(v: String) { _type.value = if (_type.value == v) "" else v }
     fun clearFilters() {
+        _displayQuery.value = ""
         _query.value = ""
         _muscle.value = ""
         _type.value = ""

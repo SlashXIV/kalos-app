@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.kalos.app.core.domain.model.Exercise
 import com.kalos.app.core.domain.model.TemplateExercise
 import com.kalos.app.core.domain.model.WorkoutTemplate
+import com.kalos.app.core.domain.repository.ExerciseRepository
 import com.kalos.app.core.domain.repository.WorkoutRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -24,6 +25,7 @@ data class BuilderUiState(
 @HiltViewModel
 class WorkoutBuilderViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository,
+    private val exerciseRepository: ExerciseRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(BuilderUiState())
@@ -61,6 +63,12 @@ class WorkoutBuilderViewModel @Inject constructor(
                 orderIndex = state.exercises.size,
             )
             state.copy(exercises = state.exercises + newEx)
+        }
+    }
+
+    fun addExerciseById(id: Long) {
+        viewModelScope.launch {
+            exerciseRepository.getById(id)?.let { addExercise(it) }
         }
     }
 

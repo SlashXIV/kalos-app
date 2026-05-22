@@ -3,8 +3,11 @@ package com.kalos.app.feature.nutrition
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kalos.app.core.domain.model.*
+import com.kalos.app.core.domain.repository.FoodRepository
 import com.kalos.app.core.domain.repository.MealRepository
 import com.kalos.app.core.domain.repository.UserRepository
+import com.kalos.app.core.domain.usecase.FoodSuggestion
+import com.kalos.app.core.domain.usecase.SuggestFoodsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -20,6 +23,7 @@ data class NutritionUiState(
     val totalProtein: Float = 0f,
     val totalCarbs: Float = 0f,
     val totalFat: Float = 0f,
+    val suggestions: List<FoodSuggestion> = emptyList(),
     val isLoading: Boolean = true,
 )
 
@@ -28,6 +32,8 @@ data class NutritionUiState(
 class NutritionViewModel @Inject constructor(
     private val mealRepository: MealRepository,
     private val userRepository: UserRepository,
+    private val foodRepository: FoodRepository,
+    private val suggestFoods: SuggestFoodsUseCase,
 ) : ViewModel() {
 
     private val _date = MutableStateFlow(LocalDate.now().toString())
@@ -37,16 +43,26 @@ class NutritionViewModel @Inject constructor(
         _date.flatMapLatest { mealRepository.getMealsForDate(it) },
         userRepository.observeGoal(),
         _date,
-    ) { meals, goal, currentDate ->
+        foodRepository.getAll(),
+    ) { meals, goal, currentDate, allFoods ->
         val safeGoal = goal ?: NutritionGoal()
+        val totalKcal = meals.sumOf { it.totalKcal.toDouble() }.toFloat()
+        val totalProtein = meals.sumOf { it.totalProtein.toDouble() }.toFloat()
+        val totalCarbs = meals.sumOf { it.totalCarbs.toDouble() }.toFloat()
+        val totalFat = meals.sumOf { it.totalFat.toDouble() }.toFloat()
+        val isToday = currentDate == LocalDate.now().toString()
+        val suggestions = if (isToday && totalKcal > 0f) {
+            suggestFoods(allFoods, safeGoal, totalKcal, totalProtein, totalCarbs, totalFat)
+        } else emptyList()
         NutritionUiState(
             date = currentDate,
             meals = meals,
             goal = safeGoal,
-            totalKcal = meals.sumOf { it.totalKcal.toDouble() }.toFloat(),
-            totalProtein = meals.sumOf { it.totalProtein.toDouble() }.toFloat(),
-            totalCarbs = meals.sumOf { it.totalCarbs.toDouble() }.toFloat(),
-            totalFat = meals.sumOf { it.totalFat.toDouble() }.toFloat(),
+            totalKcal = totalKcal,
+            totalProtein = totalProtein,
+            totalCarbs = totalCarbs,
+            totalFat = totalFat,
+            suggestions = suggestions,
             isLoading = false,
         )
     }.stateIn(

@@ -1,5 +1,6 @@
 package com.kalos.app.feature.nutrition.search
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kalos.app.core.domain.model.Food
@@ -32,6 +33,7 @@ data class FoodSearchUiState(
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class FoodSearchViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val foodRepository: FoodRepository,
     private val mealRepository: MealRepository,
 ) : ViewModel() {
@@ -42,6 +44,12 @@ class FoodSearchViewModel @Inject constructor(
     private val _query = MutableStateFlow("")
 
     init {
+        // Pre-fill query from nav arg (set by suggestion tap)
+        val startQuery = savedStateHandle.get<String>("query").orEmpty()
+        if (startQuery.isNotEmpty()) {
+            _state.update { it.copy(query = startQuery, isLoading = true) }
+            _query.value = startQuery
+        }
         // Debounced search
         viewModelScope.launch {
             _query

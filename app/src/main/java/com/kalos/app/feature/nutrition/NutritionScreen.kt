@@ -18,12 +18,14 @@ import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.MealEntry
 import com.kalos.app.core.domain.model.MealItem
 import com.kalos.app.core.domain.model.MealType
+import com.kalos.app.core.domain.usecase.FoodSuggestion
 import com.kalos.app.core.ui.component.CalorieProgressRing
 import com.kalos.app.core.ui.component.MacroTrioRow
 import com.kalos.app.navigation.Screen
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -141,6 +143,24 @@ fun NutritionScreen(
                     )
                 }
             }
+
+            // Smart suggestions — only shown for today when at least one food logged
+            if (state.suggestions.isNotEmpty()) {
+                item(key = "suggestions") {
+                    SuggestionsCard(
+                        suggestions = state.suggestions,
+                        onSuggestionClick = { suggestion ->
+                            navController.navigate(
+                                Screen.FoodSearch.routeWithQuery(
+                                    MealType.SNACK.name,
+                                    state.date,
+                                    suggestion.food.name,
+                                )
+                            )
+                        },
+                    )
+                }
+            }
         }
     }
 }
@@ -206,6 +226,95 @@ private fun MealSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun SuggestionsCard(
+    suggestions: List<FoodSuggestion>,
+    onSuggestionClick: (FoodSuggestion) -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = MaterialTheme.shapes.large,
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Icon(
+                    Icons.Filled.AutoAwesome,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Text(
+                    "Suggestions",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "Aliments qui complètent vos macros restantes",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(12.dp))
+            suggestions.forEachIndexed { index, suggestion ->
+                if (index > 0) HorizontalDivider(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    modifier = Modifier.padding(vertical = 4.dp),
+                )
+                SuggestionRow(suggestion = suggestion, onClick = { onSuggestionClick(suggestion) })
+            }
+        }
+    }
+}
+
+@Composable
+private fun SuggestionRow(suggestion: FoodSuggestion, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                suggestion.food.name,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            )
+            Text(
+                "${suggestion.servingG.roundToInt()}g  ·  P ${suggestion.proteinG.roundToInt()}g  ·  G ${suggestion.carbsG.roundToInt()}g  ·  L ${suggestion.fatG.roundToInt()}g",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.width(8.dp))
+        Text(
+            "${suggestion.kcal.roundToInt()} kcal",
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Spacer(Modifier.width(4.dp))
+        FilledTonalIconButton(
+            onClick = onClick,
+            modifier = Modifier.size(32.dp),
+            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                contentColor = MaterialTheme.colorScheme.primary,
+            ),
+        ) {
+            Icon(Icons.Filled.Add, contentDescription = "Ajouter", modifier = Modifier.size(16.dp))
         }
     }
 }

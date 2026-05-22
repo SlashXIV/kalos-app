@@ -78,10 +78,11 @@ fun KalosNavGraph() {
 
             // Nutrition sub-screens
             composable(
-                route = "nutrition/food_search?mealType={mealType}&date={date}",
+                route = "nutrition/food_search?mealType={mealType}&date={date}&query={query}",
                 arguments = listOf(
                     navArgument("mealType") { type = NavType.StringType },
                     navArgument("date") { type = NavType.StringType },
+                    navArgument("query") { type = NavType.StringType; defaultValue = "" },
                 )
             ) { backStackEntry ->
                 FoodSearchScreen(

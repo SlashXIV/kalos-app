@@ -19,8 +19,10 @@ sealed class Screen(val route: String) {
     object Profile : Screen("profile")
 
     // Nutrition sub-screens
-    object FoodSearch : Screen("nutrition/food_search?mealType={mealType}&date={date}") {
-        fun route(mealType: String, date: String) = "nutrition/food_search?mealType=$mealType&date=$date"
+    object FoodSearch : Screen("nutrition/food_search?mealType={mealType}&date={date}&query={query}") {
+        fun route(mealType: String, date: String) = "nutrition/food_search?mealType=$mealType&date=$date&query="
+        fun routeWithQuery(mealType: String, date: String, query: String) =
+            "nutrition/food_search?mealType=$mealType&date=$date&query=${android.net.Uri.encode(query)}"
     }
     object CustomFood : Screen("nutrition/custom_food?foodId={foodId}") {
         fun create() = "nutrition/custom_food?foodId=-1"

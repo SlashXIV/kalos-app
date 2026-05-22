@@ -515,7 +515,7 @@ private fun WorkoutFrequencyBars(weeksData: List<Int>) {
     val max = weeksData.maxOrNull()?.coerceAtLeast(1) ?: 1
     val weekLabels = listOf("S-3", "S-2", "S-1", "Cette sem.")
     Row(
-        modifier = Modifier.fillMaxWidth().height(72.dp),
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.Bottom,
     ) {
@@ -527,15 +527,17 @@ private fun WorkoutFrequencyBars(weeksData: List<Int>) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Bottom,
             ) {
-                if (count > 0) {
-                    Text(
-                        "$count",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                        color = if (isCurrentWeek) MaterialTheme.colorScheme.tertiary
-                                else MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(Modifier.height(2.dp))
+                Box(modifier = Modifier.height(20.dp), contentAlignment = Alignment.BottomCenter) {
+                    if (count > 0) {
+                        Text(
+                            "$count",
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                            color = if (isCurrentWeek) MaterialTheme.colorScheme.tertiary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
+                Spacer(Modifier.height(2.dp))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -551,6 +553,7 @@ private fun WorkoutFrequencyBars(weeksData: List<Int>) {
                     weekLabels.getOrElse(i) { "S${i + 1}" },
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
                 )
             }
         }

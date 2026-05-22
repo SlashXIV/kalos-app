@@ -15,6 +15,9 @@ object NotificationHelper {
     const val CHANNEL_ID = "kalos_workout_reminders"
     private const val CHANNEL_NAME = "Rappels d'entraînement"
 
+    const val SMART_CHANNEL_ID = "kalos_smart_reminders"
+    private const val SMART_CHANNEL_NAME = "Rappels intelligents"
+
     fun createChannel(context: Context) {
         val channel = NotificationChannel(
             CHANNEL_ID,
@@ -27,6 +30,18 @@ object NotificationHelper {
             .createNotificationChannel(channel)
     }
 
+    fun createSmartChannel(context: Context) {
+        val channel = NotificationChannel(
+            SMART_CHANNEL_ID,
+            SMART_CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ).apply {
+            description = "Rappels de discipline nutrition, sport et hydratation"
+        }
+        context.getSystemService(NotificationManager::class.java)
+            .createNotificationChannel(channel)
+    }
+
     fun postWorkoutReminder(context: Context, title: String, text: String, notifId: Int) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
@@ -34,6 +49,22 @@ object NotificationHelper {
             ) return
         }
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .build()
+        context.getSystemService(NotificationManager::class.java).notify(notifId, notification)
+    }
+
+    fun postSmartReminder(context: Context, title: String, text: String, notifId: Int) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) return
+        }
+        val notification = NotificationCompat.Builder(context, SMART_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(text)

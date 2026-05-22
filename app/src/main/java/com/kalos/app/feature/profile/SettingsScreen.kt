@@ -21,6 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.data.DietaryPreferencesStore
 import com.kalos.app.core.domain.model.DietaryFilter
+import com.kalos.app.core.notification.IntelligentReminderScheduler
 import com.kalos.app.core.notification.ReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,10 +34,12 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val prefsStore: DietaryPreferencesStore,
     private val reminderScheduler: ReminderScheduler,
+    private val smartScheduler: IntelligentReminderScheduler,
 ) : ViewModel() {
     val filters: StateFlow<Set<DietaryFilter>> = prefsStore.filtersFlow
     fun toggle(filter: DietaryFilter, enabled: Boolean) = prefsStore.setFilter(filter, enabled)
 
+    // Program reminder hour
     private val _notifHour = MutableStateFlow(reminderScheduler.getNotifHour())
     val notifHour: StateFlow<Int> = _notifHour.asStateFlow()
 
@@ -44,6 +47,32 @@ class SettingsViewModel @Inject constructor(
         reminderScheduler.setNotifHour(hour)
         _notifHour.value = hour
     }
+
+    // Smart reminders
+    private val _smartEnabled = MutableStateFlow(smartScheduler.isEnabled())
+    val smartEnabled: StateFlow<Boolean> = _smartEnabled.asStateFlow()
+
+    private val _smartNutrition = MutableStateFlow(smartScheduler.isNutritionEnabled())
+    val smartNutrition: StateFlow<Boolean> = _smartNutrition.asStateFlow()
+
+    private val _smartWorkout = MutableStateFlow(smartScheduler.isWorkoutEnabled())
+    val smartWorkout: StateFlow<Boolean> = _smartWorkout.asStateFlow()
+
+    private val _smartHydration = MutableStateFlow(smartScheduler.isHydrationEnabled())
+    val smartHydration: StateFlow<Boolean> = _smartHydration.asStateFlow()
+
+    private val _inactivityDays = MutableStateFlow(smartScheduler.getInactivityDays())
+    val inactivityDays: StateFlow<Int> = _inactivityDays.asStateFlow()
+
+    private val _smartHour = MutableStateFlow(smartScheduler.getHour())
+    val smartHour: StateFlow<Int> = _smartHour.asStateFlow()
+
+    fun setSmartEnabled(v: Boolean) { smartScheduler.setEnabled(v); _smartEnabled.value = v }
+    fun setSmartNutrition(v: Boolean) { smartScheduler.setNutritionEnabled(v); _smartNutrition.value = v }
+    fun setSmartWorkout(v: Boolean) { smartScheduler.setWorkoutEnabled(v); _smartWorkout.value = v }
+    fun setSmartHydration(v: Boolean) { smartScheduler.setHydrationEnabled(v); _smartHydration.value = v }
+    fun setInactivityDays(days: Int) { smartScheduler.setInactivityDays(days); _inactivityDays.value = days }
+    fun setSmartHour(hour: Int) { smartScheduler.setHour(hour); _smartHour.value = hour }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -135,7 +164,7 @@ fun SettingsScreen(
         var sliderHour by remember { mutableFloatStateOf(notifHour.toFloat()) }
         AlertDialog(
             onDismissRequest = { showHourDialog = false },
-            title = { Text("Heure des rappels") },
+            title = { Text("Heure des rappels programme") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -151,7 +180,7 @@ fun SettingsScreen(
                         steps = 15,
                     )
                     Text(
-                        "S'applique à tous les rappels d'entraînement",
+                        "S'applique aux rappels de séances planifiées",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -190,6 +219,17 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            // ── Smart reminders ──────────────────────────────────────────────
+            Text(
+                "Rappels intelligents",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            SmartRemindersCard(viewModel = viewModel)
+
+            HorizontalDivider()
+
             // ── Dietary preferences ──────────────────────────────────────────
             Text(
                 "Préférences alimentaires",
@@ -245,7 +285,7 @@ fun SettingsScreen(
 
             HorizontalDivider()
 
-            // ── Reminders ────────────────────────────────────────────────────
+            // ── Program reminders ────────────────────────────────────────────
             Text(
                 "Rappels d'entraînement",
                 style = MaterialTheme.typography.titleSmall,
@@ -254,7 +294,7 @@ fun SettingsScreen(
 
             SettingsItem(
                 icon = Icons.Filled.Notifications,
-                title = "Heure des rappels",
+                title = "Heure des rappels programme",
                 subtitle = "${notifHour}h00 — activez les rappels depuis la fiche programme",
                 onClick = { showHourDialog = true },
             )
@@ -320,10 +360,191 @@ fun SettingsScreen(
             SettingsItem(
                 icon = Icons.Filled.Info,
                 title = "Version",
-                subtitle = "Kalos 2.1.0",
+                subtitle = "Kalos 2.2.0",
                 enabled = false,
             )
         }
+    }
+}
+
+// ─── Smart reminders card ─────────────────────────────────────────────────────
+
+@Composable
+private fun SmartRemindersCard(viewModel: SettingsViewModel) {
+    val enabled by viewModel.smartEnabled.collectAsStateWithLifecycle()
+    val nutritionEnabled by viewModel.smartNutrition.collectAsStateWithLifecycle()
+    val workoutEnabled by viewModel.smartWorkout.collectAsStateWithLifecycle()
+    val hydrationEnabled by viewModel.smartHydration.collectAsStateWithLifecycle()
+    val inactivityDays by viewModel.inactivityDays.collectAsStateWithLifecycle()
+    val smartHour by viewModel.smartHour.collectAsStateWithLifecycle()
+
+    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
+            // Master switch
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Icon(
+                        Icons.Filled.NotificationsActive,
+                        contentDescription = null,
+                        tint = if (enabled) MaterialTheme.colorScheme.primary
+                               else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(22.dp),
+                    )
+                    Column {
+                        Text(
+                            "Rappels de discipline",
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                        )
+                        Text(
+                            "Nutrition, sport, hydratation",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                Switch(
+                    checked = enabled,
+                    onCheckedChange = viewModel::setSmartEnabled,
+                    colors = SwitchDefaults.colors(
+                        checkedTrackColor = MaterialTheme.colorScheme.primary,
+                        checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
+                )
+            }
+
+            if (enabled) {
+                Spacer(Modifier.height(12.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                Spacer(Modifier.height(12.dp))
+
+                // Nutrition toggle
+                SmartToggleRow(
+                    title = "Nutrition",
+                    subtitle = "Si aucun repas enregistré aujourd'hui",
+                    checked = nutritionEnabled,
+                    onCheckedChange = viewModel::setSmartNutrition,
+                )
+
+                Spacer(Modifier.height(10.dp))
+
+                // Workout toggle + inactivity threshold
+                SmartToggleRow(
+                    title = "Activité physique",
+                    subtitle = "Si inactif depuis trop longtemps",
+                    checked = workoutEnabled,
+                    onCheckedChange = viewModel::setSmartWorkout,
+                )
+
+                if (workoutEnabled) {
+                    Spacer(Modifier.height(6.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(start = 4.dp),
+                    ) {
+                        listOf(2, 3, 5).forEach { days ->
+                            FilterChip(
+                                selected = inactivityDays == days,
+                                onClick = { viewModel.setInactivityDays(days) },
+                                label = {
+                                    Text(
+                                        "$days j",
+                                        style = MaterialTheme.typography.labelSmall,
+                                    )
+                                },
+                            )
+                        }
+                        Text(
+                            "sans séance",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.align(Alignment.CenterVertically),
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(10.dp))
+
+                // Hydration toggle
+                SmartToggleRow(
+                    title = "Hydratation",
+                    subtitle = "Si < 50 % de l'objectif eau atteint",
+                    checked = hydrationEnabled,
+                    onCheckedChange = viewModel::setSmartHydration,
+                )
+
+                Spacer(Modifier.height(12.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                Spacer(Modifier.height(12.dp))
+
+                // Hour picker inline
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        "Heure des rappels",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Text(
+                        "${smartHour}h00",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                Slider(
+                    value = smartHour.toFloat(),
+                    onValueChange = { viewModel.setSmartHour(it.toInt()) },
+                    valueRange = 6f..22f,
+                    steps = 15,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text(
+                    "Les rappels sont envoyés une fois par jour à l'heure choisie",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SmartToggleRow(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+            Text(title, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+            ),
+        )
     }
 }
 

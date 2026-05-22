@@ -22,7 +22,7 @@ import com.kalos.app.core.database.entity.*
         TrainingProgramEntity::class,
         ProgramWorkoutEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = false,
 )
 abstract class KalosDatabase : RoomDatabase() {

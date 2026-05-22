@@ -1,6 +1,5 @@
 package com.kalos.app.core.data.repository
 
-import com.kalos.app.core.data.mapper.toDomain
 import com.kalos.app.core.database.dao.ProgramDao
 import com.kalos.app.core.database.dao.WorkoutTemplateDao
 import com.kalos.app.core.database.dao.ExerciseDao
@@ -71,5 +70,35 @@ class ProgramRepositoryImpl @Inject constructor(
     override suspend fun activate(id: Long) {
         dao.deactivateAll()
         dao.activate(id)
+    }
+
+    override suspend fun linkTemplate(templateId: Long, programId: Long, dayOfWeek: Int) {
+        dao.deleteWorkoutByProgramAndDay(programId, dayOfWeek)
+        dao.deleteWorkoutByProgramAndTemplate(programId, templateId)
+        dao.upsertWorkout(
+            ProgramWorkoutEntity(
+                programId = programId,
+                templateId = templateId,
+                dayOfWeek = dayOfWeek,
+            )
+        )
+    }
+
+    override suspend fun unlinkTemplate(templateId: Long, programId: Long) {
+        dao.deleteWorkoutByProgramAndTemplate(programId, templateId)
+    }
+
+    override suspend fun getLinksForTemplate(templateId: Long): List<ProgramWorkout> {
+        return dao.getWorkoutsForTemplate(templateId).mapNotNull { pw ->
+            val t = templateDao.getById(pw.templateId) ?: return@mapNotNull null
+            ProgramWorkout(
+                id = pw.id,
+                programId = pw.programId,
+                template = WorkoutTemplate(id = t.id, name = t.name, description = t.description,
+                    estimatedDurationMin = t.estimatedDurationMin),
+                dayOfWeek = pw.dayOfWeek,
+                weekNumber = pw.weekNumber,
+            )
+        }
     }
 }

@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kalos.app.core.domain.model.Exercise
 import com.kalos.app.core.domain.model.TemplateExercise
+import com.kalos.app.core.domain.model.TrainingProgram
 import com.kalos.app.core.domain.model.WorkoutTemplate
 import com.kalos.app.core.domain.repository.ExerciseRepository
+import com.kalos.app.core.domain.repository.ProgramRepository
 import com.kalos.app.core.domain.repository.WorkoutRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -20,17 +22,30 @@ data class BuilderUiState(
     val isSaving: Boolean = false,
     val savedId: Long? = null,
     val isLoading: Boolean = false,
+    val availablePrograms: List<TrainingProgram> = emptyList(),
+    val selectedProgramId: Long? = null,
+    val selectedDayOfWeek: Int? = null,
 )
 
 @HiltViewModel
 class WorkoutBuilderViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository,
     private val exerciseRepository: ExerciseRepository,
+    private val programRepository: ProgramRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(BuilderUiState())
     val state: StateFlow<BuilderUiState> = _state
     private var editingTemplateId: Long = -1
+    private var originalLinkProgramId: Long? = null
+
+    init {
+        viewModelScope.launch {
+            programRepository.getAll().collect { programs ->
+                _state.update { it.copy(availablePrograms = programs) }
+            }
+        }
+    }
 
     fun loadTemplate(id: Long) {
         if (id <= 0) return
@@ -48,12 +63,26 @@ class WorkoutBuilderViewModel @Inject constructor(
                     )
                 }
             }
+            val links = programRepository.getLinksForTemplate(id)
+            val first = links.firstOrNull()
+            if (first != null) {
+                originalLinkProgramId = first.programId
+                _state.update { it.copy(selectedProgramId = first.programId, selectedDayOfWeek = first.dayOfWeek) }
+            }
         }
     }
 
     fun onNameChange(v: String) = _state.update { it.copy(name = v) }
     fun onDescriptionChange(v: String) = _state.update { it.copy(description = v) }
     fun onDurationChange(v: String) = _state.update { it.copy(estimatedDuration = v) }
+
+    fun onProgramSelected(programId: Long?) {
+        _state.update { it.copy(selectedProgramId = programId, selectedDayOfWeek = null) }
+    }
+
+    fun onDaySelected(day: Int?) {
+        _state.update { it.copy(selectedDayOfWeek = day) }
+    }
 
     fun addExercise(exercise: Exercise) {
         _state.update { state ->
@@ -100,6 +129,13 @@ class WorkoutBuilderViewModel @Inject constructor(
                     exercises = s.exercises,
                 )
             )
+            val newProgramId = s.selectedProgramId
+            val newDay = s.selectedDayOfWeek
+            if (newProgramId != null && newDay != null) {
+                programRepository.linkTemplate(id, newProgramId, newDay)
+            } else if (originalLinkProgramId != null) {
+                programRepository.unlinkTemplate(id, originalLinkProgramId!!)
+            }
             _state.update { it.copy(isSaving = false, savedId = id) }
         }
     }

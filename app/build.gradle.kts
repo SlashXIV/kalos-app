@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.activity.compose)
     implementation(libs.splashscreen)
     implementation(libs.datastore.preferences)
+    implementation(libs.work.runtime.ktx)
 
     // Compose
     implementation(platform(libs.compose.bom))

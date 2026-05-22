@@ -44,6 +44,15 @@ interface ProgramDao {
     @Query("DELETE FROM program_workout WHERE programId = :programId")
     suspend fun deleteAllWorkoutsForProgram(programId: Long)
 
+    @Query("SELECT * FROM program_workout WHERE templateId = :templateId")
+    suspend fun getWorkoutsForTemplate(templateId: Long): List<ProgramWorkoutEntity>
+
+    @Query("DELETE FROM program_workout WHERE programId = :programId AND dayOfWeek = :dayOfWeek")
+    suspend fun deleteWorkoutByProgramAndDay(programId: Long, dayOfWeek: Int)
+
+    @Query("DELETE FROM program_workout WHERE programId = :programId AND templateId = :templateId")
+    suspend fun deleteWorkoutByProgramAndTemplate(programId: Long, templateId: Long)
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(programs: List<TrainingProgramEntity>)
 

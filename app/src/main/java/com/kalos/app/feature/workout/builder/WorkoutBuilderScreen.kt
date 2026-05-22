@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.kalos.app.core.domain.model.TrainingProgram
 import com.kalos.app.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,7 +35,6 @@ fun WorkoutBuilderScreen(
     LaunchedEffect(templateId) { viewModel.loadTemplate(templateId) }
     LaunchedEffect(state.savedId) { if (state.savedId != null) navController.popBackStack() }
 
-    // Receive exercise selected from the catalog — use null assignment to keep the flow alive
     LaunchedEffect(currentEntry) {
         currentEntry?.savedStateHandle?.let { handle ->
             handle.getStateFlow<Long?>("added_exercise_id", null).collect { exerciseId ->
@@ -46,7 +46,6 @@ fun WorkoutBuilderScreen(
         }
     }
 
-    // Edit sets/reps dialog
     editingExerciseIndex?.let { idx ->
         if (idx < state.exercises.size) {
             val te = state.exercises[idx]
@@ -208,6 +207,132 @@ fun WorkoutBuilderScreen(
                             }
                             IconButton(onClick = { viewModel.removeExercise(index) }) {
                                 Icon(Icons.Filled.Delete, contentDescription = "Supprimer", tint = MaterialTheme.colorScheme.error)
+                            }
+                        }
+                    }
+                }
+            }
+
+            item {
+                ProgramLinkSection(
+                    programs = state.availablePrograms,
+                    selectedProgramId = state.selectedProgramId,
+                    selectedDayOfWeek = state.selectedDayOfWeek,
+                    onProgramSelected = viewModel::onProgramSelected,
+                    onDaySelected = viewModel::onDaySelected,
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ProgramLinkSection(
+    programs: List<TrainingProgram>,
+    selectedProgramId: Long?,
+    selectedDayOfWeek: Int?,
+    onProgramSelected: (Long?) -> Unit,
+    onDaySelected: (Int?) -> Unit,
+) {
+    val days = listOf("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche")
+
+    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Icon(
+                    Icons.Filled.CalendarToday,
+                    null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Text("Rattacher à un programme", style = MaterialTheme.typography.titleSmall)
+            }
+
+            if (programs.isEmpty()) {
+                Text(
+                    "Aucun programme disponible — créez-en un dans l'onglet Programmes",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                var programExpanded by remember { mutableStateOf(false) }
+                ExposedDropdownMenuBox(
+                    expanded = programExpanded,
+                    onExpandedChange = { programExpanded = it },
+                ) {
+                    OutlinedTextField(
+                        value = programs.find { it.id == selectedProgramId }?.name ?: "Aucun",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Programme") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = programExpanded) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                    )
+                    ExposedDropdownMenu(
+                        expanded = programExpanded,
+                        onDismissRequest = { programExpanded = false },
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Aucun") },
+                            onClick = { onProgramSelected(null); programExpanded = false },
+                        )
+                        programs.forEach { program ->
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        modifier = Modifier.fillMaxWidth(),
+                                    ) {
+                                        Text(program.name)
+                                        if (program.isActive) {
+                                            Text(
+                                                "Actif",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.primary,
+                                            )
+                                        }
+                                    }
+                                },
+                                onClick = { onProgramSelected(program.id); programExpanded = false },
+                            )
+                        }
+                    }
+                }
+
+                if (selectedProgramId != null) {
+                    var dayExpanded by remember { mutableStateOf(false) }
+                    ExposedDropdownMenuBox(
+                        expanded = dayExpanded,
+                        onExpandedChange = { dayExpanded = it },
+                    ) {
+                        OutlinedTextField(
+                            value = selectedDayOfWeek?.let { days.getOrElse(it - 1) { "?" } } ?: "Choisir le jour",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Jour de la semaine") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dayExpanded) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(),
+                        )
+                        ExposedDropdownMenu(
+                            expanded = dayExpanded,
+                            onDismissRequest = { dayExpanded = false },
+                        ) {
+                            days.forEachIndexed { idx, day ->
+                                DropdownMenuItem(
+                                    text = { Text(day) },
+                                    onClick = { onDaySelected(idx + 1); dayExpanded = false },
+                                )
                             }
                         }
                     }

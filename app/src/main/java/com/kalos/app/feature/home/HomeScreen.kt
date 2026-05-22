@@ -21,6 +21,7 @@ import com.kalos.app.core.ui.component.MacroTrioRow
 import com.kalos.app.navigation.Screen
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
@@ -133,6 +134,8 @@ fun HomeScreen(
             state.activeProgramName != null -> {
                 RestDayCard(
                     programName = state.activeProgramName!!,
+                    nextWorkout = state.nextSessionWorkout,
+                    nextDate = state.nextSessionDate,
                     onViewProgram = { navController.navigate(Screen.Programs.route) },
                 )
             }
@@ -199,6 +202,8 @@ private fun TodayProgramWorkoutCard(
 @Composable
 private fun RestDayCard(
     programName: String,
+    nextWorkout: ProgramWorkout?,
+    nextDate: LocalDate?,
     onViewProgram: () -> Unit,
 ) {
     ElevatedCard(modifier = Modifier.fillMaxWidth()) {
@@ -209,20 +214,30 @@ private fun RestDayCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    "Repos aujourd'hui",
-                    style = MaterialTheme.typography.titleSmall,
-                )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text("Repos aujourd'hui", style = MaterialTheme.typography.titleSmall)
                 Text(
                     programName,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                if (nextWorkout != null && nextDate != null) {
+                    val dayName = nextDate.dayOfWeek
+                        .getDisplayName(TextStyle.FULL, Locale.FRENCH)
+                        .replaceFirstChar { it.uppercase() }
+                    val sessionName = nextWorkout.template?.name
+                    val label = if (sessionName != null) "$dayName — $sessionName" else dayName
+                    Text(
+                        "Prochaine séance : $label",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
             }
-            TextButton(onClick = onViewProgram) {
-                Text("Programme")
-            }
+            TextButton(onClick = onViewProgram) { Text("Programme") }
         }
     }
 }

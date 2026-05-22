@@ -23,6 +23,8 @@ data class HomeUiState(
     val recentWorkouts: List<WorkoutLog> = emptyList(),
     val todayProgramWorkout: ProgramWorkout? = null,
     val activeProgramName: String? = null,
+    val nextSessionDate: LocalDate? = null,
+    val nextSessionWorkout: ProgramWorkout? = null,
     val isLoading: Boolean = true,
 )
 
@@ -64,14 +66,34 @@ class HomeViewModel @Inject constructor(
             isLoading = false,
         )
     }.combine(programRepository.getActive()) { base, activeProgram ->
-        val todayDow = LocalDate.now().dayOfWeek.value // 1=Lundi .. 7=Dimanche
+        val todayDow = LocalDate.now().dayOfWeek.value
+        val todayWorkout = activeProgram?.workouts?.firstOrNull { it.dayOfWeek == todayDow }
+        val nextPair = if (todayWorkout == null) {
+            activeProgram?.workouts?.let { nextScheduledAfterToday(it) }
+        } else null
         base.copy(
-            todayProgramWorkout = activeProgram?.workouts?.firstOrNull { it.dayOfWeek == todayDow },
+            todayProgramWorkout = todayWorkout,
             activeProgramName = activeProgram?.name,
+            nextSessionDate = nextPair?.second,
+            nextSessionWorkout = nextPair?.first,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = HomeUiState(),
     )
+
+    private fun nextScheduledAfterToday(workouts: List<ProgramWorkout>): Pair<ProgramWorkout, LocalDate>? {
+        val today = LocalDate.now()
+        val todayDow = today.dayOfWeek.value
+        val sorted = workouts.sortedBy { it.dayOfWeek }
+        val nextThisWeek = sorted.firstOrNull { it.dayOfWeek > todayDow }
+        if (nextThisWeek != null) {
+            return Pair(nextThisWeek, today.plusDays((nextThisWeek.dayOfWeek - todayDow).toLong()))
+        }
+        val firstNextWeek = sorted.firstOrNull()
+        return firstNextWeek?.let {
+            Pair(it, today.plusDays((7 - todayDow + it.dayOfWeek).toLong()))
+        }
+    }
 }

@@ -40,7 +40,6 @@ fun CalendarScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // Month navigation row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -63,7 +62,6 @@ fun CalendarScreen(
                 }
             }
 
-            // Weekday headers
             Row(modifier = Modifier.fillMaxWidth()) {
                 listOf("L", "M", "M", "J", "V", "S", "D").forEach { day ->
                     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
@@ -80,10 +78,10 @@ fun CalendarScreen(
 
             HorizontalDivider()
 
-            // Legend
-            Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                 LegendItem(color = MaterialTheme.colorScheme.primary, label = "Nutrition")
-                LegendItem(color = MaterialTheme.colorScheme.tertiary, label = "Sport")
+                LegendItem(color = MaterialTheme.colorScheme.tertiary, label = "Sport réalisé")
+                LegendItem(color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f), label = "Sport planifié")
             }
         }
     }
@@ -93,11 +91,10 @@ fun CalendarScreen(
 private fun CalendarGrid(state: CalendarUiState) {
     val month = state.month
     val firstDay = month.atDay(1)
-    val dayOfWeekOffset = firstDay.dayOfWeek.value - 1 // 0=Mon, 6=Sun
+    val dayOfWeekOffset = firstDay.dayOfWeek.value - 1
     val daysInMonth = month.lengthOfMonth()
     val today = LocalDate.now()
 
-    // Build list: null for empty cells, then day numbers
     val cells = buildList {
         repeat(dayOfWeekOffset) { add(null) }
         for (d in 1..daysInMonth) add(d)
@@ -120,6 +117,7 @@ private fun CalendarGrid(state: CalendarUiState) {
                     isToday = date == today,
                     hasNutrition = dateStr in state.nutritionDates,
                     hasWorkout = dateStr in state.workoutDates,
+                    hasPlanned = dateStr in state.plannedWorkoutDates,
                 )
             }
         }
@@ -132,6 +130,7 @@ private fun DayCell(
     isToday: Boolean,
     hasNutrition: Boolean,
     hasWorkout: Boolean,
+    hasPlanned: Boolean,
 ) {
     Box(
         modifier = Modifier
@@ -153,7 +152,7 @@ private fun DayCell(
                 color = if (isToday) MaterialTheme.colorScheme.onPrimaryContainer
                 else MaterialTheme.colorScheme.onSurface,
             )
-            if (hasNutrition || hasWorkout) {
+            if (hasNutrition || hasWorkout || hasPlanned) {
                 Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                     if (hasNutrition) {
                         Box(
@@ -169,6 +168,13 @@ private fun DayCell(
                                 .size(4.dp)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.tertiary)
+                        )
+                    } else if (hasPlanned) {
+                        Box(
+                            Modifier
+                                .size(4.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f))
                         )
                     }
                 }

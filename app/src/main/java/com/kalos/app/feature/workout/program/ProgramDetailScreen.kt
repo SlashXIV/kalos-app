@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.ProgramWorkout
 import com.kalos.app.core.domain.model.TrainingProgram
 import com.kalos.app.core.domain.repository.ProgramRepository
+import com.kalos.app.core.notification.ReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +28,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProgramDetailViewModel @Inject constructor(
     private val programRepository: ProgramRepository,
+    private val reminderScheduler: ReminderScheduler,
 ) : ViewModel() {
 
     private val _program = MutableStateFlow<TrainingProgram?>(null)
@@ -40,6 +42,7 @@ class ProgramDetailViewModel @Inject constructor(
         val id = _program.value?.id ?: return
         viewModelScope.launch {
             programRepository.activate(id)
+            reminderScheduler.schedule()
             _program.value = _program.value?.copy(isActive = true)
         }
     }

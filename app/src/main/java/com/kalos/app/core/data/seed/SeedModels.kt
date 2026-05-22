@@ -29,9 +29,17 @@ data class SeedExercise(
 )
 
 @Serializable
+data class SeedProgramWorkout(
+    val dayOfWeek: Int,
+    val weekNumber: Int = 1,
+    val templateName: String,
+)
+
+@Serializable
 data class SeedProgram(
     val name: String,
     val description: String = "",
     val durationWeeks: Int = 4,
     val daysPerWeek: Int = 3,
+    val workouts: List<SeedProgramWorkout> = emptyList(),
 )

@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.kalos.app.core.domain.model.ProgramWorkout
 import com.kalos.app.core.ui.component.CalorieProgressRing
 import com.kalos.app.core.ui.component.MacroTrioRow
 import com.kalos.app.navigation.Screen
@@ -117,7 +119,26 @@ fun HomeScreen(
             }
         }
 
-        // Today's workouts
+        // Programme actif — séance du jour
+        when {
+            state.todayProgramWorkout != null -> {
+                TodayProgramWorkoutCard(
+                    programWorkout = state.todayProgramWorkout!!,
+                    programName = state.activeProgramName ?: "",
+                    onStart = { templateId ->
+                        navController.navigate(Screen.ActiveWorkout.route(templateId))
+                    },
+                )
+            }
+            state.activeProgramName != null -> {
+                RestDayCard(
+                    programName = state.activeProgramName!!,
+                    onViewProgram = { navController.navigate(Screen.Programs.route) },
+                )
+            }
+        }
+
+        // Séances du jour déjà effectuées
         if (state.todayWorkouts.isNotEmpty()) {
             Text("Entraînements aujourd'hui", style = MaterialTheme.typography.titleSmall)
             state.todayWorkouts.forEach { log ->
@@ -134,6 +155,75 @@ fun HomeScreen(
         }
 
         Spacer(Modifier.height(8.dp))
+    }
+}
+
+@Composable
+private fun TodayProgramWorkoutCard(
+    programWorkout: ProgramWorkout,
+    programName: String,
+    onStart: (Long) -> Unit,
+) {
+    val template = programWorkout.template ?: return
+    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                "Séance prévue aujourd'hui",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(template.name, style = MaterialTheme.typography.titleMedium)
+            if (programName.isNotBlank()) {
+                Text(
+                    programName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = { onStart(template.id) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Démarrer la séance")
+            }
+        }
+    }
+}
+
+@Composable
+private fun RestDayCard(
+    programName: String,
+    onViewProgram: () -> Unit,
+) {
+    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    "Repos aujourd'hui",
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Text(
+                    programName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            TextButton(onClick = onViewProgram) {
+                Text("Programme")
+            }
+        }
     }
 }
 

@@ -13,6 +13,9 @@ interface WorkoutTemplateDao {
     @Query("SELECT * FROM workout_template WHERE id = :id")
     suspend fun getById(id: Long): WorkoutTemplateEntity?
 
+    @Query("SELECT * FROM workout_template WHERE name = :name LIMIT 1")
+    suspend fun getByName(name: String): WorkoutTemplateEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(template: WorkoutTemplateEntity): Long
 

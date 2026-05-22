@@ -29,11 +29,23 @@ class ProgramRepositoryImpl @Inject constructor(
     }
 
     private suspend fun buildProgram(entity: TrainingProgramEntity): TrainingProgram {
-        val workoutEntities = dao.getWorkoutsForProgram(entity.id)
+        val workoutEntities = dao.getWorkoutsForProgramOnce(entity.id)
+        val workouts = workoutEntities.mapNotNull { pw ->
+            val t = templateDao.getById(pw.templateId) ?: return@mapNotNull null
+            ProgramWorkout(
+                id = pw.id, programId = pw.programId,
+                template = WorkoutTemplate(
+                    id = t.id, name = t.name, description = t.description,
+                    estimatedDurationMin = t.estimatedDurationMin,
+                ),
+                dayOfWeek = pw.dayOfWeek, weekNumber = pw.weekNumber,
+            )
+        }
         return TrainingProgram(
             id = entity.id, name = entity.name, description = entity.description,
             durationWeeks = entity.durationWeeks, daysPerWeek = entity.daysPerWeek,
             isActive = entity.isActive, createdAt = entity.createdAt,
+            workouts = workouts,
         )
     }
 

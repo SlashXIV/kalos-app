@@ -3,16 +3,15 @@ package com.kalos.app.feature.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kalos.app.core.domain.model.DailyNutritionSummary
-import com.kalos.app.core.domain.model.MealEntry
-import com.kalos.app.core.domain.model.MealType
 import com.kalos.app.core.domain.model.NutritionGoal
+import com.kalos.app.core.domain.model.ProgramWorkout
 import com.kalos.app.core.domain.model.WorkoutLog
 import com.kalos.app.core.domain.repository.MealRepository
+import com.kalos.app.core.domain.repository.ProgramRepository
 import com.kalos.app.core.domain.repository.UserRepository
 import com.kalos.app.core.domain.repository.WorkoutRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -22,6 +21,8 @@ data class HomeUiState(
     val summary: DailyNutritionSummary = DailyNutritionSummary(LocalDate.now().toString()),
     val todayWorkouts: List<WorkoutLog> = emptyList(),
     val recentWorkouts: List<WorkoutLog> = emptyList(),
+    val todayProgramWorkout: ProgramWorkout? = null,
+    val activeProgramName: String? = null,
     val isLoading: Boolean = true,
 )
 
@@ -30,6 +31,7 @@ class HomeViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val mealRepository: MealRepository,
     private val workoutRepository: WorkoutRepository,
+    private val programRepository: ProgramRepository,
 ) : ViewModel() {
 
     private val today = LocalDate.now().toString()
@@ -46,7 +48,6 @@ class HomeViewModel @Inject constructor(
         val totalProtein = meals.sumOf { it.totalProtein.toDouble() }.toFloat()
         val totalCarbs = meals.sumOf { it.totalCarbs.toDouble() }.toFloat()
         val totalFat = meals.sumOf { it.totalFat.toDouble() }.toFloat()
-
         HomeUiState(
             userName = profile?.name ?: "",
             today = today,
@@ -61,6 +62,12 @@ class HomeViewModel @Inject constructor(
             todayWorkouts = todayLogs,
             recentWorkouts = allLogs.take(3),
             isLoading = false,
+        )
+    }.combine(programRepository.getActive()) { base, activeProgram ->
+        val todayDow = LocalDate.now().dayOfWeek.value // 1=Lundi .. 7=Dimanche
+        base.copy(
+            todayProgramWorkout = activeProgram?.workouts?.firstOrNull { it.dayOfWeek == todayDow },
+            activeProgramName = activeProgram?.name,
         )
     }.stateIn(
         scope = viewModelScope,

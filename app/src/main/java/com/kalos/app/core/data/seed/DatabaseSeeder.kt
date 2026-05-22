@@ -4,10 +4,13 @@ import android.content.Context
 import com.kalos.app.core.database.dao.ExerciseDao
 import com.kalos.app.core.database.dao.FoodDao
 import com.kalos.app.core.database.dao.ProgramDao
+import com.kalos.app.core.database.dao.WorkoutTemplateDao
 import com.kalos.app.core.database.entity.ExerciseEntity
 import com.kalos.app.core.data.util.normalizeForSearch
 import com.kalos.app.core.database.entity.FoodEntity
+import com.kalos.app.core.database.entity.ProgramWorkoutEntity
 import com.kalos.app.core.database.entity.TrainingProgramEntity
+import com.kalos.app.core.database.entity.WorkoutTemplateEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -22,6 +25,7 @@ class DatabaseSeeder @Inject constructor(
     private val foodDao: FoodDao,
     private val exerciseDao: ExerciseDao,
     private val programDao: ProgramDao,
+    private val templateDao: WorkoutTemplateDao,
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -63,12 +67,26 @@ class DatabaseSeeder @Inject constructor(
     private suspend fun seedPrograms() {
         val raw = context.assets.open("seed_programs.json").bufferedReader().readText()
         val seeds: List<SeedProgram> = json.decodeFromString(raw)
-        val entities = seeds.map { s ->
-            TrainingProgramEntity(
-                name = s.name, description = s.description,
-                durationWeeks = s.durationWeeks, daysPerWeek = s.daysPerWeek,
+
+        for (seed in seeds) {
+            val programId = programDao.upsert(
+                TrainingProgramEntity(
+                    name = seed.name, description = seed.description,
+                    durationWeeks = seed.durationWeeks, daysPerWeek = seed.daysPerWeek,
+                )
             )
+            for (workout in seed.workouts) {
+                val existingTemplate = templateDao.getByName(workout.templateName)
+                val templateId = existingTemplate?.id ?: templateDao.upsert(
+                    WorkoutTemplateEntity(name = workout.templateName, description = "")
+                )
+                programDao.upsertWorkout(
+                    ProgramWorkoutEntity(
+                        programId = programId, templateId = templateId,
+                        dayOfWeek = workout.dayOfWeek, weekNumber = workout.weekNumber,
+                    )
+                )
+            }
         }
-        programDao.insertAll(entities)
     }
 }

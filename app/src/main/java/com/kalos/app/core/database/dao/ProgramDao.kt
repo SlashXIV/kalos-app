@@ -32,6 +32,9 @@ interface ProgramDao {
     @Query("SELECT * FROM program_workout WHERE programId = :programId ORDER BY weekNumber ASC, dayOfWeek ASC")
     fun getWorkoutsForProgram(programId: Long): Flow<List<ProgramWorkoutEntity>>
 
+    @Query("SELECT * FROM program_workout WHERE programId = :programId ORDER BY weekNumber ASC, dayOfWeek ASC")
+    suspend fun getWorkoutsForProgramOnce(programId: Long): List<ProgramWorkoutEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertWorkout(workout: ProgramWorkoutEntity): Long
 

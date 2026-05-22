@@ -48,7 +48,7 @@ fun ExerciseDetailScreen(
                 title = { Text(exercise?.name ?: "Exercice") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
                     }
                 }
             )

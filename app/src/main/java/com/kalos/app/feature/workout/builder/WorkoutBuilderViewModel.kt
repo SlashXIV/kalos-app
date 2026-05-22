@@ -49,6 +49,7 @@ class WorkoutBuilderViewModel @Inject constructor(
 
     fun loadTemplate(id: Long) {
         if (id <= 0) return
+        if (editingTemplateId == id) return  // already loaded — don't overwrite in-progress edits
         editingTemplateId = id
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }

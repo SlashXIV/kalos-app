@@ -176,6 +176,39 @@ fun ActiveWorkoutScreen(
         }
     }
 
+    if (state.resumeAvailable) {
+        val elapsedMin = ((System.currentTimeMillis() - state.resumeStartedAt) / 60_000).toInt()
+        val timeLabel = when {
+            elapsedMin < 1 -> "à l'instant"
+            elapsedMin < 60 -> "il y a $elapsedMin min"
+            else -> "il y a ${elapsedMin / 60}h${"%02d".format(elapsedMin % 60)}"
+        }
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text("Séance en cours") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Une séance non terminée a été trouvée (${state.templateName}), démarrée $timeLabel.")
+                    if (state.resumeIsStale) {
+                        Text(
+                            "Cette séance date de plus de 24h. Elle est peut-être obsolète.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = viewModel::resumeDraft) { Text("Reprendre") }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::discardDraftAndStart) {
+                    Text("Nouvelle séance", color = MaterialTheme.colorScheme.error)
+                }
+            },
+        )
+    }
+
     if (showFinishDialog) {
         AlertDialog(
             onDismissRequest = { showFinishDialog = false },

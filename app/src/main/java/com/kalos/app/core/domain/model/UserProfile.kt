@@ -24,6 +24,7 @@ enum class ActivityLevel(val label: String, val multiplier: Float) {
 }
 
 enum class FitnessGoal(val label: String, val kcalDelta: Int) {
+    LOSE_AGGRESSIVE("Sèche agressive (−750 kcal)", -750),
     LOSE_FAST("Perte rapide (−500 kcal)", -500),
     LOSE_SLOW("Perte progressive (−250 kcal)", -250),
     MAINTAIN("Maintien", 0),

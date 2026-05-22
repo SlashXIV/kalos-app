@@ -30,10 +30,32 @@ fun ExerciseCatalogScreen(
     val muscleFilters = listOf("Pectoraux","Grand dorsal","Épaules","Biceps","Triceps","Quadriceps","Ischio-jambiers","Fessiers","Abdominaux","Mollets","Cardio","Trapèzes","Érecteurs")
     val typeFilters = listOf("Musculation","Poids du corps","Cardio","HIIT","Mobilité")
 
+    // Detect builder context from back stack — works for both new (templateId=-1) and edit
+    val inBuilderContext = remember {
+        navController.previousBackStackEntry?.destination?.route
+            ?.startsWith("workout/builder") == true
+    }
+
+    // When ExerciseDetail (opened from builder) passes back an exercise ID, propagate to builder
+    LaunchedEffect(Unit) {
+        val handle = navController.currentBackStackEntry?.savedStateHandle ?: return@LaunchedEffect
+        handle.getStateFlow<Long?>("added_exercise_id", null).collect { exerciseId ->
+            if (exerciseId != null && inBuilderContext) {
+                navController.previousBackStackEntry
+                    ?.savedStateHandle
+                    ?.set("added_exercise_id", exerciseId)
+                handle.remove<Long>("added_exercise_id")
+                navController.popBackStack()
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Catalogue d'exercices") },
+                title = {
+                    Text(if (inBuilderContext) "Ajouter un exercice" else "Catalogue d'exercices")
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Retour")
@@ -89,11 +111,11 @@ fun ExerciseCatalogScreen(
             } else {
                 LazyColumn {
                     items(state.exercises, key = { it.id }) { exercise ->
-                        val inBuilderContext = templateId > 0
                         ExerciseListItem(
                             exercise = exercise,
                             onClick = {
                                 if (inBuilderContext) {
+                                    // Tap principal = ajouter directement à la séance
                                     navController.previousBackStackEntry
                                         ?.savedStateHandle
                                         ?.set("added_exercise_id", exercise.id)
@@ -103,7 +125,8 @@ fun ExerciseCatalogScreen(
                                 }
                             },
                             onInfoClick = if (inBuilderContext) {
-                                { navController.navigate(Screen.ExerciseDetail.route(exercise.id)) }
+                                // Bouton ⓘ = ouvrir la fiche détail avec CTA "Ajouter"
+                                { navController.navigate(Screen.ExerciseDetail.routeFromBuilder(exercise.id)) }
                             } else null,
                         )
                         HorizontalDivider()

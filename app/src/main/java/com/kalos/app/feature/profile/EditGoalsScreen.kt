@@ -8,7 +8,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -18,11 +20,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.NutritionGoal
 import com.kalos.app.core.domain.repository.UserRepository
+import com.kalos.app.core.domain.usecase.CalculateBmrUseCase
 import com.kalos.app.core.domain.usecase.CalculateMacroGoalsUseCase
+import com.kalos.app.core.domain.usecase.CalculateTdeeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 data class EditGoalsState(
     val kcal: String = "2000",
@@ -32,12 +37,21 @@ data class EditGoalsState(
     val hasProfile: Boolean = false,
     val isSaving: Boolean = false,
     val savedSuccessfully: Boolean = false,
+    // Breakdown from auto-calc
+    val showBreakdown: Boolean = false,
+    val bmr: Float = 0f,
+    val tdee: Float = 0f,
+    val goalDelta: Int = 0,
+    val activityLabel: String = "",
+    val goalLabel: String = "",
 )
 
 @HiltViewModel
 class EditGoalsViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val calculateMacroGoals: CalculateMacroGoalsUseCase,
+    private val calculateTdee: CalculateTdeeUseCase,
+    private val calculateBmr: CalculateBmrUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(EditGoalsState())
@@ -66,6 +80,8 @@ class EditGoalsViewModel @Inject constructor(
     fun autoCalculate() {
         viewModelScope.launch {
             val profile = userRepository.getProfile() ?: return@launch
+            val bmr = calculateBmr(profile)
+            val tdee = calculateTdee(profile)
             val goal = calculateMacroGoals(profile)
             _state.update {
                 it.copy(
@@ -73,6 +89,12 @@ class EditGoalsViewModel @Inject constructor(
                     protein = goal.proteinG.toString(),
                     carbs = goal.carbsG.toString(),
                     fat = goal.fatG.toString(),
+                    showBreakdown = true,
+                    bmr = bmr,
+                    tdee = tdee,
+                    goalDelta = profile.goal.kcalDelta,
+                    activityLabel = profile.activityLevel.label,
+                    goalLabel = profile.goal.label,
                 )
             }
         }
@@ -110,7 +132,7 @@ fun EditGoalsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Modifier les objectifs") },
+                title = { Text("Objectifs nutritionnels") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Filled.ArrowBack, "Retour")
@@ -129,14 +151,12 @@ fun EditGoalsScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(padding)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("Objectifs caloriques et macros quotidiens",
-                style = MaterialTheme.typography.titleSmall)
-
+            // Auto-calculate button
             if (state.hasProfile) {
-                OutlinedButton(
+                FilledTonalButton(
                     onClick = viewModel::autoCalculate,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
@@ -146,7 +166,59 @@ fun EditGoalsScreen(
                 }
             }
 
+            // Breakdown card — shown after auto-calc
+            if (state.showBreakdown) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
+                    ),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            "Détail du calcul",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        BreakdownRow("Métabolisme de base (BMR)", "${state.bmr.roundToInt()} kcal")
+                        BreakdownRow("Activité · ${state.activityLabel}", "${state.tdee.roundToInt()} kcal")
+                        val deltaStr = if (state.goalDelta >= 0) "+${state.goalDelta}" else "${state.goalDelta}"
+                        BreakdownRow("Ajustement · ${state.goalLabel}", "$deltaStr kcal")
+                        HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text(
+                                "Objectif calculé",
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            Text(
+                                "${state.kcal} kcal",
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                        Text(
+                            "Vous pouvez ajuster librement les valeurs ci-dessous.",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+
+            HorizontalDivider()
+            Text(
+                "Objectif calorique quotidien",
+                style = MaterialTheme.typography.titleSmall,
+            )
             GoalField("Calories (kcal)", state.kcal, viewModel::onKcalChange)
+
             HorizontalDivider()
             Text("Macronutriments", style = MaterialTheme.typography.titleSmall)
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -155,7 +227,7 @@ fun EditGoalsScreen(
             }
             GoalField("Lipides (g)", state.fat, viewModel::onFatChange)
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
             Button(
                 onClick = viewModel::save,
                 modifier = Modifier.fillMaxWidth().height(56.dp),
@@ -165,6 +237,17 @@ fun EditGoalsScreen(
                 else Text("Enregistrer")
             }
         }
+    }
+}
+
+@Composable
+private fun BreakdownRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
+        Text(value, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurface)
     }
 }
 

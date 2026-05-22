@@ -35,6 +35,7 @@ sealed class Screen(val route: String) {
     }
     object ExerciseDetail : Screen("workout/exercise/{exerciseId}") {
         fun route(exerciseId: Long) = "workout/exercise/$exerciseId"
+        fun routeFromBuilder(exerciseId: Long) = "workout/exercise/$exerciseId?fromBuilder=true"
     }
     object WorkoutBuilder : Screen("workout/builder?templateId={templateId}") {
         fun create() = "workout/builder?templateId=-1"

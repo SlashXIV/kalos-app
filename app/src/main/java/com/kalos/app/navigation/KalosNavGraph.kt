@@ -112,12 +112,16 @@ fun KalosNavGraph() {
                 )
             }
             composable(
-                route = "workout/exercise/{exerciseId}",
-                arguments = listOf(navArgument("exerciseId") { type = NavType.LongType })
+                route = "workout/exercise/{exerciseId}?fromBuilder={fromBuilder}",
+                arguments = listOf(
+                    navArgument("exerciseId") { type = NavType.LongType },
+                    navArgument("fromBuilder") { type = NavType.BoolType; defaultValue = false },
+                )
             ) { backStackEntry ->
                 ExerciseDetailScreen(
                     navController = navController,
                     exerciseId = backStackEntry.arguments?.getLong("exerciseId") ?: -1L,
+                    fromBuilder = backStackEntry.arguments?.getBoolean("fromBuilder") ?: false,
                 )
             }
             composable(

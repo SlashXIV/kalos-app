@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -35,6 +36,7 @@ class ExerciseDetailViewModel @Inject constructor(
 fun ExerciseDetailScreen(
     navController: NavController,
     exerciseId: Long,
+    fromBuilder: Boolean = false,
     viewModel: ExerciseDetailViewModel = hiltViewModel(),
 ) {
     val exercise by viewModel.exercise.collectAsState()
@@ -50,6 +52,23 @@ fun ExerciseDetailScreen(
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            if (fromBuilder) {
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        // Passe l'ID au catalogue (qui le propagera au builder)
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("added_exercise_id", exerciseId)
+                        navController.popBackStack()
+                    },
+                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                    text = { Text("Ajouter à la séance") },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                )
+            }
         }
     ) { padding ->
         exercise?.let { ex ->
@@ -58,10 +77,10 @@ fun ExerciseDetailScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(padding)
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .let { if (fromBuilder) it.padding(bottom = 80.dp) else it },
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                // Tags
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     AssistChip(onClick = {}, label = { Text(ex.primaryMuscle) })
                     AssistChip(onClick = {}, label = { Text(ex.type.label) })

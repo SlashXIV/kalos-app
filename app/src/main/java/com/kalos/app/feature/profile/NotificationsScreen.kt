@@ -136,6 +136,8 @@ fun NotificationsScreen(
                         colors = SliderDefaults.colors(
                             thumbColor = MaterialTheme.colorScheme.primary,
                             activeTrackColor = MaterialTheme.colorScheme.primary,
+                            inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            inactiveTickColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         ),
                     )
                     Text(
@@ -472,6 +474,8 @@ private fun SmartRemindersCard(state: NotificationsUiState, viewModel: Notificat
                     colors = SliderDefaults.colors(
                         thumbColor = MaterialTheme.colorScheme.primary,
                         activeTrackColor = MaterialTheme.colorScheme.primary,
+                        inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        inactiveTickColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     ),
                 )
                 Text(

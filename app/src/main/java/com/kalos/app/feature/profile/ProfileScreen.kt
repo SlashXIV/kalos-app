@@ -96,7 +96,7 @@ fun ProfileScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
-                            ProfileStat("Poids", "${profile.weightKg} kg")
+                            ProfileStat("Poids", "${"%.1f".format(state.lastWeightKg ?: profile.weightKg)} kg")
                             ProfileStat("Taille", "${profile.heightCm.toInt()} cm")
                             ProfileStat("Objectif", "${profile.targetWeightKg} kg")
                         }
@@ -157,9 +157,6 @@ fun ProfileScreen(
             }
             ProfileNavItem(Icons.Filled.TrackChanges, "Modifier les objectifs") {
                 navController.navigate(Screen.EditGoals.route)
-            }
-            ProfileNavItem(icon = Icons.Filled.MonitorWeight, label = "Suivi du poids") {
-                navController.navigate(Screen.WeightLog.route)
             }
             ProfileNavItem(Icons.Filled.Settings, "Paramètres") {
                 navController.navigate(Screen.Settings.route)

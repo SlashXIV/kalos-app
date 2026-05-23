@@ -2,6 +2,16 @@
 
 ---
 
+## v2.4.0 — 23 May 2026
+
+### Added
+- Exercise progression chart in `ExerciseDetailScreen`: Canvas line chart showing max weight per session over the last 20 sessions
+- X-axis uses real dates (not session index) — first and last date labeled
+- PR badge ("PR : X.X kg") displayed in the card header in green
+- Chart appears only from 2 sessions; single session shows a placeholder message; 0 sessions hides the section
+
+---
+
 ## v2.3.0 — 23 May 2026
 
 ### Added

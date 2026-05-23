@@ -1,6 +1,6 @@
 # Features
 
-> Version: 2.1.2
+> Version: 2.4.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -90,7 +90,8 @@ Statuses: **Done** · **Partial** · **Planned**
 | Text search | Done | |
 | Filter by muscle group (13 options) | Done | |
 | Filter by type (5 options) | Done | |
-| Exercise detail screen | Done | Muscles, equipment, description |
+| Exercise detail screen | Done | Muscles, equipment, description, progression chart |
+| Exercise progression chart | Done | Canvas line chart, date X-axis, PR badge, 20 last sessions |
 | Dual-mode behavior (standalone / builder) | Done | |
 
 ### Session builder
@@ -131,7 +132,7 @@ Statuses: **Done** · **Partial** · **Planned**
 |---|---|---|
 | Past sessions list | Done | Tappable cards with formatted dates |
 | Session detail view | Done | Name, date, duration, volume, sets per exercise, PR per exercise |
-| Volume / progression charts | Planned | Multi-session aggregation, deferred |
+| Volume / progression charts | Planned | Weekly volume aggregation, deferred |
 
 ### Training programs
 

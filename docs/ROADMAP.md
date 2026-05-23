@@ -31,10 +31,9 @@ Depends on body weight log (done). Surface a small card on Home showing the last
 
 ---
 
-### 3. Exercise progression chart
-**Impact: Medium · Effort: Medium**
+### ~~3. Exercise progression chart~~ — Done in v2.4.0
 
-In `ExerciseDetailScreen`, add a Canvas chart showing max weight over the last 30 sessions for that exercise. Requires a query on `WorkoutLogSetEntity` filtered by exercise. Natural companion to the workout history detail screen.
+Canvas line chart in `ExerciseDetailScreen`: max weight per session (last 20), date real X-axis, PR badge. Chart shown from 2 sessions.
 
 ---
 

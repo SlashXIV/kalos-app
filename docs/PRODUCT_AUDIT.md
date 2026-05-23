@@ -1,6 +1,6 @@
 # Product Audit
 
-> Version: 2.2.0 — 23 May 2026
+> Version: 2.4.0 — 23 May 2026
 
 ---
 
@@ -34,7 +34,6 @@ The builder → active tracker → summary path works well. The draft auto-save 
 
 Gaps:
 - **Custom programs** creation and editing are partially implemented.
-- **Exercise progression chart** missing in ExerciseDetailScreen.
 - **Home body weight card** not yet surfaced on the dashboard.
 
 ### Calendar
@@ -62,8 +61,8 @@ Gaps:
 | ~~High~~ | ~~Body weight log~~ | Done in v2.1.2 |
 | ~~High~~ | ~~Workout history~~ | Done in v2.2.0 — list, detail, PRs |
 | ~~Medium~~ | ~~Nutrition history detail~~ | Done in v2.3.0 |
+| ~~Medium~~ | ~~Exercise progression chart~~ | Done in v2.4.0 — Canvas chart, date X-axis, PR badge |
 | Medium | Home body weight card | Last logged weight not surfaced on the dashboard. |
-| Medium | Exercise progression chart | No weight-over-time chart in ExerciseDetailScreen. |
 | Medium | Custom programs | Creation and editing UI are incomplete. |
 | Low | Exercise favorites | The catalog has no way to mark or filter favorite exercises. |
 | Low | Advanced food filters | Food search has no category or tag filter, only a text query. |

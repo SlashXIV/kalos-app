@@ -96,7 +96,7 @@ fun ProfileScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
-                            ProfileStat("Poids", "${"%.1f".format(state.lastWeightKg ?: profile.weightKg)} kg")
+                            ProfileStat("Poids", "${profile.weightKg} kg")
                             ProfileStat("Taille", "${profile.heightCm.toInt()} cm")
                             ProfileStat("Objectif", "${profile.targetWeightKg} kg")
                         }

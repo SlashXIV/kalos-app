@@ -1,6 +1,6 @@
 # Features
 
-> Version: 2.5.0
+> Version: 2.6.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -120,7 +120,7 @@ Statuses: **Done** · **Partial** · **Planned**
 |---|---|---|
 | Past sessions list | Done | Tappable cards with formatted dates |
 | Session detail view | Done | Name, date, duration, volume, sets per exercise, PR per exercise |
-| Volume / progression charts | Planned | Weekly volume aggregation, deferred |
+| Weekly volume chart | Done | Bar chart, last 8 weeks, shown from 2 weeks of data |
 
 ### Training programs
 

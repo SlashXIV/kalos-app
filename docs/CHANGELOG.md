@@ -2,6 +2,16 @@
 
 ---
 
+## v2.6.0 — 23 May 2026
+
+### Added
+- Volume trend chart dans `WorkoutHistoryScreen` : bar chart Canvas, agrégation hebdomadaire (somme des `totalVolumeKg` par semaine ISO), 8 dernières semaines
+- Barres arrondies, 3 lignes de grille, labels de date (d MMM) sur première, dernière et semaine centrale
+- Ligne récapitulative : volume total sur la période affichée
+- Affiché uniquement si ≥ 2 semaines de données non nulles
+
+---
+
 ## v2.5.0 — 23 May 2026
 
 ### Added

@@ -36,10 +36,9 @@ Canvas line chart in `ExerciseDetailScreen`: max weight per session (last 20), d
 
 ---
 
-### 4. Workout volume trend chart
-**Impact: Medium · Effort: Medium**
+### ~~4. Workout volume trend chart~~ — Done in v2.6.0
 
-Weekly volume aggregation (sum of reps × weight per week) shown in WorkoutHistoryScreen or a dedicated insights panel. Deferred from workout history v1 — natural follow-up once the detail screen is validated.
+Weekly aggregation of `totalVolumeKg`, last 8 weeks, bar chart in `WorkoutHistoryScreen`.
 
 ---
 

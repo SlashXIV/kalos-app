@@ -102,10 +102,12 @@ fun HomeScreen(
         }
 
         // Body weight card
-        if (state.lastWeightKg != null && state.lastWeightDate != null) {
+        val lastWeightKg = state.lastWeightKg
+        val lastWeightDate = state.lastWeightDate
+        if (lastWeightKg != null && lastWeightDate != null) {
             BodyWeightCard(
-                weightKg = state.lastWeightKg,
-                date = state.lastWeightDate,
+                weightKg = lastWeightKg,
+                date = lastWeightDate,
                 delta = state.weightDelta,
             )
         }

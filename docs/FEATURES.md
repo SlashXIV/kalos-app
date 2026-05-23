@@ -129,9 +129,9 @@ Statuses: **Done** · **Partial** · **Planned**
 
 | Feature | Status | Notes |
 |---|---|---|
-| Past sessions list | Partial | List displayed, no interaction or detail |
-| Session detail view | Planned | |
-| Volume / progression charts | Planned | |
+| Past sessions list | Done | Tappable cards with formatted dates |
+| Session detail view | Done | Name, date, duration, volume, sets per exercise, PR per exercise |
+| Volume / progression charts | Planned | Multi-session aggregation, deferred |
 
 ### Training programs
 
@@ -180,7 +180,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |
 | Data import / restore | Done | Confirmation dialog (destructive) |
-| Version display | Done | Kalos 2.1.1 |
+| Version display | Done | Kalos 2.1.2 |
 
 ---
 

@@ -2,6 +2,18 @@
 
 ---
 
+## v2.2.0 — 23 May 2026
+
+### Added
+- Workout history list: cards are now tappable with formatted dates (Aujourd'hui / Hier / d MMM [yyyy])
+- Session detail screen (`WorkoutLogDetailScreen`): oriented toward reading past performance
+  - Header: session name, full date, duration, total volume, set count
+  - Per-exercise cards: name, primary muscle group, completed sets (reps × weight), volume sub-total
+  - Personal record: "PR : X.X kg" sourced from `getMaxWeight()` per exercise, displayed inline
+- Route `workout/log/{logId}` wired in the navigation graph; distinct from the post-workout summary route
+
+---
+
 ## v2.1.2 — 23 May 2026
 
 ### Added

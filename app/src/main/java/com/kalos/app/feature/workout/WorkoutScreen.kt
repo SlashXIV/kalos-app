@@ -73,7 +73,7 @@ fun WorkoutScreen(
                     onDelete = { template -> templateToDelete = template },
                 )
                 1 -> ProgramsTabContent(navController = navController)
-                2 -> WorkoutHistoryTabContent()
+                2 -> WorkoutHistoryTabContent(navController = navController)
             }
         }
     }

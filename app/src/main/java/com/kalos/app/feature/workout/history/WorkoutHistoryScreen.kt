@@ -1,5 +1,6 @@
 package com.kalos.app.feature.workout.history
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.WorkoutLog
 import com.kalos.app.core.ui.component.EmptyState
+import com.kalos.app.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +40,7 @@ fun WorkoutHistoryScreen(
     ) { padding ->
         WorkoutHistoryContent(
             viewModel = viewModel,
+            navController = navController,
             modifier = Modifier.padding(padding),
         )
     }
@@ -45,14 +48,16 @@ fun WorkoutHistoryScreen(
 
 @Composable
 fun WorkoutHistoryTabContent(
+    navController: NavController,
     viewModel: WorkoutHistoryViewModel = hiltViewModel(),
 ) {
-    WorkoutHistoryContent(viewModel = viewModel)
+    WorkoutHistoryContent(viewModel = viewModel, navController = navController)
 }
 
 @Composable
 private fun WorkoutHistoryContent(
     viewModel: WorkoutHistoryViewModel,
+    navController: NavController,
     modifier: Modifier = Modifier,
 ) {
     val logs by viewModel.logs.collectAsStateWithLifecycle()
@@ -71,15 +76,22 @@ private fun WorkoutHistoryContent(
             modifier = modifier.fillMaxSize(),
         ) {
             items(logs, key = { it.id }) { log ->
-                WorkoutLogCard(log)
+                WorkoutLogCard(
+                    log = log,
+                    onClick = { navController.navigate(Screen.WorkoutLogDetail.route(log.id)) },
+                )
             }
         }
     }
 }
 
 @Composable
-private fun WorkoutLogCard(log: WorkoutLog) {
-    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+private fun WorkoutLogCard(log: WorkoutLog, onClick: () -> Unit) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+    ) {
         Column(
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -95,17 +107,17 @@ private fun WorkoutLogCard(log: WorkoutLog) {
                     modifier = Modifier.weight(1f),
                 )
                 Text(
-                    log.date,
+                    formatLogDateShort(log.date),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 LogStat(Icons.Filled.Timer, formatDuration(log.durationSecs))
-                LogStat(Icons.Filled.FitnessCenter, "${log.exercises.size} exercices")
+                LogStat(Icons.Filled.FitnessCenter, "${log.exercises.size} exercice${if (log.exercises.size > 1) "s" else ""}")
                 val completed = log.exercises.sumOf { le -> le.sets.count { it.isCompleted } }
-                if (completed > 0) LogStat(Icons.Filled.CheckCircle, "$completed séries")
-                if (log.totalVolumeKg > 0) LogStat(Icons.Filled.MonitorWeight, "%.0f kg".format(log.totalVolumeKg))
+                if (completed > 0) LogStat(Icons.Filled.CheckCircle, "$completed série${if (completed > 1) "s" else ""}")
+                if (log.totalVolumeKg > 0f) LogStat(Icons.Filled.MonitorWeight, "%.0f kg".format(log.totalVolumeKg))
             }
         }
     }

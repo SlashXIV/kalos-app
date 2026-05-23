@@ -54,6 +54,9 @@ sealed class Screen(val route: String) {
         fun route(programId: Long) = "workout/program/$programId"
     }
     object WorkoutHistory : Screen("workout/history")
+    object WorkoutLogDetail : Screen("workout/log/{logId}") {
+        fun route(logId: Long) = "workout/log/$logId"
+    }
 
     // Profile sub-screens
     object EditProfile : Screen("profile/edit")

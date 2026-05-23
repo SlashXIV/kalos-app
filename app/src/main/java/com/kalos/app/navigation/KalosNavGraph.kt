@@ -32,6 +32,7 @@ import com.kalos.app.feature.workout.builder.WorkoutBuilderScreen
 import com.kalos.app.feature.workout.catalog.ExerciseCatalogScreen
 import com.kalos.app.feature.workout.catalog.ExerciseDetailScreen
 import com.kalos.app.feature.workout.history.WorkoutHistoryScreen
+import com.kalos.app.feature.workout.history.WorkoutLogDetailScreen
 import com.kalos.app.feature.workout.program.ProgramDetailScreen
 import com.kalos.app.feature.workout.program.ProgramsScreen
 
@@ -165,6 +166,15 @@ fun KalosNavGraph() {
                 )
             }
             composable(Screen.WorkoutHistory.route) { WorkoutHistoryScreen(navController) }
+            composable(
+                route = "workout/log/{logId}",
+                arguments = listOf(navArgument("logId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                WorkoutLogDetailScreen(
+                    navController = navController,
+                    logId = backStackEntry.arguments?.getLong("logId") ?: -1L,
+                )
+            }
 
             // Profile sub-screens
             composable(Screen.EditProfile.route) { EditProfileScreen(navController) }

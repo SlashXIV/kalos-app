@@ -34,3 +34,15 @@ val md_theme_dark_onSurfaceVariant     = Color(0xFF8A8AAC)
 val md_theme_dark_outline              = Color(0xFF2E2E50)
 val md_theme_dark_error                = Color(0xFFFF6B6B)
 val md_theme_dark_onError              = Color(0xFF2D0000)
+
+// ── Surface container family (M3 elevation tokens — must stay in the same blue-dark family)
+// ElevatedCard uses surfaceContainerLow; Card uses surfaceContainerHighest by default.
+// Defining these explicitly prevents Compose from falling back to its neutral-gray baseline.
+val md_theme_dark_surfaceDim              = Color(0xFF0E0E1C)
+val md_theme_dark_surfaceBright           = Color(0xFF1E1E38)
+val md_theme_dark_surfaceTint             = PrimaryGreen
+val md_theme_dark_surfaceContainerLowest  = Color(0xFF0C0C18)
+val md_theme_dark_surfaceContainerLow     = Color(0xFF111120)  // = surface → ElevatedCard matches Card
+val md_theme_dark_surfaceContainer        = Color(0xFF151530)
+val md_theme_dark_surfaceContainerHigh    = Color(0xFF1A1A38)
+val md_theme_dark_surfaceContainerHighest = Color(0xFF1F1F40)

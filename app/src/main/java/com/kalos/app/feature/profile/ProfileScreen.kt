@@ -16,6 +16,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.Sex
 import com.kalos.app.navigation.Screen
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -136,6 +139,18 @@ fun ProfileScreen(
                 }
             }
 
+            // Body weight card
+            val lastWeightKg = state.lastWeightKg
+            val lastWeightDate = state.lastWeightDate
+            if (lastWeightKg != null && lastWeightDate != null) {
+                BodyWeightCard(
+                    weightKg = lastWeightKg,
+                    date = lastWeightDate,
+                    delta = state.weightDelta,
+                    onClick = { navController.navigate(Screen.WeightLog.route) },
+                )
+            }
+
             // Navigation items
             ProfileNavItem(Icons.Filled.Edit, "Modifier le profil") {
                 navController.navigate(Screen.EditProfile.route)
@@ -143,15 +158,57 @@ fun ProfileScreen(
             ProfileNavItem(Icons.Filled.TrackChanges, "Modifier les objectifs") {
                 navController.navigate(Screen.EditGoals.route)
             }
-            ProfileNavItem(
-                icon = Icons.Filled.MonitorWeight,
-                label = "Suivi du poids",
-                subtitle = state.lastWeightKg?.let { "${"%.1f".format(it)} kg" },
-            ) {
+            ProfileNavItem(icon = Icons.Filled.MonitorWeight, label = "Suivi du poids") {
                 navController.navigate(Screen.WeightLog.route)
             }
             ProfileNavItem(Icons.Filled.Settings, "Paramètres") {
                 navController.navigate(Screen.Settings.route)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BodyWeightCard(weightKg: Float, date: String, delta: Float?, onClick: () -> Unit) {
+    val dateLabel = remember(date) {
+        val d = LocalDate.parse(date)
+        val today = LocalDate.now()
+        when (d) {
+            today -> "Aujourd'hui"
+            today.minusDays(1) -> "Hier"
+            else -> d.format(DateTimeFormatter.ofPattern("d MMM", Locale.FRENCH))
+        }
+    }
+    val weightLabel = if (weightKg == weightKg.toLong().toFloat()) "${weightKg.toLong()} kg"
+                      else "${"%.1f".format(weightKg)} kg"
+
+    ElevatedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Icon(Icons.Filled.MonitorWeight, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text("Poids corporel", style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(weightLabel, style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(dateLabel, style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (delta != null) {
+                    val sign = if (delta >= 0f) "+" else ""
+                    val deltaLabel = if (delta == delta.toLong().toFloat()) "${sign}${delta.toLong()} kg"
+                                     else "${sign}${"%.1f".format(delta)} kg"
+                    Text(deltaLabel, style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
         }
     }

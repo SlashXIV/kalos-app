@@ -5,8 +5,12 @@
 ## v2.5.0 — 23 May 2026
 
 ### Added
-- Body weight card on Home screen: last logged weight, date label (Aujourd'hui / Hier / d MMM), delta vs previous entry with sign
-- Card hidden when no weight has been logged yet
+- Body weight card dans l'écran **Profil** : dernier poids enregistré, date (Aujourd'hui / Hier / d MMM), delta vs entrée précédente avec signe, tap vers Suivi du poids
+- Carte absente si aucune pesée enregistrée
+
+### Removed
+- `HomeScreen` et `HomeViewModel` supprimés — écran jamais câblé dans la navigation, vestige du plan initial
+- Section "Home" retirée de la documentation (les features décrites étaient portées par l'écran mort)
 
 ---
 

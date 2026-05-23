@@ -6,7 +6,7 @@
 
 ## Overall assessment
 
-Kalos is a feature-complete, offline-first fitness and nutrition tracker. The core flows — onboarding, daily meal logging, and active workout tracking — are solid and well-polished. Body weight log and workout history are now complete. The remaining gaps are all Medium or Low priority. The one remaining visible dead interaction is the nutrition history day detail (tapping a row has no effect).
+Kalos is a feature-complete, offline-first fitness and nutrition tracker. The core flows — onboarding, daily meal logging, and active workout tracking — are solid and well-polished. Body weight log, workout history, nutrition history, and exercise progression chart are complete. The remaining gaps are Low priority.
 
 ---
 
@@ -15,10 +15,6 @@ Kalos is a feature-complete, offline-first fitness and nutrition tracker. The co
 ### Onboarding
 
 **Solid.** Four-step flow is complete and coherent. TDEE and macro calculation (Mifflin-St Jeor) is correctly implemented and explained to the user on the result screen. No re-onboarding mechanism from settings, but all fields are editable from the profile screen so this is non-blocking.
-
-### Home
-
-**Solid.** The dashboard is contextual and reactive. The program card correctly distinguishes between a scheduled workout day and a rest day, and displays the next planned session. Data updates in real time via StateFlow.
 
 ### Nutrition
 
@@ -42,7 +38,7 @@ Gaps:
 
 ### Profile
 
-**Complete.** Profile and goal editing both handle recalculation correctly. The goal edit screen shows a detailed breakdown before saving, which is good for user understanding. No body weight tracking UI (see Workout section above).
+**Complete.** Profile and goal editing both handle recalculation correctly. Body weight card on this screen shows last logged weight, date, and delta vs previous entry — tappable to the full weight log.
 
 ### Settings
 

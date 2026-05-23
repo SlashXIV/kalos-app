@@ -19,19 +19,6 @@ Statuses: **Done** · **Partial** · **Planned**
 
 ---
 
-## Home
-
-| Feature | Status | Notes |
-|---|---|---|
-| Daily calorie progress ring | Done | Consumed / Goal / Remaining |
-| Daily macro bars (protein / carbs / fat) | Done | |
-| Quick-action shortcuts (nutrition, workout) | Done | |
-| Today's program workout card | Done | "Start session" button if workout scheduled today |
-| Rest day card | Done | Shows next scheduled workout when no session today |
-| Today's completed workouts list | Done | Name, exercise count, duration |
-| Body weight card | Done | Last weight, date, delta vs previous entry; hidden if no entry |
-
----
 
 ## Nutrition
 
@@ -170,6 +157,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Edit full profile | Done | Auto-recalculates macros on activity or goal change |
 | Edit goals (manual or auto-calculated) | Done | Detailed breakdown before saving |
 | Body weight log and trend chart | Done | Entry dialog, 30-day line chart, recent history list |
+| Body weight card | Done | Last weight, date, delta vs previous; tappable → Suivi du poids; hidden if no entry |
 
 ---
 

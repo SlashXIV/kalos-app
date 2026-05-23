@@ -25,7 +25,7 @@ import com.kalos.app.core.database.entity.*
         ProgramWorkoutEntity::class,
         WaterIntakeEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = false,
 )
 abstract class KalosDatabase : RoomDatabase() {

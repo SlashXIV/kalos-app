@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -78,11 +79,29 @@ fun ExerciseCatalogScreen(
             )
             Spacer(Modifier.height(8.dp))
 
-            // Muscle filter chips
+            // Favoris + muscle filter chips
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
+                FilterChip(
+                    selected = state.onlyFavorites,
+                    onClick = viewModel::onFavoritesToggle,
+                    label = { Text("Favoris", style = MaterialTheme.typography.labelSmall) },
+                    leadingIcon = if (state.onlyFavorites) {
+                        { Icon(Icons.Filled.Favorite, contentDescription = null, modifier = androidx.compose.ui.Modifier.size(FilterChipDefaults.IconSize)) }
+                    } else null,
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled = true,
+                        selected = state.onlyFavorites,
+                        selectedBorderColor = MaterialTheme.colorScheme.primary,
+                        borderColor = MaterialTheme.colorScheme.outline,
+                    ),
+                )
                 muscleFilters.forEach { muscle ->
                     FilterChip(
                         selected = state.selectedMuscle == muscle,
@@ -147,6 +166,9 @@ fun ExerciseCatalogScreen(
                             onInfoClick = if (inBuilderContext) {
                                 // Bouton ⓘ = ouvrir la fiche détail avec CTA "Ajouter"
                                 { navController.navigate(Screen.ExerciseDetail.routeFromBuilder(exercise.id)) }
+                            } else null,
+                            onFavoriteClick = if (!inBuilderContext) {
+                                { viewModel.toggleFavorite(exercise) }
                             } else null,
                         )
                         HorizontalDivider()

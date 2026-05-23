@@ -3,6 +3,8 @@ package com.kalos.app.core.ui.component
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -16,6 +18,7 @@ fun ExerciseListItem(
     exercise: Exercise,
     onClick: () -> Unit,
     onInfoClick: (() -> Unit)? = null,
+    onFavoriteClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     ListItem(
@@ -34,17 +37,28 @@ fun ExerciseListItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         },
-        trailingContent = if (onInfoClick != null) {
-            {
-                IconButton(onClick = onInfoClick) {
-                    Icon(
-                        Icons.Outlined.Info,
-                        contentDescription = "Détails",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+        trailingContent = when {
+            onInfoClick != null -> {
+                {
+                    IconButton(onClick = onInfoClick) {
+                        Icon(Icons.Outlined.Info, contentDescription = "Détails",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
             }
-        } else null,
+            onFavoriteClick != null -> {
+                {
+                    IconButton(onClick = onFavoriteClick) {
+                        Icon(
+                            if (exercise.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = if (exercise.isFavorite) "Retirer des favoris" else "Ajouter aux favoris",
+                            tint = if (exercise.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+            else -> null
+        },
         modifier = modifier.clickable(onClick = onClick),
     )
 }

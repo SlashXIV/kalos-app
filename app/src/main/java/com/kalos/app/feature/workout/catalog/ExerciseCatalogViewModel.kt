@@ -17,6 +17,7 @@ data class CatalogUiState(
     val selectedMuscle: String = "",
     val selectedType: String = "",
     val selectedEquipment: String = "",
+    val onlyFavorites: Boolean = false,
     val muscleGroups: List<String> = emptyList(),
     val equipmentTypes: List<String> = emptyList(),
     val isLoading: Boolean = true,
@@ -33,18 +34,19 @@ class ExerciseCatalogViewModel @Inject constructor(
     private val _muscle = MutableStateFlow("")
     private val _type = MutableStateFlow("")
     private val _equipment = MutableStateFlow("")
+    private val _onlyFavorites = MutableStateFlow(false)
     private val _muscleGroups = MutableStateFlow<List<String>>(emptyList())
     private val _equipmentTypes = MutableStateFlow<List<String>>(emptyList())
 
-    private data class Filters(val query: String, val muscle: String, val type: String, val equipment: String)
+    private data class Filters(val query: String, val muscle: String, val type: String, val equipment: String, val onlyFavorites: Boolean)
 
-    private val filters = combine(_query.debounce(300), _muscle, _type, _equipment) { q, m, t, e ->
-        Filters(q, m, t, e)
+    private val filters = combine(_query.debounce(300), _muscle, _type, _equipment, _onlyFavorites) { q, m, t, e, fav ->
+        Filters(q, m, t, e, fav)
     }
 
     val uiState: StateFlow<CatalogUiState> = combine(
         filters.flatMapLatest { f ->
-            exerciseRepository.filter(f.query, f.muscle, f.type, f.equipment)
+            exerciseRepository.filter(f.query, f.muscle, f.type, f.equipment, f.onlyFavorites)
         },
         filters,
         _displayQuery,
@@ -57,6 +59,7 @@ class ExerciseCatalogViewModel @Inject constructor(
             selectedMuscle = f.muscle,
             selectedType = f.type,
             selectedEquipment = f.equipment,
+            onlyFavorites = f.onlyFavorites,
             muscleGroups = muscles,
             equipmentTypes = equipment,
             isLoading = false,
@@ -80,11 +83,18 @@ class ExerciseCatalogViewModel @Inject constructor(
     }
     fun onMuscleChange(v: String) { _muscle.value = if (_muscle.value == v) "" else v }
     fun onTypeChange(v: String) { _type.value = if (_type.value == v) "" else v }
+    fun onFavoritesToggle() { _onlyFavorites.value = !_onlyFavorites.value }
+    fun toggleFavorite(exercise: Exercise) {
+        viewModelScope.launch {
+            exerciseRepository.setFavorite(exercise.id, !exercise.isFavorite)
+        }
+    }
     fun clearFilters() {
         _displayQuery.value = ""
         _query.value = ""
         _muscle.value = ""
         _type.value = ""
         _equipment.value = ""
+        _onlyFavorites.value = false
     }
 }

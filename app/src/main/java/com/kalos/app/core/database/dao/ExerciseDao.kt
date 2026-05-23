@@ -24,9 +24,13 @@ interface ExerciseDao {
         AND (:muscle = '' OR primaryMuscle = :muscle)
         AND (:type = '' OR type = :type)
         AND (:equipment = '' OR equipment = :equipment)
+        AND (:onlyFavorites = 0 OR isFavorite = 1)
         ORDER BY name ASC
     """)
-    fun filter(query: String, muscle: String, type: String, equipment: String): Flow<List<ExerciseEntity>>
+    fun filter(query: String, muscle: String, type: String, equipment: String, onlyFavorites: Boolean = false): Flow<List<ExerciseEntity>>
+
+    @Query("UPDATE exercise SET isFavorite = :isFavorite WHERE id = :id")
+    suspend fun setFavorite(id: Long, isFavorite: Boolean)
 
     @Query("SELECT * FROM exercise WHERE id = :id")
     suspend fun getById(id: Long): ExerciseEntity?

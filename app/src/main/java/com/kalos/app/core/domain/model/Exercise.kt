@@ -12,6 +12,7 @@ data class Exercise(
     val instructions: String = "",
     val imageUrl: String = "",
     val isCustom: Boolean = false,
+    val isFavorite: Boolean = false,
 )
 
 enum class ExerciseLevel(val label: String) {

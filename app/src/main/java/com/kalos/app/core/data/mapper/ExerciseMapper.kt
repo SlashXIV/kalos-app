@@ -25,6 +25,7 @@ fun ExerciseEntity.toDomain(): Exercise {
         instructions = instructions,
         imageUrl = imageUrl,
         isCustom = isCustom,
+        isFavorite = isFavorite,
     )
 }
 
@@ -40,4 +41,5 @@ fun Exercise.toEntity() = ExerciseEntity(
     instructions = instructions,
     imageUrl = imageUrl,
     isCustom = isCustom,
+    isFavorite = isFavorite,
 )

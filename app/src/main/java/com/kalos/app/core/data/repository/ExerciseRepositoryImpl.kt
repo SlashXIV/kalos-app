@@ -10,8 +10,9 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class ExerciseRepositoryImpl @Inject constructor(private val dao: ExerciseDao) : ExerciseRepository {
-    override fun filter(query: String, muscle: String, type: String, equipment: String): Flow<List<Exercise>> =
-        dao.filter(query, muscle, type, equipment).map { list -> list.map { it.toDomain() } }
+    override fun filter(query: String, muscle: String, type: String, equipment: String, onlyFavorites: Boolean): Flow<List<Exercise>> =
+        dao.filter(query, muscle, type, equipment, onlyFavorites).map { list -> list.map { it.toDomain() } }
+    override suspend fun setFavorite(id: Long, isFavorite: Boolean) = dao.setFavorite(id, isFavorite)
     override fun getAll(): Flow<List<Exercise>> = dao.getAll().map { list -> list.map { it.toDomain() } }
     override suspend fun getById(id: Long): Exercise? = dao.getById(id)?.toDomain()
     override suspend fun getMuscleGroups(): List<String> = dao.getMuscleGroups()

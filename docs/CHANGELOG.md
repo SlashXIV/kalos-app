@@ -4,6 +4,9 @@
 
 ## v2.1.2 — 23 May 2026
 
+### Added
+- Body weight log (`Profile > Suivi du poids`): entry dialog, 30-day Canvas line chart, recent history list with per-entry delta. Last logged weight surfaced as a subtitle on the Profile navigation card.
+
 ### Fixed
 - Hydration block in the daily journal now follows the selected date instead of always showing today's data. Viewing a past date displays the water intake logged that day. Quick-add buttons and the edit-goal icon are hidden when browsing history; the progress bar and total remain visible in read-only mode.
 - `buildDailySummary` (copy to clipboard) now uses the date-scoped water value, consistent with the rest of the journal.

@@ -8,19 +8,11 @@ Priorities are based on user impact relative to implementation effort. The list 
 
 ## Next priorities
 
-### 1. Body weight log
-**Impact: High · Effort: Low**
-
-`BodyWeightEntity` (date + weightKg) already exists in the database. Required work:
-- Input UI in the Profile screen or as a card on Home
-- Trend chart (Vico, already integrated) covering the last 30 / 90 days
-- Optional: surface latest weight on the Home dashboard
-
-This is the highest-return item given the low implementation cost.
+### ~~1. Body weight log~~ — Done in v2.1.2
 
 ---
 
-### 2. Workout history
+### 1. Workout history
 **Impact: High · Effort: Medium**
 
 The current implementation is a stub. Required work:
@@ -53,7 +45,7 @@ In `ExerciseDetailScreen`, add a Vico chart showing estimated 1RM or max weight 
 ### 5. Home screen body weight card
 **Impact: Medium · Effort: Low**
 
-Depends on item 1. Once weight logging exists, surface a small card on Home showing the last logged weight and the delta from the previous entry.
+Depends on body weight log (done). Surface a small card on Home showing the last logged weight and the delta from the previous entry.
 
 ---
 

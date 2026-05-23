@@ -143,6 +143,13 @@ fun ProfileScreen(
             ProfileNavItem(Icons.Filled.TrackChanges, "Modifier les objectifs") {
                 navController.navigate(Screen.EditGoals.route)
             }
+            ProfileNavItem(
+                icon = Icons.Filled.MonitorWeight,
+                label = "Suivi du poids",
+                subtitle = state.lastWeightKg?.let { "${"%.1f".format(it)} kg" },
+            ) {
+                navController.navigate(Screen.WeightLog.route)
+            }
             ProfileNavItem(Icons.Filled.Settings, "Paramètres") {
                 navController.navigate(Screen.Settings.route)
             }
@@ -164,6 +171,7 @@ private fun ProfileStat(label: String, value: String) {
 private fun ProfileNavItem(
     icon: ImageVector,
     label: String,
+    subtitle: String? = null,
     onClick: () -> Unit,
 ) {
     ElevatedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
@@ -173,7 +181,16 @@ private fun ProfileNavItem(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Icon(icon, null, tint = MaterialTheme.colorScheme.primary)
-            Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(label, style = MaterialTheme.typography.bodyLarge)
+                if (subtitle != null) {
+                    Text(
+                        subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
             Icon(Icons.Filled.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }

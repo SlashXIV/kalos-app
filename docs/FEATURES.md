@@ -1,6 +1,6 @@
 # Features
 
-> Version: 2.1.1
+> Version: 2.1.2
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -167,7 +167,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Nutrition goals display | Done | |
 | Edit full profile | Done | Auto-recalculates macros on activity or goal change |
 | Edit goals (manual or auto-calculated) | Done | Detailed breakdown before saving |
-| Body weight log and trend chart | Planned | DB entity exists (`BodyWeightEntity`), no UI |
+| Body weight log and trend chart | Done | Entry dialog, 30-day line chart, recent history list |
 
 ---
 

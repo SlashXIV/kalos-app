@@ -99,6 +99,7 @@ class NutritionViewModel @Inject constructor(
     fun goToPreviousDay() { _date.update { LocalDate.parse(it).minusDays(1).toString() } }
     fun goToNextDay() { _date.update { LocalDate.parse(it).plusDays(1).toString() } }
     fun goToToday() { _date.value = LocalDate.now().toString() }
+    fun setDate(date: String) { _date.value = date }
 
     fun deleteItem(itemId: Long) {
         viewModelScope.launch { mealRepository.removeItem(itemId) }

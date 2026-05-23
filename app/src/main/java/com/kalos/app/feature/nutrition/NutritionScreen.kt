@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -37,9 +38,14 @@ import kotlinx.coroutines.launch
 @Composable
 fun NutritionScreen(
     navController: NavController,
+    initialDate: String? = null,
     viewModel: NutritionViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(initialDate) {
+        if (initialDate != null) viewModel.setDate(initialDate)
+    }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -59,7 +65,20 @@ fun NutritionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nutrition", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) },
+                title = {
+                    Text(
+                        if (initialDate != null) dateLabel
+                        else "Nutrition",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    )
+                },
+                navigationIcon = {
+                    if (initialDate != null) {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+                        }
+                    }
+                },
                 actions = {
                     IconButton(onClick = {
                         clipboardManager.setText(AnnotatedString(buildDailySummary(state)))
@@ -67,8 +86,10 @@ fun NutritionScreen(
                     }) {
                         Icon(Icons.Filled.ContentCopy, contentDescription = "Copier le résumé")
                     }
-                    IconButton(onClick = { navController.navigate(Screen.NutritionHistory.route) }) {
-                        Icon(Icons.Filled.BarChart, contentDescription = "Historique")
+                    if (initialDate == null) {
+                        IconButton(onClick = { navController.navigate(Screen.NutritionHistory.route) }) {
+                            Icon(Icons.Filled.BarChart, contentDescription = "Historique")
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

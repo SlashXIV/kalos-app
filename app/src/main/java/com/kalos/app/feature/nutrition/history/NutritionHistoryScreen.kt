@@ -1,5 +1,6 @@
 package com.kalos.app.feature.nutrition.history
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,6 +16,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.database.dao.DailySummaryRow
 import com.kalos.app.core.ui.component.EmptyState
+import com.kalos.app.navigation.Screen
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +59,10 @@ fun NutritionHistoryScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(state.summaries, key = { it.date }) { summary ->
-                    DaySummaryCard(summary)
+                    DaySummaryCard(
+                        summary = summary,
+                        onClick = { navController.navigate(Screen.NutritionDay.route(summary.date)) },
+                    )
                 }
             }
         }
@@ -62,10 +70,18 @@ fun NutritionHistoryScreen(
 }
 
 @Composable
-private fun DaySummaryCard(summary: DailySummaryRow) {
-    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+private fun DaySummaryCard(summary: DailySummaryRow, onClick: () -> Unit) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(summary.date, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                formatHistoryDate(summary.date),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Spacer(Modifier.height(4.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("${(summary.totalKcal ?: 0f).roundToInt()} kcal", style = MaterialTheme.typography.titleMedium)
@@ -76,6 +92,20 @@ private fun DaySummaryCard(summary: DailySummaryRow) {
                 Text("G: ${(summary.totalCarbs ?: 0f).roundToInt()}g", style = MaterialTheme.typography.bodySmall)
                 Text("L: ${(summary.totalFat ?: 0f).roundToInt()}g", style = MaterialTheme.typography.bodySmall)
             }
+        }
+    }
+}
+
+private fun formatHistoryDate(dateStr: String): String {
+    val d = LocalDate.parse(dateStr)
+    val today = LocalDate.now()
+    return when (d) {
+        today -> "Aujourd'hui"
+        today.minusDays(1) -> "Hier"
+        else -> {
+            val pattern = if (d.year == today.year) "EEEE d MMMM" else "EEEE d MMMM yyyy"
+            d.format(DateTimeFormatter.ofPattern(pattern, Locale.FRENCH))
+                .replaceFirstChar { it.uppercase() }
         }
     }
 }

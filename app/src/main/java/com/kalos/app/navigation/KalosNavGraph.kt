@@ -104,6 +104,15 @@ fun KalosNavGraph() {
                 )
             }
             composable(Screen.NutritionHistory.route) { NutritionHistoryScreen(navController) }
+            composable(
+                route = "nutrition/day/{date}",
+                arguments = listOf(navArgument("date") { type = NavType.StringType })
+            ) { backStackEntry ->
+                NutritionScreen(
+                    navController = navController,
+                    initialDate = backStackEntry.arguments?.getString("date"),
+                )
+            }
 
             // Workout sub-screens
             composable(

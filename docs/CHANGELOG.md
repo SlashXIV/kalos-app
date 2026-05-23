@@ -2,6 +2,17 @@
 
 ---
 
+## v2.1.2 — 23 May 2026
+
+### Fixed
+- Hydration block in the daily journal now follows the selected date instead of always showing today's data. Viewing a past date displays the water intake logged that day. Quick-add buttons and the edit-goal icon are hidden when browsing history; the progress bar and total remain visible in read-only mode.
+- `buildDailySummary` (copy to clipboard) now uses the date-scoped water value, consistent with the rest of the journal.
+
+### Changed
+- `WaterRepository` is now injected into `NutritionViewModel` as the single source of truth for the selected date. `WaterViewModel` is no longer instantiated from `NutritionScreen`.
+
+---
+
 ## v2.1.1 — 23 May 2026
 
 ### Added

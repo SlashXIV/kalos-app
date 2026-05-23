@@ -67,8 +67,7 @@ fun NutritionScreen(
             TopAppBar(
                 title = {
                     Text(
-                        if (initialDate != null) dateLabel
-                        else "Nutrition",
+                        if (!state.isToday) dateLabel else "Nutrition",
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     )
                 },
@@ -175,7 +174,8 @@ fun NutritionScreen(
                     isGoalReached = state.isWaterGoalReached,
                     displayTotal = state.waterDisplayTotal,
                     displayGoal = state.waterDisplayGoal,
-                    isEditable = state.isToday,
+                    isWaterEditable = true,
+                    isGoalEditable = state.isToday,
                     onAdd = viewModel::addWater,
                     onSetGoal = viewModel::setWaterGoal,
                 )
@@ -296,7 +296,8 @@ private fun HydrationCard(
     isGoalReached: Boolean,
     displayTotal: String,
     displayGoal: String,
-    isEditable: Boolean,
+    isWaterEditable: Boolean,
+    isGoalEditable: Boolean,
     onAdd: (Int) -> Unit,
     onSetGoal: (Int) -> Unit,
 ) {
@@ -337,7 +338,7 @@ private fun HydrationCard(
                         )
                     }
                 }
-                if (isEditable) {
+                if (isGoalEditable) {
                     IconButton(
                         onClick = { showGoalDialog = true },
                         modifier = Modifier.size(28.dp),
@@ -378,8 +379,8 @@ private fun HydrationCard(
                 )
             }
 
-            // Quick-add buttons — only shown when viewing today
-            if (isEditable) {
+            // Quick-add buttons — hidden only when water editing is explicitly disabled
+            if (isWaterEditable) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),

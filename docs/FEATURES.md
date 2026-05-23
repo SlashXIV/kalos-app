@@ -76,7 +76,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Feature | Status | Notes |
 |---|---|---|
 | 60-day daily summaries | Done | kcal + protein / carbs / fat per day |
-| Day detail (which foods were logged) | Planned | Tap on a row currently has no action |
+| Day detail (which foods were logged) | Done | Tap navigates to read-only journal for that date |
 
 ---
 

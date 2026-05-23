@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: v2.2.0 — 23 May 2026
+> Last updated: v2.3.0 — 23 May 2026
 
 Priorities are based on user impact relative to implementation effort. The list is intentionally short — only changes worth doing next.
 
@@ -18,14 +18,9 @@ Session detail view, tappable history list, and PR per exercise delivered. Volum
 
 ---
 
-### 1. Nutrition history day detail
-**Impact: Medium · Effort: Low**
+### ~~1. Nutrition history day detail~~ — Done in v2.3.0
 
-The 60-day history screen lists summaries but tapping a row has no effect. Required work:
-- Navigate to the nutrition journal for the selected date (date-parameterized navigation already exists)
-- Or open a bottom sheet with that day's meal breakdown
-
-Low effort, removes an obvious dead interaction.
+Tapping a row in the 60-day history now opens the nutrition journal for that date in read-only mode.
 
 ---
 

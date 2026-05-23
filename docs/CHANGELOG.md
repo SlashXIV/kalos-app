@@ -2,6 +2,15 @@
 
 ---
 
+## v2.3.0 — 23 May 2026
+
+### Added
+- Nutrition history: tapping a day in the 60-day list now opens the nutrition journal for that date in read-only mode
+- Dates in the history list are now formatted (Aujourd'hui / Hier / Lundi 19 mai)
+- When opened from history: back button in the top bar, history icon hidden, title shows the selected date
+
+---
+
 ## v2.2.0 — 23 May 2026
 
 ### Added

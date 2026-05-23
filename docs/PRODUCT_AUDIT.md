@@ -61,7 +61,7 @@ Gaps:
 |---|---|---|
 | ~~High~~ | ~~Body weight log~~ | Done in v2.1.2 |
 | ~~High~~ | ~~Workout history~~ | Done in v2.2.0 — list, detail, PRs |
-| Medium | Nutrition history detail | Tapping a day in the 60-day history has no action. Expected: navigate to that day's journal. |
+| ~~Medium~~ | ~~Nutrition history detail~~ | Done in v2.3.0 |
 | Medium | Home body weight card | Last logged weight not surfaced on the dashboard. |
 | Medium | Exercise progression chart | No weight-over-time chart in ExerciseDetailScreen. |
 | Medium | Custom programs | Creation and editing UI are incomplete. |

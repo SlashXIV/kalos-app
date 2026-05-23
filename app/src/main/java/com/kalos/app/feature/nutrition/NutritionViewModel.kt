@@ -8,6 +8,7 @@ import com.kalos.app.core.domain.model.DietaryFilter
 import com.kalos.app.core.domain.repository.FoodRepository
 import com.kalos.app.core.domain.repository.MealRepository
 import com.kalos.app.core.domain.repository.UserRepository
+import com.kalos.app.core.domain.repository.WaterRepository
 import com.kalos.app.core.domain.usecase.FoodSuggestion
 import com.kalos.app.core.domain.usecase.SuggestFoodsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +28,15 @@ data class NutritionUiState(
     val totalFat: Float = 0f,
     val suggestions: List<FoodSuggestion> = emptyList(),
     val isLoading: Boolean = true,
-)
+    val isToday: Boolean = true,
+    val waterMl: Int = 0,
+    val waterGoalMl: Int = 2000,
+) {
+    val waterProgress: Float get() = if (waterGoalMl > 0) (waterMl.toFloat() / waterGoalMl).coerceIn(0f, 1f) else 0f
+    val isWaterGoalReached: Boolean get() = waterMl >= waterGoalMl
+    val waterDisplayTotal: String get() = if (waterMl >= 1000) "${"%.1f".format(waterMl / 1000f)} L" else "$waterMl ml"
+    val waterDisplayGoal: String get() = if (waterGoalMl >= 1000) "${"%.1f".format(waterGoalMl / 1000f)} L" else "$waterGoalMl ml"
+}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -37,12 +46,15 @@ class NutritionViewModel @Inject constructor(
     private val foodRepository: FoodRepository,
     private val suggestFoods: SuggestFoodsUseCase,
     private val dietaryPrefsStore: DietaryPreferencesStore,
+    private val waterRepository: WaterRepository,
 ) : ViewModel() {
 
     private val _date = MutableStateFlow(LocalDate.now().toString())
     val date: StateFlow<String> = _date
 
-    val uiState: StateFlow<NutritionUiState> = combine(
+    private val _waterGoalMl = MutableStateFlow(waterRepository.getGoalMl())
+
+    private val baseState: Flow<NutritionUiState> = combine(
         _date.flatMapLatest { mealRepository.getMealsForDate(it) },
         userRepository.observeGoal(),
         _date,
@@ -68,7 +80,16 @@ class NutritionViewModel @Inject constructor(
             totalFat = totalFat,
             suggestions = suggestions,
             isLoading = false,
+            isToday = isToday,
         )
+    }
+
+    val uiState: StateFlow<NutritionUiState> = combine(
+        baseState,
+        _date.flatMapLatest { waterRepository.observeWaterForDate(it) },
+        _waterGoalMl,
+    ) { state, waterMl, waterGoalMl ->
+        state.copy(waterMl = waterMl, waterGoalMl = waterGoalMl)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -85,5 +106,15 @@ class NutritionViewModel @Inject constructor(
 
     fun deleteItems(itemIds: List<Long>) {
         viewModelScope.launch { itemIds.forEach { mealRepository.removeItem(it) } }
+    }
+
+    fun addWater(amountMl: Int) {
+        viewModelScope.launch { waterRepository.addWater(amountMl) }
+    }
+
+    fun setWaterGoal(goalMl: Int) {
+        if (goalMl < 100) return
+        waterRepository.setGoalMl(goalMl)
+        _waterGoalMl.value = goalMl
     }
 }

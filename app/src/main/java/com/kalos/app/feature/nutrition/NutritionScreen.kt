@@ -38,10 +38,8 @@ import kotlinx.coroutines.launch
 fun NutritionScreen(
     navController: NavController,
     viewModel: NutritionViewModel = hiltViewModel(),
-    waterViewModel: WaterViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val waterState by waterViewModel.uiState.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -64,7 +62,7 @@ fun NutritionScreen(
                 title = { Text("Nutrition", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) },
                 actions = {
                     IconButton(onClick = {
-                        clipboardManager.setText(AnnotatedString(buildDailySummary(state, waterState)))
+                        clipboardManager.setText(AnnotatedString(buildDailySummary(state)))
                         scope.launch { snackbarHostState.showSnackbar("Résumé nutritionnel copié") }
                     }) {
                         Icon(Icons.Filled.ContentCopy, contentDescription = "Copier le résumé")
@@ -150,9 +148,15 @@ fun NutritionScreen(
             // Hydration card
             item(key = "hydration") {
                 HydrationCard(
-                    state = waterState,
-                    onAdd = waterViewModel::addWater,
-                    onSetGoal = waterViewModel::setGoal,
+                    waterMl = state.waterMl,
+                    waterGoalMl = state.waterGoalMl,
+                    progress = state.waterProgress,
+                    isGoalReached = state.isWaterGoalReached,
+                    displayTotal = state.waterDisplayTotal,
+                    displayGoal = state.waterDisplayGoal,
+                    isEditable = state.isToday,
+                    onAdd = viewModel::addWater,
+                    onSetGoal = viewModel::setWaterGoal,
                 )
             }
 
@@ -265,7 +269,13 @@ private fun MealSection(
 
 @Composable
 private fun HydrationCard(
-    state: WaterUiState,
+    waterMl: Int,
+    waterGoalMl: Int,
+    progress: Float,
+    isGoalReached: Boolean,
+    displayTotal: String,
+    displayGoal: String,
+    isEditable: Boolean,
     onAdd: (Int) -> Unit,
     onSetGoal: (Int) -> Unit,
 ) {
@@ -290,14 +300,14 @@ private fun HydrationCard(
                         Icons.Filled.WaterDrop,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp),
-                        tint = if (state.isGoalReached) MaterialTheme.colorScheme.primary
+                        tint = if (isGoalReached) MaterialTheme.colorScheme.primary
                                else MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
                     )
                     Text(
                         "Hydratation",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                     )
-                    if (state.isGoalReached) {
+                    if (isGoalReached) {
                         Icon(
                             Icons.Filled.CheckCircle,
                             contentDescription = "Objectif atteint",
@@ -306,16 +316,18 @@ private fun HydrationCard(
                         )
                     }
                 }
-                IconButton(
-                    onClick = { showGoalDialog = true },
-                    modifier = Modifier.size(28.dp),
-                ) {
-                    Icon(
-                        Icons.Filled.Edit,
-                        contentDescription = "Modifier l'objectif",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                if (isEditable) {
+                    IconButton(
+                        onClick = { showGoalDialog = true },
+                        modifier = Modifier.size(28.dp),
+                    ) {
+                        Icon(
+                            Icons.Filled.Edit,
+                            contentDescription = "Modifier l'objectif",
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
 
@@ -326,52 +338,52 @@ private fun HydrationCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        state.displayTotal,
+                        displayTotal,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = if (state.isGoalReached) MaterialTheme.colorScheme.primary
+                        color = if (isGoalReached) MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        "/ ${state.displayGoal}",
+                        "/ $displayGoal",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 LinearProgressIndicator(
-                    progress = { state.progress },
+                    progress = { progress },
                     modifier = Modifier.fillMaxWidth().height(6.dp).clip(MaterialTheme.shapes.small),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                 )
             }
 
-            // Quick-add buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                listOf(250, 500, 750).forEach { ml ->
-                    OutlinedButton(
-                        onClick = { onAdd(ml) },
+            // Quick-add buttons — only shown when viewing today
+            if (isEditable) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    listOf(250, 500, 750).forEach { ml ->
+                        OutlinedButton(
+                            onClick = { onAdd(ml) },
+                            modifier = Modifier.weight(1f),
+                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+                            border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.dp),
+                        ) {
+                            Text("+${ml}ml", style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
+                    FilledTonalButton(
+                        onClick = { showCustomDialog = true },
                         modifier = Modifier.weight(1f),
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
-                        border = ButtonDefaults.outlinedButtonBorder.copy(
-                            width = 1.dp,
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         ),
                     ) {
-                        Text("+${ml}ml", style = MaterialTheme.typography.labelMedium)
+                        Text("Autre", style = MaterialTheme.typography.labelMedium)
                     }
-                }
-                FilledTonalButton(
-                    onClick = { showCustomDialog = true },
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
-                    colors = ButtonDefaults.filledTonalButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    ),
-                ) {
-                    Text("Autre", style = MaterialTheme.typography.labelMedium)
                 }
             }
         }
@@ -380,7 +392,7 @@ private fun HydrationCard(
     if (showGoalDialog) {
         WaterAmountDialog(
             title = "Objectif quotidien",
-            initialValue = state.goalMl.toString(),
+            initialValue = waterGoalMl.toString(),
             suffix = "ml",
             onConfirm = { v ->
                 v.toIntOrNull()?.let { onSetGoal(it) }
@@ -537,7 +549,7 @@ private fun SuggestionRow(suggestion: FoodSuggestion, onClick: () -> Unit) {
     }
 }
 
-private fun buildDailySummary(state: NutritionUiState, waterState: WaterUiState): String {
+private fun buildDailySummary(state: NutritionUiState): String {
     val sb = StringBuilder()
 
     sb.appendLine("Date : ${state.date}")
@@ -559,12 +571,12 @@ private fun buildDailySummary(state: NutritionUiState, waterState: WaterUiState)
     sb.appendLine("Restant : ${(state.goal.fatG - state.totalFat).toInt()} g")
     sb.appendLine()
 
-    sb.append("Hydratation : ${waterState.todayMl} / ${waterState.goalMl} ml")
-    if (waterState.isGoalReached) {
+    sb.append("Hydratation : ${state.waterMl} / ${state.waterGoalMl} ml")
+    if (state.isWaterGoalReached) {
         sb.appendLine("  ✓ Objectif atteint")
     } else {
         sb.appendLine()
-        sb.appendLine("Restant : ${waterState.goalMl - waterState.todayMl} ml")
+        sb.appendLine("Restant : ${state.waterGoalMl - state.waterMl} ml")
     }
 
     val nonEmpty = state.meals.filter { it.items.isNotEmpty() }

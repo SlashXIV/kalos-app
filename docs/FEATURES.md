@@ -1,212 +1,198 @@
-# Kalos — Inventaire des fonctionnalités
+# Features
 
-> Dernière mise à jour : v2.1.1
+> Version: 2.1.1
 
-Légende : ✅ Terminé · ⚠️ Partiel · 🔲 Non fait
+Statuses: **Done** · **Partial** · **Planned**
 
 ---
 
 ## Onboarding
 
-| Fonctionnalité | État | Notes |
+| Feature | Status | Notes |
 |---|---|---|
-| Écran d'accueil (Welcome) | ✅ | Branding + liste de features |
-| Configuration du profil (âge, sexe, taille, poids, objectif poids) | ✅ | |
-| Sélection niveau d'activité + objectif | ✅ | 5 niveaux, 5 objectifs |
-| Calcul BMR / TDEE / macros (Mifflin-St Jeor) | ✅ | Affiché sur écran résultat |
-| Persistance profil + objectifs au premier lancement | ✅ | |
-| Seeding base de données (aliments, exercices, programmes) | ✅ | Une seule fois, au premier lancement |
+| Welcome screen | Done | |
+| Profile setup (age, sex, height, weight, target weight) | Done | |
+| Activity level + goal selection | Done | 5 levels, 5 goals |
+| BMR / TDEE / macro calculation (Mifflin-St Jeor) | Done | Displayed on result screen |
+| Profile and goals persistence on first launch | Done | |
+| Database seeding (foods, exercises, programs) | Done | Runs once when food table is empty |
 
 ---
 
-## Accueil (Home)
+## Home
 
-| Fonctionnalité | État | Notes |
+| Feature | Status | Notes |
 |---|---|---|
-| Anneau de progression calorique du jour | ✅ | Consommé / Objectif / Restant |
-| Barres macros du jour (P / G / L) | ✅ | |
-| Raccourcis rapides (Journal nutrition, Séance sport) | ✅ | |
-| Carte programme du jour (si séance planifiée) | ✅ | Bouton "Démarrer la séance" |
-| Carte jour de repos (si programme actif, pas de séance) | ✅ | Affiche la prochaine séance planifiée |
-| Liste des séances terminées aujourd'hui | ✅ | Nom + nb exercices + durée |
+| Daily calorie progress ring | Done | Consumed / Goal / Remaining |
+| Daily macro bars (protein / carbs / fat) | Done | |
+| Quick-action shortcuts (nutrition, workout) | Done | |
+| Today's program workout card | Done | "Start session" button if workout scheduled today |
+| Rest day card | Done | Shows next scheduled workout when no session today |
+| Today's completed workouts list | Done | Name, exercise count, duration |
 
 ---
 
 ## Nutrition
 
-### Journal quotidien
+### Daily journal
 
-| Fonctionnalité | État | Notes |
+| Feature | Status | Notes |
 |---|---|---|
-| Navigation par date (← →, retour à aujourd'hui) | ✅ | Futur désactivé |
-| Résumé journalier (anneau calories + macros) | ✅ | |
-| 4 sections repas (Petit-déjeuner / Déjeuner / Dîner / Collations) | ✅ | |
-| Ajout aliment par repas → recherche | ✅ | |
-| Suppression d'un aliment d'un repas | ✅ | |
-| Consolidation des doublons (affichage groupé) | ✅ | |
-| Copie du résumé journalier (presse-papier) | ✅ | |
-| Suivi hydratation (compteur eau en ml) | ✅ | Ajout rapide 250/500/750ml + personnalisé |
-| Objectif hydratation configurable | ✅ | Dialog in-screen |
-| Valeurs négatives pour corrections hydratation | ✅ | |
-| Suggestions intelligentes d'aliments | ✅ | Basé sur macros restantes + filtres diététiques |
+| Date navigation (previous / next / today) | Done | Future dates disabled |
+| Daily summary (calorie ring + macro bars) | Done | |
+| 4 meal sections (Breakfast / Lunch / Dinner / Snacks) | Done | |
+| Add food to a meal | Done | |
+| Delete food from a meal | Done | |
+| Duplicate food consolidation (grouped display) | Done | |
+| Copy daily summary to clipboard | Done | |
+| Water intake tracking | Done | Quick-add 250 / 500 / 750 ml + custom |
+| Configurable water goal | Done | In-screen dialog |
+| Negative correction for water intake | Done | |
+| Smart food suggestions | Done | Based on remaining macros and dietary filters |
 
-### Recherche d'aliments
+### Food search
 
-| Fonctionnalité | État | Notes |
+| Feature | Status | Notes |
 |---|---|---|
-| Recherche texte avec debounce (300ms) | ✅ | |
-| Aliments récents (si aucune requête) | ✅ | |
-| Aliments favoris (si aucune requête) | ✅ | |
-| Fiche aliment (bottom sheet) | ✅ | Modes portion / grammes |
-| Projection "Après ajout" (totaux journaliers projetés vs objectif) | ✅ | Code couleur normal / avertissement / dépassement |
-| Filtres diététiques appliqués aux résultats | ✅ | |
-| Création d'un aliment personnalisé depuis la recherche | ✅ | |
+| Text search with debounce (300 ms) | Done | |
+| Recent foods (shown when query is empty) | Done | |
+| Favorite foods (shown when query is empty) | Done | |
+| Food detail sheet | Done | Portion / grams mode toggle |
+| "After adding" projected daily totals | Done | Color-coded: normal / warning / over target |
+| Dietary filter applied to results | Done | |
+| Create custom food from search screen | Done | |
 
-### Aliments personnalisés
+### Custom foods
 
-| Fonctionnalité | État | Notes |
+| Feature | Status | Notes |
 |---|---|---|
-| Création d'aliment avec macros per 100g | ✅ | |
-| Édition d'un aliment existant | ✅ | |
-| Tags diététiques (porc, alcool, végétarien, vegan) | ✅ | Logique d'interdépendance (vegan → végétarien) |
-| Séparateur décimal français (, accepté) | ✅ | |
+| Create food with macros per 100 g | Done | |
+| Edit existing custom food | Done | |
+| Dietary tags (pork, alcohol, vegetarian, vegan) | Done | Vegan implies vegetarian |
+| French decimal separator support | Done | Accepts both `.` and `,` |
 
-### Historique nutrition
+### Nutrition history
 
-| Fonctionnalité | État | Notes |
+| Feature | Status | Notes |
 |---|---|---|
-| Résumés journaliers sur 60 jours | ✅ | Kcal + P/G/L par jour |
-| Détail d'une journée (quels aliments) | 🔲 | Tap sur un jour → rien pour l'instant |
+| 60-day daily summaries | Done | kcal + protein / carbs / fat per day |
+| Day detail (which foods were logged) | Planned | Tap on a row currently has no action |
 
 ---
 
-## Sport
+## Workout
 
-### Catalogue d'exercices
+### Exercise catalog
 
-| Fonctionnalité | État | Notes |
+| Feature | Status | Notes |
 |---|---|---|
-| Liste de ~100 exercices | ✅ | Données seed |
-| Recherche texte | ✅ | |
-| Filtres par groupe musculaire (13 options) | ✅ | |
-| Filtres par type (5 options) | ✅ | |
-| Fiche exercice (muscles, équipement, description) | ✅ | |
-| Mode "Ajouter à la séance" (depuis le builder) | ✅ | Comportement dual selon contexte |
+| ~100 seeded exercises | Done | |
+| Text search | Done | |
+| Filter by muscle group (13 options) | Done | |
+| Filter by type (5 options) | Done | |
+| Exercise detail screen | Done | Muscles, equipment, description |
+| Dual-mode behavior (standalone / builder) | Done | |
 
-### Builder de séances
+### Session builder
 
-| Fonctionnalité | État | Notes |
+| Feature | Status | Notes |
 |---|---|---|
-| Création d'un template de séance | ✅ | |
-| Édition d'un template existant | ✅ | |
-| Ajout / suppression d'exercices | ✅ | |
-| Édition sets × reps par exercice | ✅ | |
-| Liaison programme + jour de semaine | ✅ | |
-| Ordre des exercices | ✅ | Indexé, affiché dans l'ordre |
+| Create workout template | Done | |
+| Edit existing template | Done | |
+| Add / remove exercises | Done | |
+| Edit sets × reps per exercise | Done | |
+| Link template to a program and day | Done | |
 
-### Séance active (workout tracker)
+### Active workout tracker
 
-| Fonctionnalité | État | Notes |
+| Feature | Status | Notes |
 |---|---|---|
-| Chronomètre séance (temps réel) | ✅ | Survit au verrouillage écran |
-| Navigation par onglets entre exercices | ✅ | |
-| Saisie poids / reps par série | ✅ | |
-| Marquage série complétée | ✅ | |
-| Ajout / suppression de séries | ✅ | |
-| Minuterie de repos automatique (après série complétée) | ✅ | Durée configurable par exercice |
-| Skip repos | ✅ | |
-| Sauvegarde automatique brouillon (debounce 400ms) | ✅ | |
-| Reprise de séance interrompue | ✅ | Dialog avec temps écoulé + avertissement si >24h |
-| Fin de séance + sauvegarde dans l'historique | ✅ | |
+| Session timer (wall-clock, survives lock screen) | Done | |
+| Tab navigation between exercises | Done | |
+| Weight / reps input per set | Done | |
+| Mark set as completed | Done | |
+| Add / remove sets | Done | |
+| Automatic rest timer (triggered on set completion) | Done | Duration configurable per exercise |
+| Skip rest | Done | |
+| Auto-save draft (debounced, 400 ms) | Done | |
+| Resume interrupted session | Done | Dialog with elapsed time, staleness warning if > 24 h |
+| Finish session and save to history | Done | |
 
-### Résumé de séance
+### Post-workout summary
 
-| Fonctionnalité | État | Notes |
+| Feature | Status | Notes |
 |---|---|---|
-| Résumé post-séance (durée, volume total, exercices) | ✅ | |
-| Détail des séries complétées par exercice | ✅ | |
+| Summary screen (duration, total volume, exercises) | Done | |
+| Per-exercise set detail | Done | |
 
-### Historique sport
+### Workout history
 
-| Fonctionnalité | État | Notes |
+| Feature | Status | Notes |
 |---|---|---|
-| Liste des séances passées | ⚠️ | Stub minimal, liste sans interaction |
-| Détail d'une séance historique | 🔲 | |
-| Graphe de volume / progression | 🔲 | |
+| Past sessions list | Partial | List displayed, no interaction or detail |
+| Session detail view | Planned | |
+| Volume / progression charts | Planned | |
 
-### Programmes d'entraînement
+### Training programs
 
-| Fonctionnalité | État | Notes |
+| Feature | Status | Notes |
 |---|---|---|
-| Affichage des 3 programmes seed (PPL, U/L, Full Body) | ✅ | |
-| Activation / désactivation d'un programme | ✅ | |
-| Détail programme (jours + templates associés) | ✅ | |
-| Création / édition de programmes custom | ⚠️ | UI partielle |
-| Rappels jour J / veille par programme | ✅ | Dans ProgramDetailScreen |
+| Display 3 seeded programs (PPL, Upper/Lower, Full Body) | Done | |
+| Activate / deactivate a program | Done | |
+| Program detail (days and assigned templates) | Done | |
+| Create / edit custom programs | Partial | UI incomplete |
+| Day-of / day-before reminders per program | Done | In ProgramDetailScreen |
 
 ---
 
-## Calendrier
+## Calendar
 
-| Fonctionnalité | État | Notes |
+| Feature | Status | Notes |
 |---|---|---|
-| Grille mensuelle avec navigation mois | ✅ | |
-| Indicateurs par jour (nutrition, séance faite, planifiée) | ✅ | Points colorés |
-| Légende des indicateurs | ✅ | |
-| Carte détail d'une journée (tap sur un jour) | ✅ | Nutrition + hydratation + séances |
-| Lien "Voir nutrition" depuis le détail | ✅ | |
-| Insight fréquence d'entraînement (4 semaines) | ✅ | Graphe à barres |
-| Insight moyenne calorique (7 jours) | ✅ | Avec code couleur vs objectif |
+| Monthly grid with month navigation | Done | |
+| Per-day indicators (nutrition logged, workout done, planned) | Done | Color-coded dots |
+| Indicator legend | Done | |
+| Day detail card (nutrition, water, sessions) | Done | |
+| Link to nutrition screen from day detail | Done | |
+| Workout frequency insight (4 weeks) | Done | Bar chart |
+| 7-day average calorie insight | Done | Color-coded vs goal |
 
 ---
 
-## Profil
+## Profile
 
-| Fonctionnalité | État | Notes |
+| Feature | Status | Notes |
 |---|---|---|
-| Affichage profil (poids, taille, objectif, TDEE) | ✅ | |
-| Affichage objectifs nutritionnels | ✅ | |
-| Édition profil complet | ✅ | Recalcul auto des macros si objectif/activité changent |
-| Édition objectifs (manuel ou auto-calculé) | ✅ | Breakdown détaillé affiché |
-| Suivi du poids corporel (courbe) | 🔲 | Entité DB existe, aucune UI |
+| Profile display (weight, height, goal, TDEE) | Done | |
+| Nutrition goals display | Done | |
+| Edit full profile | Done | Auto-recalculates macros on activity or goal change |
+| Edit goals (manual or auto-calculated) | Done | Detailed breakdown before saving |
+| Body weight log and trend chart | Planned | DB entity exists (`BodyWeightEntity`), no UI |
 
 ---
 
-## Paramètres
+## Settings
 
-| Fonctionnalité | État | Notes |
+| Feature | Status | Notes |
 |---|---|---|
-| Lien vers Notifications | ✅ | |
-| Filtres diététiques (porc, alcool, végétarien, vegan) | ✅ | Persistés en DataStore |
-| Info mode halal | ✅ | Caveat certification |
-| Export des données (JSON) | ✅ | Via sélecteur de fichier |
-| Import / restauration des données | ✅ | Dialog de confirmation |
-| Affichage version (À propos) | ✅ | Kalos 2.1.1 |
+| Link to Notifications screen | Done | |
+| Dietary filters (pork, alcohol, vegetarian, vegan) | Done | Persisted in DataStore |
+| Halal mode info card | Done | |
+| Data export (JSON) | Done | Via file picker |
+| Data import / restore | Done | Confirmation dialog (destructive) |
+| Version display | Done | Kalos 2.1.1 |
 
 ---
 
-## Notifications & Rappels
+## Notifications
 
-| Fonctionnalité | État | Notes |
+| Feature | Status | Notes |
 |---|---|---|
-| Rappels intelligents (master switch) | ✅ | WorkManager daily |
-| Rappel nutrition (si aucun repas enregistré) | ✅ | |
-| Rappel activité physique (inactivité configurable 2/3/5j) | ✅ | |
-| Rappel hydratation (si <50% objectif) | ✅ | |
-| Heure d'envoi rappels intelligents (slider 6h-22h) | ✅ | |
-| Rappels programme par séance (toggle par programme) | ✅ | |
-| Heure d'envoi rappels programme | ✅ | |
-| Rappel jour J / veille (par programme) | ✅ | Dans ProgramDetailScreen |
-
----
-
-## Technique / Transverse
-
-| Fonctionnalité | État | Notes |
-|---|---|---|
-| Mode sombre permanent | ✅ | |
-| Persistance Room (offline-first) | ✅ | |
-| Police Nunito (Google Fonts, downloadable) | ✅ | |
-| Localisation française complète | ✅ | Dates, décimales, labels |
-| Architecture MVVM + Repository + UseCases | ✅ | |
-| Injection Hilt | ✅ | |
+| Smart reminders master switch | Done | WorkManager daily job |
+| Nutrition reminder (no meal logged today) | Done | |
+| Activity reminder (configurable inactivity threshold: 2 / 3 / 5 days) | Done | |
+| Hydration reminder (< 50% of water goal) | Done | |
+| Smart reminder send time (slider, 6 h–22 h) | Done | |
+| Per-program reminder toggle | Done | |
+| Program reminder send time | Done | |
+| Day-of / day-before reminder per program | Done | In ProgramDetailScreen |

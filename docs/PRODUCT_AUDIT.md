@@ -1,134 +1,91 @@
-# Kalos — Audit produit
+# Product Audit
 
-> Version auditée : **2.1.1** — 23 mai 2026
-
----
-
-## Vue d'ensemble
-
-Kalos est un tracker fitness & nutrition offline-first, entièrement en français, ciblant Android 8.0+. L'application couvre les trois piliers d'un suivi de forme : alimentation, entraînement, et progression dans le temps.
-
-**Maturité globale : production-ready** sur les fonctions principales. Deux modules secondaires restent partiels (historique sport, programmes custom).
+> Version: 2.1.1 — 23 May 2026
 
 ---
 
-## Modules
+## Overall assessment
+
+Kalos is a feature-complete, offline-first fitness and nutrition tracker. The core flows — onboarding, daily meal logging, and active workout tracking — are solid and well-polished. Two secondary modules (workout history, custom programs) remain incomplete. The main structural gap is the absence of a body weight log UI despite the database entity already existing.
+
+---
+
+## Module-by-module review
 
 ### Onboarding
-**État : complet**
 
-Flow en 4 étapes : Bienvenue → Profil (âge, sexe, taille, poids, objectif de poids) → Objectif (activité, but) → Résultat (BMR / TDEE / macros calculés). La formule Mifflin-St Jeor est correctement implémentée et documentée visuellement sur l'écran résultat.
+**Solid.** Four-step flow is complete and coherent. TDEE and macro calculation (Mifflin-St Jeor) is correctly implemented and explained to the user on the result screen. No re-onboarding mechanism from settings, but all fields are editable from the profile screen so this is non-blocking.
 
-Pas de possibilité de relancer l'onboarding depuis les paramètres (non-bloquant : tout est modifiable depuis "Modifier le profil" et "Modifier les objectifs").
+### Home
 
----
-
-### Home (Dashboard)
-**État : complet**
-
-Tableau de bord contextuel et vivant. L'anneau calorique et les barres macros reflètent les données du jour en temps réel. La carte programme est particulièrement bien faite : elle distingue "jour de séance" vs "jour de repos" et affiche la prochaine séance planifiée.
-
-Points de polish déjà réalisés : données dynamiques, raccourcis rapides, liste des séances du jour.
-
----
+**Solid.** The dashboard is contextual and reactive. The program card correctly distinguishes between a scheduled workout day and a rest day, and displays the next planned session. Data updates in real time via StateFlow.
 
 ### Nutrition
-**État : complet — module le plus abouti**
 
-Le journal quotidien est le cœur de l'app et il est bien fini :
-- Navigation par date fluide
-- 4 sections repas correctement séparées
-- Hydratation avec ajouts rapides et corrections négatives
-- Suggestions d'aliments intelligentes (basées sur macros restantes + filtres diét.)
-- Fiche aliment avec projection "Après ajout" (totaux projetés vs objectif, code couleur)
-- Aliments personnalisés complets avec tags diététiques
+**Most polished module.** The daily journal covers the full logging loop: meal sections, hydration with quick-add buttons and negative corrections, smart suggestions based on remaining macros and dietary filters, and a projected macro strip in the food detail sheet. Dietary filter logic is consistent across search results and suggestions.
 
-**Limite principale** : L'historique nutrition affiche des résumés (60j) mais ne permet pas de voir le détail d'une journée (quels repas, quels aliments). Un tap sur une ligne d'historique ne fait rien.
+The only notable gap: the 60-day history screen lists daily summaries but a tap on a row has no action. The detail view (what was actually eaten that day) is missing.
 
----
+### Workout
 
-### Sport
-**État : complet sur le chemin critique, partiel sur les modules secondaires**
+**Core flow complete; secondary features incomplete.**
 
-Le flux principal — créer une séance → l'exécuter → la terminer — est solide et bien pensé :
-- Builder avec liaison programme
-- Tracker actif avec chrono, séries, minuterie de repos, sauvegarde brouillon, et reprise
-- Résumé post-séance
+The builder → active tracker → summary path works well. The draft auto-save and resume dialog (with staleness detection beyond 24 h) are particularly solid. Total volume is calculated and persisted correctly.
 
-**Manques identifiés :**
+Gaps:
+- **Workout history** is a stub. The list of past sessions is displayed but there is no interaction, no session detail, and no progression charts. This is the most visible gap for a regular user.
+- **Custom programs** creation and editing are partially implemented.
+- **Body weight log** has a database entity (`BodyWeightEntity`) but no UI at any level (no input, no chart, no home card). This is a significant omission for a fitness tracker.
 
-1. **Historique sport** : actuellement un stub. On voit la liste des séances passées mais sans interaction, sans détail, sans courbes de progression. C'est le vide le plus visible pour un utilisateur qui pratique régulièrement.
+### Calendar
 
-2. **Programmes custom** : les 3 programmes seed sont bien affichés, et on peut les activer / consulter leur détail. La création et l'édition de programmes personnalisés existent partiellement dans l'UI.
+**Complete.** Monthly grid with three-state day indicators (nutrition logged, workout done, planned), animated day detail card, and two insights (4-week workout frequency bar chart, 7-day average calorie). The "Cette sem." label clipping issue was resolved in v2.1.0.
 
-3. **Suivi du poids corporel** : l'entité `BodyWeightEntity` existe dans la base de données mais il n'y a aucun écran pour saisir ou visualiser l'évolution du poids. Gap fort étant donné que c'est affiché dans le profil.
+### Profile
 
----
+**Complete.** Profile and goal editing both handle recalculation correctly. The goal edit screen shows a detailed breakdown before saving, which is good for user understanding. No body weight tracking UI (see Workout section above).
 
-### Calendrier
-**État : complet**
+### Settings
 
-Grille mensuelle propre avec indicateurs colorés (nutrition / séance faite / planifiée). La carte de détail journalier est bien réalisée et les deux insights (fréquence d'entraînement 4 semaines, moyenne calorique 7j) donnent une vraie lecture de tendance.
+**Complete.** Dietary preferences integrate across the full nutrition flow. Export and import work with a proper confirmation dialog on import. The notifications link navigates to the dedicated screen.
 
-La correction de la troncature du label "Cette sem." est bien en place (v2.1.0).
+### Notifications
+
+**Complete.** Smart reminders (WorkManager daily job) and program reminders are both functional, configurable, and centralized in a dedicated screen since v2.1.0. Per-program toggles, inactivity threshold chips (2 / 3 / 5 days), and time sliders are all correctly wired.
 
 ---
 
-### Profil
-**État : complet**
+## Identified gaps (prioritized)
 
-Affichage clair des données physiques et objectifs. L'édition du profil recalcule automatiquement les macros si l'objectif ou le niveau d'activité change. L'écran "Modifier les objectifs" est particulièrement bien fait avec son breakdown détaillé avant enregistrement.
-
-**Gap** : Aucune UI pour le suivi du poids corporel (voir section Sport ci-dessus).
-
----
-
-### Paramètres & Notifications
-**État : complet**
-
-Les préférences diététiques sont bien intégrées dans toute la chaîne (filtrage des suggestions, filtrage des résultats de recherche). Export / import JSON fonctionnel avec confirmation.
-
-Les notifications sont centralisées dans un écran dédié (depuis v2.1.0) : rappels intelligents (WorkManager daily) + rappels programme par toggle. Bien architecturé.
-
----
-
-## UX globale
-
-**Points forts :**
-- Cohérence visuelle : palette verte / orange appliquée correctement depuis v2.1.1 (plus de token marron)
-- Transitions fluides (fade + slide, 200ms)
-- Formulaires intelligents (séparateur décimal français, validation live, désactivation des boutons si invalide)
-- Feedbacks utilisateur présents (snackbars, spinners, dialogs de confirmation)
-- Architecture réactive : l'UI se met à jour en temps réel (StateFlow)
-
-**Points à surveiller :**
-- L'historique sport vide crée une attente non satisfaite
-- Pas de photo de profil (mineur, non attendu)
-- La navigation "Profil" n'est pas dans la bottom bar directement (mais accessible via l'onglet 4)
-
----
-
-## Qualité du code
-
-| Critère | Évaluation |
-|---|---|
-| Architecture | MVVM + Repository + UseCase bien séparé |
-| Réactivité | StateFlow + combine() correctement utilisés |
-| DI | Hilt proprement configuré |
-| Persistance | Room + fallbackToDestructiveMigration (acceptable en dev) |
-| Notifications | WorkManager, EntryPoint pattern (non @HiltWorker) |
-| Performance | Memoization Compose (remember(key)) en place sur CalendarGrid |
-| Thème | Material3 dark, tokens bien mappés depuis v2.1.1 |
-
----
-
-## Gaps et zones à traiter (priorisés)
-
-| Priorité | Zone | Description |
+| Priority | Area | Description |
 |---|---|---|
-| 🔴 Haute | Suivi poids corporel | Entité DB existante, aucune UI. Manque fort pour un tracker fitness |
-| 🔴 Haute | Historique sport | Stub actuel : liste sans interaction ni graphes de progression |
-| 🟡 Moyenne | Détail historique nutrition | Tap sur jour → afficher les repas de ce jour |
-| 🟡 Moyenne | Programmes custom | Création / édition partielle |
-| 🟢 Basse | Favoris exercices | Catalogue sans favoris |
-| 🟢 Basse | Filtres avancés aliments | Recherche sans filtre catégorie |
+| High | Body weight log | `BodyWeightEntity` exists in the database with no UI. Weight input, trend chart, and integration with the Home dashboard are all missing. |
+| High | Workout history | Current implementation is a stub. No session detail, no volume trend, no personal records display (use case already exists: `GetPersonalRecordsUseCase`). |
+| Medium | Nutrition history detail | Tapping a day in the 60-day history has no action. Expected behavior: navigate to that day's journal or show a summary sheet. |
+| Medium | Custom programs | Creation and editing UI are incomplete. |
+| Low | Exercise favorites | The catalog has no way to mark or filter favorite exercises. |
+| Low | Advanced food filters | Food search has no category or tag filter, only a text query. |
+
+---
+
+## UX notes
+
+- Color system is consistent since v2.1.1 (secondary token remapped to green, no residual brown).
+- French decimal separator (`,`) is handled correctly in numeric inputs.
+- The food projection strip ("Après ajout") is a strong UX decision — visible before committing.
+- No user avatar or photo support (not a stated requirement, non-blocking).
+- The TDEE displayed in the profile is a static calculation from the last saved profile. It is not invalidated automatically when macros are manually edited.
+
+---
+
+## Technical notes
+
+| Area | Status |
+|---|---|
+| Architecture (MVVM + Repository + UseCase) | Clean, well-separated |
+| Reactive state (StateFlow + combine) | Correctly used throughout |
+| Dependency injection (Hilt) | Consistent |
+| Database migrations | `fallbackToDestructiveMigration` — acceptable for current stage |
+| Notifications | WorkManager + EntryPoint pattern (not @HiltWorker) |
+| Compose performance | `remember(key)` in place for CalendarGrid; general performance acceptable |
+| Theme | Material3 dark, all tokens correctly mapped |

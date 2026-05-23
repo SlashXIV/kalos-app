@@ -5,9 +5,12 @@
 ## v2.3.0 — 23 May 2026
 
 ### Added
-- Nutrition history: tapping a day in the 60-day list now opens the nutrition journal for that date in read-only mode
+- Nutrition history: tapping a day in the 60-day list opens the journal for that date
 - Dates in the history list are now formatted (Aujourd'hui / Hier / Lundi 19 mai)
-- When opened from history: back button in the top bar, history icon hidden, title shows the selected date
+- When opened from history: back button in the top bar, history icon hidden
+- Journal is editable for past days: add/remove food entries and water intake on any date
+- Water goal modification remains today-only; smart suggestions remain today-only
+- TopAppBar title shows the date whenever a past day is active (history navigation or arrow navigation from main tab)
 
 ---
 

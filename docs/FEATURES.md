@@ -1,6 +1,6 @@
 # Features
 
-> Version: 2.6.0
+> Version: 2.7.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -81,6 +81,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Exercise detail screen | Done | Muscles, equipment, description, progression chart |
 | Exercise progression chart | Done | Canvas line chart, date X-axis, PR badge, 20 last sessions |
 | Dual-mode behavior (standalone / builder) | Done | |
+| Exercise favorites | Done | Heart icon toggle in standalone mode, Favoris filter chip |
 
 ### Session builder
 

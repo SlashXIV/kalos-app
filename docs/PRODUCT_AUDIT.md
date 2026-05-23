@@ -1,6 +1,6 @@
 # Product Audit
 
-> Version: 2.6.0 — 23 May 2026
+> Version: 2.7.0 — 23 May 2026
 
 ---
 
@@ -60,7 +60,7 @@ Gaps:
 | ~~Medium~~ | ~~Exercise progression chart~~ | Done in v2.4.0 — Canvas chart, date X-axis, PR badge |
 | ~~Medium~~ | ~~Home body weight card~~ | Done in v2.5.0 — last weight, date, delta |
 | Medium | Custom programs | Creation and editing UI are incomplete. |
-| Low | Exercise favorites | The catalog has no way to mark or filter favorite exercises. |
+| ~~Low~~ | ~~Exercise favorites~~ | Done in v2.7.0 — heart icon toggle + Favoris filter chip |
 | Low | Advanced food filters | Food search has no category or tag filter, only a text query. |
 
 ---

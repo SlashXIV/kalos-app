@@ -2,6 +2,15 @@
 
 ---
 
+## v2.7.0 — 23 May 2026
+
+### Added
+- Exercices favoris dans le catalogue : icône cœur en trailing sur chaque item (mode standalone uniquement), toggle persisté en base
+- Chip "Favoris" en tête des filtres du catalogue, combinable avec les filtres muscle et type
+- `isFavorite` column ajoutée sur la table `exercise` (DB version 8)
+
+---
+
 ## v2.6.0 — 23 May 2026
 
 ### Added

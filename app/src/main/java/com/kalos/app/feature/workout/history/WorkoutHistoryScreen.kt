@@ -1,5 +1,6 @@
 package com.kalos.app.feature.workout.history
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,14 +12,25 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.WorkoutLog
 import com.kalos.app.core.ui.component.EmptyState
 import com.kalos.app.navigation.Screen
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.WeekFields
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,6 +73,8 @@ private fun WorkoutHistoryContent(
     modifier: Modifier = Modifier,
 ) {
     val logs by viewModel.logs.collectAsStateWithLifecycle()
+    val weeklyVolumes = remember(logs) { computeWeeklyVolumes(logs) }
+
     if (logs.isEmpty()) {
         Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             EmptyState(
@@ -75,12 +89,96 @@ private fun WorkoutHistoryContent(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = modifier.fillMaxSize(),
         ) {
+            if (weeklyVolumes.size >= 2) {
+                item {
+                    VolumeChartCard(weeklyVolumes)
+                }
+            }
             items(logs, key = { it.id }) { log ->
                 WorkoutLogCard(
                     log = log,
                     onClick = { navController.navigate(Screen.WorkoutLogDetail.route(log.id)) },
                 )
             }
+        }
+    }
+}
+
+private data class WeeklyVolume(val weekStart: LocalDate, val volumeKg: Float)
+
+private fun computeWeeklyVolumes(logs: List<WorkoutLog>): List<WeeklyVolume> {
+    val isoWeek = WeekFields.ISO
+    return logs
+        .filter { it.totalVolumeKg > 0f }
+        .groupBy {
+            val date = LocalDate.parse(it.date)
+            date.with(isoWeek.dayOfWeek(), 1)
+        }
+        .map { (weekStart, weekLogs) ->
+            WeeklyVolume(weekStart, weekLogs.sumOf { it.totalVolumeKg.toDouble() }.toFloat())
+        }
+        .sortedBy { it.weekStart }
+        .takeLast(8)
+}
+
+@Composable
+private fun VolumeChartCard(weeks: List<WeeklyVolume>) {
+    val barColor = MaterialTheme.colorScheme.primary
+    val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val gridColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+    val textMeasurer = rememberTextMeasurer()
+    val labelStyle = TextStyle(fontSize = 9.sp, color = labelColor)
+    val dateFmt = DateTimeFormatter.ofPattern("d MMM", Locale.FRENCH)
+
+    val maxVolume = weeks.maxOf { it.volumeKg }
+
+    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("Volume hebdomadaire", style = MaterialTheme.typography.titleSmall)
+            Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp),
+            ) {
+                val bottomPadding = 20f
+                val leftPadding = 8f
+                val chartWidth = size.width - leftPadding
+                val chartHeight = size.height - bottomPadding
+                val barCount = weeks.size
+                val slotWidth = chartWidth / barCount
+                val barWidth = slotWidth * 0.55f
+
+                // Horizontal grid (3 lines)
+                repeat(4) { i ->
+                    val y = chartHeight * (1f - i / 3f)
+                    drawLine(gridColor, Offset(leftPadding, y), Offset(size.width, y), strokeWidth = 1f)
+                }
+
+                weeks.forEachIndexed { i, week ->
+                    val barHeight = if (maxVolume > 0f) (week.volumeKg / maxVolume) * chartHeight else 0f
+                    val x = leftPadding + i * slotWidth + (slotWidth - barWidth) / 2f
+                    val y = chartHeight - barHeight
+
+                    drawRoundRect(
+                        color = barColor,
+                        topLeft = Offset(x, y),
+                        size = Size(barWidth, barHeight),
+                        cornerRadius = CornerRadius(4f, 4f),
+                    )
+
+                    // X label (first and last, plus middle if 8 bars)
+                    if (i == 0 || i == barCount - 1 || (barCount >= 6 && i == barCount / 2)) {
+                        val label = textMeasurer.measure(week.weekStart.format(dateFmt), style = labelStyle)
+                        val labelX = (x + barWidth / 2f - label.size.width / 2f).coerceIn(0f, size.width - label.size.width)
+                        drawText(label, topLeft = Offset(labelX, chartHeight + 4f))
+                    }
+                }
+            }
+            Text(
+                "Total sur ${weeks.size} semaines : ${"%.0f".format(weeks.sumOf { it.volumeKg.toDouble() })} kg",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

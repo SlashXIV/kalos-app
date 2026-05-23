@@ -64,6 +64,23 @@ interface WorkoutLogDao {
     """)
     suspend fun getMaxWeight(exerciseId: Long): Float?
 
+    // Exercise progression
+    data class ExerciseProgressionRow(val date: String, val maxWeight: Float)
+
+    @Query("""
+        SELECT wl.date AS date, MAX(wls.weightKg) AS maxWeight
+        FROM workout_log_set wls
+        JOIN workout_log_exercise wle ON wls.logExerciseId = wle.id
+        JOIN workout_log wl ON wle.logId = wl.id
+        WHERE wle.exerciseId = :exerciseId
+          AND wls.isCompleted = 1
+          AND wls.weightKg > 0
+        GROUP BY wl.id
+        ORDER BY wl.date ASC
+        LIMIT :limit
+    """)
+    suspend fun getExerciseProgression(exerciseId: Long, limit: Int = 20): List<ExerciseProgressionRow>
+
     // Body weight
     @Insert
     suspend fun insertBodyWeight(entry: BodyWeightEntity)

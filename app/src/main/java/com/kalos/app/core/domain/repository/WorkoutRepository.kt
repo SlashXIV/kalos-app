@@ -20,6 +20,9 @@ interface WorkoutRepository {
     suspend fun upsertSet(logId: Long, exerciseId: Long, set: WorkoutSet): Long
     suspend fun getMaxWeight(exerciseId: Long): Float?
 
+    // Exercise progression
+    suspend fun getExerciseProgression(exerciseId: Long): List<Pair<String, Float>>
+
     // Body weight
     suspend fun logBodyWeight(date: String, weightKg: Float)
     fun getBodyWeightHistory(): Flow<List<Pair<String, Float>>>

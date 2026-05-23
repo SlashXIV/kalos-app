@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material3.*
@@ -98,6 +99,15 @@ fun HomeScreen(
                     fatGoal = state.summary.goalFat,
                 )
             }
+        }
+
+        // Body weight card
+        if (state.lastWeightKg != null && state.lastWeightDate != null) {
+            BodyWeightCard(
+                weightKg = state.lastWeightKg,
+                date = state.lastWeightDate,
+                delta = state.weightDelta,
+            )
         }
 
         // Quick actions
@@ -246,6 +256,50 @@ private fun RestDayCard(
                 }
             }
             TextButton(onClick = onViewProgram) { Text("Programme") }
+        }
+    }
+}
+
+@Composable
+private fun BodyWeightCard(weightKg: Float, date: String, delta: Float?) {
+    val dateLabel = remember(date) {
+        val d = java.time.LocalDate.parse(date)
+        val today = java.time.LocalDate.now()
+        when (d) {
+            today -> "Aujourd'hui"
+            today.minusDays(1) -> "Hier"
+            else -> d.format(java.time.format.DateTimeFormatter.ofPattern("d MMM", Locale.FRENCH))
+        }
+    }
+    val weightLabel = if (weightKg == weightKg.toLong().toFloat()) "${weightKg.toLong()} kg" else "${"%.1f".format(weightKg)} kg"
+
+    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Icon(
+                    Icons.Filled.MonitorWeight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text("Poids corporel", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(weightLabel, style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(dateLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (delta != null) {
+                    val sign = if (delta >= 0f) "+" else ""
+                    val deltaLabel = if (delta == delta.toLong().toFloat()) "${sign}${delta.toLong()} kg" else "${sign}${"%.1f".format(delta)} kg"
+                    Text(deltaLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
         }
     }
 }

@@ -25,6 +25,9 @@ data class HomeUiState(
     val activeProgramName: String? = null,
     val nextSessionDate: LocalDate? = null,
     val nextSessionWorkout: ProgramWorkout? = null,
+    val lastWeightKg: Float? = null,
+    val lastWeightDate: String? = null,
+    val weightDelta: Float? = null,
     val isLoading: Boolean = true,
 )
 
@@ -76,6 +79,14 @@ class HomeViewModel @Inject constructor(
             activeProgramName = activeProgram?.name,
             nextSessionDate = nextPair?.second,
             nextSessionWorkout = nextPair?.first,
+        )
+    }.combine(workoutRepository.getBodyWeightHistory()) { base, history ->
+        val last = history.firstOrNull()
+        val prev = history.getOrNull(1)
+        base.copy(
+            lastWeightKg = last?.second,
+            lastWeightDate = last?.first,
+            weightDelta = if (last != null && prev != null) last.second - prev.second else null,
         )
     }.stateIn(
         scope = viewModelScope,

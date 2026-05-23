@@ -2,6 +2,14 @@
 
 ---
 
+## v2.5.0 — 23 May 2026
+
+### Added
+- Body weight card on Home screen: last logged weight, date label (Aujourd'hui / Hier / d MMM), delta vs previous entry with sign
+- Card hidden when no weight has been logged yet
+
+---
+
 ## v2.4.0 — 23 May 2026
 
 ### Added

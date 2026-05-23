@@ -1,6 +1,6 @@
 # Features
 
-> Version: 2.4.0
+> Version: 2.5.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -29,6 +29,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Today's program workout card | Done | "Start session" button if workout scheduled today |
 | Rest day card | Done | Shows next scheduled workout when no session today |
 | Today's completed workouts list | Done | Name, exercise count, duration |
+| Body weight card | Done | Last weight, date, delta vs previous entry; hidden if no entry |
 
 ---
 

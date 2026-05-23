@@ -24,10 +24,9 @@ Tapping a row in the 60-day history now opens the nutrition journal for that dat
 
 ---
 
-### 2. Home screen body weight card
-**Impact: Medium · Effort: Low**
+### ~~2. Home screen body weight card~~ — Done in v2.5.0
 
-Depends on body weight log (done). Surface a small card on Home showing the last logged weight and the delta from the previous entry.
+Last weight, date, delta vs previous entry. Card hidden when no entry yet.
 
 ---
 

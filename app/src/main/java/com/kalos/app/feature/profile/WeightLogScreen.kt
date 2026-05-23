@@ -40,7 +40,10 @@ import kotlin.math.abs
 data class WeightLogUiState(
     val entries: List<Pair<String, Float>> = emptyList(),
     val isSaving: Boolean = false,
-)
+) {
+    val hasTodayEntry: Boolean
+        get() = entries.firstOrNull()?.first == LocalDate.now().toString()
+}
 
 @HiltViewModel
 class WeightLogViewModel @Inject constructor(
@@ -97,6 +100,7 @@ fun WeightLogScreen(
     if (showLogDialog) {
         WeightInputDialog(
             currentWeight = lastEntry?.second,
+            isUpdate = state.hasTodayEntry,
             onConfirm = { kg ->
                 viewModel.logWeight(kg)
                 showLogDialog = false
@@ -211,7 +215,11 @@ fun WeightLogScreen(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !state.isSaving,
             ) {
-                Text(if (state.isSaving) "Enregistrement…" else "Enregistrer le poids")
+                Text(when {
+                    state.isSaving -> "Enregistrement…"
+                    state.hasTodayEntry -> "Mettre à jour le poids"
+                    else -> "Enregistrer le poids"
+                })
             }
 
             // Recent entries list
@@ -340,6 +348,7 @@ private fun WeightEntryRow(date: String, weightKg: Float, delta: Float?) {
 @Composable
 private fun WeightInputDialog(
     currentWeight: Float?,
+    isUpdate: Boolean,
     onConfirm: (Float) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -349,7 +358,7 @@ private fun WeightInputDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Enregistrer le poids") },
+        title = { Text(if (isUpdate) "Mettre à jour le poids" else "Enregistrer le poids") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(

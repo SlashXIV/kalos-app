@@ -127,9 +127,15 @@ class WorkoutRepositoryImpl @Inject constructor(
 
     override suspend fun getMaxWeight(exerciseId: Long): Float? = logDao.getMaxWeight(exerciseId)
 
-    override suspend fun logBodyWeight(date: String, weightKg: Float) =
-        logDao.insertBodyWeight(BodyWeightEntity(date = date, weightKg = weightKg))
+    override suspend fun logBodyWeight(date: String, weightKg: Float) {
+        val updated = logDao.updateBodyWeightForDate(date, weightKg)
+        if (updated == 0) {
+            logDao.insertBodyWeight(BodyWeightEntity(date = date, weightKg = weightKg))
+        }
+    }
 
     override fun getBodyWeightHistory(): Flow<List<Pair<String, Float>>> =
-        logDao.getBodyWeightHistory().map { list -> list.map { it.date to it.weightKg } }
+        logDao.getBodyWeightHistory().map { list ->
+            list.distinctBy { it.date }.map { it.date to it.weightKg }
+        }
 }

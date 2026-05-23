@@ -65,8 +65,11 @@ interface WorkoutLogDao {
     suspend fun getMaxWeight(exerciseId: Long): Float?
 
     // Body weight
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     suspend fun insertBodyWeight(entry: BodyWeightEntity)
+
+    @Query("UPDATE body_weight SET weightKg = :weightKg WHERE date = :date")
+    suspend fun updateBodyWeightForDate(date: String, weightKg: Float): Int
 
     @Query("SELECT * FROM body_weight ORDER BY date DESC LIMIT 60")
     fun getBodyWeightHistory(): Flow<List<BodyWeightEntity>>

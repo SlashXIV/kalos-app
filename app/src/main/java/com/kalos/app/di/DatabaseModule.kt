@@ -20,6 +20,7 @@ object DatabaseModule {
     @Provides
     fun provideDatabase(@ApplicationContext context: Context): KalosDatabase =
         Room.databaseBuilder(context, KalosDatabase::class.java, "kalos.db")
+            .addMigrations(KalosDatabase.MIGRATION_7_8)
             .fallbackToDestructiveMigration()
             .build()
 

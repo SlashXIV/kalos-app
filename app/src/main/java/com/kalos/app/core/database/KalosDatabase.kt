@@ -2,6 +2,8 @@ package com.kalos.app.core.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.kalos.app.core.database.dao.*
 import com.kalos.app.core.database.dao.ExportDao
 import com.kalos.app.core.database.dao.ImportDao
@@ -29,6 +31,14 @@ import com.kalos.app.core.database.entity.*
     exportSchema = false,
 )
 abstract class KalosDatabase : RoomDatabase() {
+
+    companion object {
+        val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE exercise ADD COLUMN isFavorite INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+    }
     abstract fun userProfileDao(): UserProfileDao
     abstract fun foodDao(): FoodDao
     abstract fun mealEntryDao(): MealEntryDao

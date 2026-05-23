@@ -1,12 +1,12 @@
 # Product Audit
 
-> Version: 2.1.1 — 23 May 2026
+> Version: 2.2.0 — 23 May 2026
 
 ---
 
 ## Overall assessment
 
-Kalos is a feature-complete, offline-first fitness and nutrition tracker. The core flows — onboarding, daily meal logging, and active workout tracking — are solid and well-polished. Two secondary modules (workout history, custom programs) remain incomplete. The main structural gap is the absence of a body weight log UI despite the database entity already existing.
+Kalos is a feature-complete, offline-first fitness and nutrition tracker. The core flows — onboarding, daily meal logging, and active workout tracking — are solid and well-polished. Body weight log and workout history are now complete. The remaining gaps are all Medium or Low priority. The one remaining visible dead interaction is the nutrition history day detail (tapping a row has no effect).
 
 ---
 
@@ -33,9 +33,9 @@ The only notable gap: the 60-day history screen lists daily summaries but a tap 
 The builder → active tracker → summary path works well. The draft auto-save and resume dialog (with staleness detection beyond 24 h) are particularly solid. Total volume is calculated and persisted correctly.
 
 Gaps:
-- **Workout history** is a stub. The list of past sessions is displayed but there is no interaction, no session detail, and no progression charts. This is the most visible gap for a regular user.
 - **Custom programs** creation and editing are partially implemented.
-- **Body weight log** has a database entity (`BodyWeightEntity`) but no UI at any level (no input, no chart, no home card). This is a significant omission for a fitness tracker.
+- **Exercise progression chart** missing in ExerciseDetailScreen.
+- **Home body weight card** not yet surfaced on the dashboard.
 
 ### Calendar
 
@@ -59,9 +59,11 @@ Gaps:
 
 | Priority | Area | Description |
 |---|---|---|
-| High | Body weight log | `BodyWeightEntity` exists in the database with no UI. Weight input, trend chart, and integration with the Home dashboard are all missing. |
-| High | Workout history | Current implementation is a stub. No session detail, no volume trend, no personal records display (use case already exists: `GetPersonalRecordsUseCase`). |
-| Medium | Nutrition history detail | Tapping a day in the 60-day history has no action. Expected behavior: navigate to that day's journal or show a summary sheet. |
+| ~~High~~ | ~~Body weight log~~ | Done in v2.1.2 |
+| ~~High~~ | ~~Workout history~~ | Done in v2.2.0 — list, detail, PRs |
+| Medium | Nutrition history detail | Tapping a day in the 60-day history has no action. Expected: navigate to that day's journal. |
+| Medium | Home body weight card | Last logged weight not surfaced on the dashboard. |
+| Medium | Exercise progression chart | No weight-over-time chart in ExerciseDetailScreen. |
 | Medium | Custom programs | Creation and editing UI are incomplete. |
 | Low | Exercise favorites | The catalog has no way to mark or filter favorite exercises. |
 | Low | Advanced food filters | Food search has no category or tag filter, only a text query. |
@@ -70,7 +72,7 @@ Gaps:
 
 ## UX notes
 
-- Color system is consistent since v2.1.1 (secondary token remapped to green, no residual brown).
+- Color system is fully consistent since v2.2.0 — `surfaceContainerLow` and full container family now defined, eliminating gray fallback on `ElevatedCard`.
 - French decimal separator (`,`) is handled correctly in numeric inputs.
 - The food projection strip ("Après ajout") is a strong UX decision — visible before committing.
 - No user avatar or photo support (not a stated requirement, non-blocking).

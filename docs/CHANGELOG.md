@@ -10,6 +10,7 @@
 ### Fixed
 - Hydration block in the daily journal now follows the selected date instead of always showing today's data. Viewing a past date displays the water intake logged that day. Quick-add buttons and the edit-goal icon are hidden when browsing history; the progress bar and total remain visible in read-only mode.
 - `buildDailySummary` (copy to clipboard) now uses the date-scoped water value, consistent with the rest of the journal.
+- Body weight log now enforces one entry per day: logging a second weight on the same day replaces the existing value instead of creating a duplicate row. Button label and dialog title switch to "Mettre à jour" when a today entry already exists.
 
 ### Changed
 - `WaterRepository` is now injected into `NutritionViewModel` as the single source of truth for the selected date. `WaterViewModel` is no longer instantiated from `NutritionScreen`.

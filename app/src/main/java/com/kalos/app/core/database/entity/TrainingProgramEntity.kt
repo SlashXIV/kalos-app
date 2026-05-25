@@ -11,5 +11,6 @@ data class TrainingProgramEntity(
     val durationWeeks: Int = 4,
     val daysPerWeek: Int = 3,
     val isActive: Boolean = false,
+    val isCustom: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
 )

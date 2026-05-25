@@ -43,9 +43,12 @@ fun WorkoutScreen(
             )
         },
         floatingActionButton = {
-            if (selectedTab == 0) {
-                FloatingActionButton(onClick = { navController.navigate(Screen.WorkoutBuilder.create()) }) {
+            when (selectedTab) {
+                0 -> FloatingActionButton(onClick = { navController.navigate(Screen.WorkoutBuilder.create()) }) {
                     Icon(Icons.Filled.Add, contentDescription = "Nouvelle séance")
+                }
+                1 -> FloatingActionButton(onClick = { navController.navigate(Screen.ProgramEditor.create()) }) {
+                    Icon(Icons.Filled.Add, contentDescription = "Nouveau programme")
                 }
             }
         }

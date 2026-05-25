@@ -6,6 +6,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,6 +28,44 @@ fun CustomFoodScreen(
 
     LaunchedEffect(foodId) { if (foodId > 0) viewModel.loadFood(foodId) }
     LaunchedEffect(state.savedSuccessfully) { if (state.savedSuccessfully) navController.popBackStack() }
+    LaunchedEffect(state.deletedSuccessfully) { if (state.deletedSuccessfully) navController.popBackStack() }
+
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Supprimer l'aliment") },
+            text = { Text("Cet aliment sera supprimé. S'il a déjà été utilisé dans votre historique, il sera archivé et n'apparaîtra plus dans la recherche.") },
+            confirmButton = {
+                TextButton(onClick = { showDeleteConfirm = false; viewModel.delete() }) {
+                    Text("Supprimer", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) { Text("Annuler") }
+            },
+        )
+    }
+
+    if (state.duplicateFood != null) {
+        AlertDialog(
+            onDismissRequest = viewModel::onDismissDuplicate,
+            title = { Text("Doublon détecté") },
+            text = {
+                Text(
+                    "Un aliment portant un nom similaire existe déjà : « ${state.duplicateFood!!.name} ».\n\n" +
+                    "Voulez-vous quand même créer un nouvel aliment ?",
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = viewModel::onConfirmSaveAnyway) { Text("Créer quand même") }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::onDismissDuplicate) { Text("Annuler") }
+            },
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -35,6 +74,13 @@ fun CustomFoodScreen(
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+                    }
+                },
+                actions = {
+                    if (state.isEditing) {
+                        IconButton(onClick = { showDeleteConfirm = true }) {
+                            Icon(Icons.Filled.Delete, contentDescription = "Supprimer", tint = MaterialTheme.colorScheme.error)
+                        }
                     }
                 },
             )

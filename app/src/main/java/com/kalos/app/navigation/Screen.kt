@@ -28,6 +28,7 @@ sealed class Screen(val route: String) {
         fun create() = "nutrition/custom_food?foodId=-1"
         fun edit(foodId: Long) = "nutrition/custom_food?foodId=$foodId"
     }
+    object MyFoods : Screen("nutrition/my_foods")
     object NutritionHistory : Screen("nutrition/history")
     object NutritionDay : Screen("nutrition/day/{date}") {
         fun route(date: String) = "nutrition/day/$date"
@@ -55,6 +56,10 @@ sealed class Screen(val route: String) {
     object Programs : Screen("workout/programs")
     object ProgramDetail : Screen("workout/program/{programId}") {
         fun route(programId: Long) = "workout/program/$programId"
+    }
+    object ProgramEditor : Screen("workout/program_editor?programId={programId}") {
+        fun create() = "workout/program_editor?programId=-1"
+        fun edit(programId: Long) = "workout/program_editor?programId=$programId"
     }
     object WorkoutHistory : Screen("workout/history")
     object WorkoutLogDetail : Screen("workout/log/{logId}") {

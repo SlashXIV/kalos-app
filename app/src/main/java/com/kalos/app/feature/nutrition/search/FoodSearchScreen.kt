@@ -2,10 +2,12 @@ package com.kalos.app.feature.nutrition.search
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.RestaurantMenu
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -51,6 +53,9 @@ fun FoodSearchScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { navController.navigate(Screen.MyFoods.route) }) {
+                        Icon(Icons.Filled.RestaurantMenu, contentDescription = "Mes aliments")
+                    }
                     TextButton(onClick = { navController.navigate(Screen.CustomFood.create()) }) {
                         Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(4.dp))
@@ -72,10 +77,21 @@ fun FoodSearchScreen(
                 onQueryChange = viewModel::onQueryChange,
                 placeholder = "Rechercher un aliment…",
             )
+            if (state.categories.isNotEmpty()) {
+                Spacer(Modifier.height(6.dp))
+                FoodFilterRow(
+                    categories = state.categories,
+                    selectedCategory = state.categoryFilter,
+                    onlyCustom = state.onlyCustom,
+                    onCategorySelect = viewModel::onCategorySelect,
+                    onCustomToggle = viewModel::onCustomToggle,
+                )
+            }
             Spacer(Modifier.height(8.dp))
 
+            val hasActiveFilter = state.categoryFilter.isNotEmpty() || state.onlyCustom
             LazyColumn(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                if (state.query.isEmpty()) {
+                if (state.query.isEmpty() && !hasActiveFilter) {
                     if (state.recent.isNotEmpty()) {
                         item { SectionHeader("Récents") }
                         items(state.recent) { food ->
@@ -98,7 +114,7 @@ fun FoodSearchScreen(
                             )
                         }
                     }
-                } else {
+                } else {  // query non-empty OR filter active
                     if (state.isLoading) {
                         item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
                     } else if (state.results.isEmpty()) {
@@ -340,5 +356,52 @@ private fun MacroStat(label: String, value: String) {
     Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
         Text(value, style = MaterialTheme.typography.titleSmall)
         Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun FoodFilterRow(
+    categories: List<String>,
+    selectedCategory: String,
+    onlyCustom: Boolean,
+    onCategorySelect: (String) -> Unit,
+    onCustomToggle: () -> Unit,
+) {
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 0.dp),
+    ) {
+        item {
+            FilterChip(
+                selected = onlyCustom,
+                onClick = onCustomToggle,
+                label = { Text("Perso") },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
+                border = FilterChipDefaults.filterChipBorder(
+                    enabled = true,
+                    selected = onlyCustom,
+                    selectedBorderColor = MaterialTheme.colorScheme.primary,
+                ),
+            )
+        }
+        items(categories) { category ->
+            FilterChip(
+                selected = selectedCategory == category,
+                onClick = { onCategorySelect(category) },
+                label = { Text(category) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
+                border = FilterChipDefaults.filterChipBorder(
+                    enabled = true,
+                    selected = selectedCategory == category,
+                    selectedBorderColor = MaterialTheme.colorScheme.primary,
+                ),
+            )
+        }
     }
 }

@@ -35,7 +35,12 @@ fun ProgramsScreen(
                     }
                 }
             )
-        }
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { navController.navigate(Screen.ProgramEditor.create()) }) {
+                Icon(Icons.Filled.Add, "Nouveau programme")
+            }
+        },
     ) { padding ->
         ProgramsContent(
             navController = navController,
@@ -79,6 +84,9 @@ private fun ProgramsContent(
                     program = program,
                     onActivate = { viewModel.activate(program.id) },
                     onDetail = { navController.navigate(Screen.ProgramDetail.route(program.id)) },
+                    onEdit = if (program.isCustom) {
+                        { navController.navigate(Screen.ProgramEditor.edit(program.id)) }
+                    } else null,
                 )
             }
         }
@@ -91,6 +99,7 @@ private fun ProgramCard(
     program: TrainingProgram,
     onActivate: () -> Unit,
     onDetail: () -> Unit,
+    onEdit: (() -> Unit)? = null,
 ) {
     ElevatedCard(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -110,8 +119,20 @@ private fun ProgramCard(
                         )
                     }
                 }
-                if (program.isActive) {
-                    Badge { Text("Actif") }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (program.isActive) {
+                        Badge { Text("Actif") }
+                    }
+                    if (onEdit != null) {
+                        IconButton(onClick = onEdit) {
+                            Icon(
+                                Icons.Filled.Edit,
+                                "Modifier",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        }
+                    }
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

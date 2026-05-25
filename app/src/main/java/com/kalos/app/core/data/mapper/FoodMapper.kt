@@ -20,6 +20,7 @@ fun FoodEntity.toDomain() = Food(
     isFavorite = isFavorite,
     lastUsedAt = lastUsedAt,
     tags = if (tags.isBlank()) emptyList() else tags.split(","),
+    isArchived = isArchived,
 )
 
 fun Food.toEntity() = FoodEntity(
@@ -39,4 +40,5 @@ fun Food.toEntity() = FoodEntity(
     isFavorite = isFavorite,
     lastUsedAt = lastUsedAt,
     tags = tags.joinToString(","),
+    isArchived = isArchived,
 )

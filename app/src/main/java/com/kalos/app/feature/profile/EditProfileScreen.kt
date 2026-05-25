@@ -172,7 +172,7 @@ fun EditProfileScreen(
 
             Text("Niveau d'activité", style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
-            ActivityLevel.values().forEach { level ->
+            ActivityLevel.entries.forEach { level ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth(),
@@ -182,7 +182,14 @@ fun EditProfileScreen(
                         onClick = { viewModel.onActivityChange(level) },
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text(level.label, style = MaterialTheme.typography.bodyMedium)
+                    Column {
+                        Text(level.label, style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            level.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
 

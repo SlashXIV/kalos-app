@@ -12,7 +12,7 @@ interface ExportDao {
     @Query("SELECT * FROM nutrition_goal WHERE id = 1")
     suspend fun getGoal(): NutritionGoalEntity?
 
-    @Query("SELECT * FROM food WHERE isCustom = 1 ORDER BY name ASC")
+    @Query("SELECT * FROM food WHERE isCustom = 1 AND isArchived = 0 ORDER BY name ASC")
     suspend fun getCustomFoods(): List<FoodEntity>
 
     @Query("SELECT * FROM meal_entry ORDER BY date ASC")

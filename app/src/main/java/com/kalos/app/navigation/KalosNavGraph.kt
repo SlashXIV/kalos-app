@@ -17,6 +17,7 @@ import com.kalos.app.feature.calendar.CalendarScreen
 import com.kalos.app.feature.nutrition.NutritionScreen
 import com.kalos.app.feature.nutrition.custom.CustomFoodScreen
 import com.kalos.app.feature.nutrition.history.NutritionHistoryScreen
+import com.kalos.app.feature.nutrition.myfoods.MyFoodsScreen
 import com.kalos.app.feature.nutrition.search.FoodSearchScreen
 import com.kalos.app.feature.onboarding.*
 import com.kalos.app.feature.profile.EditGoalsScreen
@@ -34,6 +35,7 @@ import com.kalos.app.feature.workout.catalog.ExerciseDetailScreen
 import com.kalos.app.feature.workout.history.WorkoutHistoryScreen
 import com.kalos.app.feature.workout.history.WorkoutLogDetailScreen
 import com.kalos.app.feature.workout.program.ProgramDetailScreen
+import com.kalos.app.feature.workout.program.ProgramEditorScreen
 import com.kalos.app.feature.workout.program.ProgramsScreen
 
 @Composable
@@ -103,6 +105,7 @@ fun KalosNavGraph() {
                     foodId = backStackEntry.arguments?.getLong("foodId") ?: -1L,
                 )
             }
+            composable(Screen.MyFoods.route) { MyFoodsScreen(navController) }
             composable(Screen.NutritionHistory.route) { NutritionHistoryScreen(navController) }
             composable(
                 route = "nutrition/day/{date}",
@@ -170,6 +173,15 @@ fun KalosNavGraph() {
                 arguments = listOf(navArgument("programId") { type = NavType.LongType })
             ) { backStackEntry ->
                 ProgramDetailScreen(
+                    navController = navController,
+                    programId = backStackEntry.arguments?.getLong("programId") ?: -1L,
+                )
+            }
+            composable(
+                route = "workout/program_editor?programId={programId}",
+                arguments = listOf(navArgument("programId") { type = NavType.LongType; defaultValue = -1L })
+            ) { backStackEntry ->
+                ProgramEditorScreen(
                     navController = navController,
                     programId = backStackEntry.arguments?.getLong("programId") ?: -1L,
                 )

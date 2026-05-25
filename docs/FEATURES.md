@@ -1,6 +1,6 @@
 # Features
 
-> Version: 2.7.0
+> Version: 3.0.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -48,6 +48,8 @@ Statuses: **Done** · **Partial** · **Planned**
 | Food detail sheet | Done | Portion / grams mode toggle |
 | "After adding" projected daily totals | Done | Color-coded: normal / warning / over target |
 | Dietary filter applied to results | Done | |
+| Category filter chips | Done | Single-select, loaded from DB, combinable with text |
+| Custom food filter | Done | "Perso" toggle chip |
 | Create custom food from search screen | Done | |
 
 ### Custom foods
@@ -56,6 +58,10 @@ Statuses: **Done** · **Partial** · **Planned**
 |---|---|---|
 | Create food with macros per 100 g | Done | |
 | Edit existing custom food | Done | |
+| Delete custom food | Done | Hard delete if unused, soft-delete (archive) if referenced in history |
+| Duplicate detection on create | Done | Warning dialog with option to create anyway |
+| "Mes aliments" screen | Done | Searchable list of custom foods with edit and delete per item |
+| "Perso" badge on food items | Done | Visible in all food lists |
 | Dietary tags (pork, alcohol, vegetarian, vegan) | Done | Vegan implies vegetarian |
 | French decimal separator support | Done | Accepts both `.` and `,` |
 
@@ -130,7 +136,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Display 3 seeded programs (PPL, Upper/Lower, Full Body) | Done | |
 | Activate / deactivate a program | Done | |
 | Program detail (days and assigned templates) | Done | |
-| Create / edit custom programs | Partial | UI incomplete |
+| Create / edit custom programs | Done | Full editor: name, description, duration, day assignments via template picker |
 | Day-of / day-before reminders per program | Done | In ProgramDetailScreen |
 
 ---
@@ -171,7 +177,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |
 | Data import / restore | Done | Confirmation dialog (destructive) |
-| Version display | Done | Kalos 2.1.2 |
+| Version display | Done | Kalos 3.0.0 |
 
 ---
 

@@ -54,6 +54,11 @@ fun GoalSetupScreen(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(level.label, style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            level.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                     RadioButton(
                         selected = state.activityLevel == level,

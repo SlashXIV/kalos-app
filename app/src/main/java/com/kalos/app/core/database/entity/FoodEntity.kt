@@ -22,4 +22,5 @@ data class FoodEntity(
     val isFavorite: Boolean = false,
     val lastUsedAt: Long = 0,
     val tags: String = "",  // comma-separated tag tokens, e.g. "pork,vegetarian"
+    val isArchived: Boolean = false,
 )

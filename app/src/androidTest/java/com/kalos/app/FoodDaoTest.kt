@@ -47,7 +47,7 @@ class FoodDaoTest {
     @Test
     fun insertAndSearch_returnsMatchingFoods() = runTest {
         foodDao.insertAll(listOf(food(name = "Banane"), food(name = "Pomme"), food(name = "Orange")))
-        val results = foodDao.search("ban").first()
+        val results = foodDao.search("ban", "", 0).first()
         assertEquals(1, results.size)
         assertEquals("Banane", results[0].name)
     }

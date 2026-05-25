@@ -7,6 +7,7 @@ data class TrainingProgram(
     val durationWeeks: Int = 4,
     val daysPerWeek: Int = 3,
     val isActive: Boolean = false,
+    val isCustom: Boolean = false,
     val workouts: List<ProgramWorkout> = emptyList(),
     val createdAt: Long = System.currentTimeMillis(),
 )

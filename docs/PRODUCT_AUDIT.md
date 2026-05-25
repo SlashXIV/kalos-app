@@ -1,6 +1,6 @@
 # Product Audit
 
-> Version: 2.7.0 — 23 May 2026
+> Version: 3.0.0 — 25 May 2026
 
 ---
 
@@ -59,9 +59,10 @@ Gaps:
 | ~~Medium~~ | ~~Nutrition history detail~~ | Done in v2.3.0 |
 | ~~Medium~~ | ~~Exercise progression chart~~ | Done in v2.4.0 — Canvas chart, date X-axis, PR badge |
 | ~~Medium~~ | ~~Home body weight card~~ | Done in v2.5.0 — last weight, date, delta |
-| Medium | Custom programs | Creation and editing UI are incomplete. |
+| ~~Medium~~ | ~~Custom programs~~ | Done in v2.8.0 — full editor, day-to-template assignments, delete |
 | ~~Low~~ | ~~Exercise favorites~~ | Done in v2.7.0 — heart icon toggle + Favoris filter chip |
-| Low | Advanced food filters | Food search has no category or tag filter, only a text query. |
+| ~~Low~~ | ~~Advanced food filters~~ | Done in v2.9.0 — category chips + Perso toggle |
+| ~~Medium~~ | ~~Custom food management~~ | Done in v3.0.0 — "Mes aliments" screen, delete (hard/soft), duplicate detection, Perso badge |
 
 ---
 

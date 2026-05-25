@@ -25,4 +25,11 @@ class ProgramViewModel @Inject constructor(
             reminderScheduler.schedule()
         }
     }
+
+    fun delete(programId: Long) {
+        viewModelScope.launch {
+            val program = programRepository.getById(programId) ?: return@launch
+            programRepository.delete(program)
+        }
+    }
 }

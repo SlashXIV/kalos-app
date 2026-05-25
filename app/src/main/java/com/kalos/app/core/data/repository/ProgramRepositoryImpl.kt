@@ -45,7 +45,7 @@ class ProgramRepositoryImpl @Inject constructor(
         return TrainingProgram(
             id = entity.id, name = entity.name, description = entity.description,
             durationWeeks = entity.durationWeeks, daysPerWeek = entity.daysPerWeek,
-            isActive = entity.isActive, createdAt = entity.createdAt,
+            isActive = entity.isActive, isCustom = entity.isCustom, createdAt = entity.createdAt,
             workouts = workouts,
         )
     }
@@ -54,7 +54,7 @@ class ProgramRepositoryImpl @Inject constructor(
         val id = dao.upsert(TrainingProgramEntity(
             id = program.id, name = program.name, description = program.description,
             durationWeeks = program.durationWeeks, daysPerWeek = program.daysPerWeek,
-            isActive = program.isActive))
+            isActive = program.isActive, isCustom = program.isCustom))
         dao.deleteAllWorkoutsForProgram(id)
         program.workouts.forEach { pw ->
             pw.template?.let {

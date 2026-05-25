@@ -15,12 +15,27 @@ data class UserProfile(
 
 enum class Sex { MALE, FEMALE }
 
-enum class ActivityLevel(val label: String, val multiplier: Float) {
-    SEDENTARY("Sédentaire", 1.2f),
-    LIGHT("Légèrement actif", 1.375f),
-    MODERATE("Modérément actif", 1.55f),
-    ACTIVE("Très actif", 1.725f),
-    VERY_ACTIVE("Extrêmement actif", 1.9f),
+enum class ActivityLevel(val label: String, val multiplier: Float, val description: String) {
+    SEDENTARY(
+        "Sédentaire", 1.2f,
+        "Peu ou pas d'exercice — travail de bureau, déplacements en voiture",
+    ),
+    LIGHT(
+        "Légèrement actif", 1.375f,
+        "Exercice léger 1–3 fois/semaine (marche, vélo, stretching)",
+    ),
+    MODERATE(
+        "Modérément actif", 1.55f,
+        "Sport 3–5 fois/semaine — gym, running, natation",
+    ),
+    ACTIVE(
+        "Très actif", 1.725f,
+        "Entraînement intense 6–7 fois/semaine ou travail physique",
+    ),
+    VERY_ACTIVE(
+        "Extrêmement actif", 1.9f,
+        "Sport intensif quotidien et travail physique exigeant — athlètes",
+    ),
 }
 
 enum class FitnessGoal(

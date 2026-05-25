@@ -2,6 +2,49 @@
 
 ---
 
+## v3.0.0 — 25 May 2026
+
+### Added
+- Écran "Mes aliments" : liste de tous les aliments personnalisés, recherche client-side, accès via icône dans la TopAppBar de la recherche d'aliments
+- Suppression d'un aliment personnalisé : hard delete si l'aliment n'a jamais été utilisé dans l'historique, soft-delete (`isArchived = true`) s'il a déjà été référencé — les macros dénormalisées dans l'historique restent intactes
+- Détection de doublon à la création : vérification par nom normalisé avant enregistrement, dialog d'avertissement avec option "Créer quand même"
+- Badge "Perso" sur chaque `FoodListItem` quand `food.isCustom = true`
+- Bouton corbeille dans la TopAppBar de `CustomFoodScreen` (mode édition uniquement), avec dialog de confirmation
+- Correction : l'édition d'un aliment personnalisé passe désormais le `foodId` existant — évitait la création d'un doublon en base à chaque save
+- DB version 10, `MIGRATION_9_10` : `ALTER TABLE food ADD COLUMN isArchived INTEGER NOT NULL DEFAULT 0`
+
+---
+
+## v2.9.1 — 23 May 2026
+
+### Changed
+- Descriptions explicatives ajoutées à chaque niveau d'activité (`ActivityLevel`) : exemples concrets sous le label dans l'onboarding (`GoalSetupScreen`) et dans la modification de profil (`EditProfileScreen`)
+- Aucun changement sur les multiplicateurs TDEE ni sur les calculs
+
+---
+
+## v2.9.0 — 23 May 2026
+
+### Added
+- Filtres avancés dans la recherche d'aliments : chips horizontaux défilables sous la barre de recherche
+- Chip "Perso" (toggle) : filtre sur les aliments personnalisés uniquement
+- Chips de catégorie (single-select) : chargées dynamiquement depuis la DB via `SELECT DISTINCT category`
+- Filtres combinables entre eux et avec la requête texte
+- Filtre actif sans texte → affiche le catalogue filtré au lieu de Récents/Favoris
+
+---
+
+## v2.8.0 — 23 May 2026
+
+### Added
+- Programmes personnalisés : éditeur complet (`ProgramEditorScreen`) avec nom, description, durée en semaines, et assignation de séances par jour (Lun–Dim) via sélecteur bottom sheet
+- FAB "+" sur l'écran Programmes (onglet Sport et écran standalone) pour créer un nouveau programme
+- Icône crayon sur les cartes de programmes personnalisés pour accéder à l'édition
+- Suppression d'un programme personnalisé depuis l'éditeur (bouton corbeille, confirmation requise)
+- `isCustom` ajouté sur la table `training_program` (DB version 9, migration 8→9 non destructive)
+
+---
+
 ## v2.7.0 — 23 May 2026
 
 ### Added

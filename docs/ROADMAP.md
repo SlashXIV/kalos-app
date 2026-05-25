@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: v2.3.0 — 23 May 2026
+> Last updated: v3.0.0 — 25 May 2026
 
 Priorities are based on user impact relative to implementation effort. The list is intentionally short — only changes worth doing next.
 
@@ -49,5 +49,6 @@ The following are noted but not prioritized:
 - Barcode scanner for food entry (OpenFoodFacts API — requires internet access, significant scope)
 - Android home screen widget (Jetpack Glance)
 - CSV / Google Sheets export
-- Custom program creation (UI partially exists, needs completion)
+- ~~Custom program creation~~ — Done in v2.8.0
+- ~~Advanced food filters~~ — Done in v2.9.0
 - Multi-user profiles

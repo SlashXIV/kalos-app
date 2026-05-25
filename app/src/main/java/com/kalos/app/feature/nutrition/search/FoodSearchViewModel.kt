@@ -31,6 +31,9 @@ data class FoodSearchUiState(
     val servingCount: String = "1",
     val isLoading: Boolean = false,
     val addedSuccessfully: Boolean = false,
+    val categoryFilter: String = "",
+    val onlyCustom: Boolean = false,
+    val categories: List<String> = emptyList(),
     // Daily context for nutritional preview
     val dailyKcal: Float = 0f,
     val dailyProtein: Float = 0f,
@@ -57,6 +60,8 @@ class FoodSearchViewModel @Inject constructor(
     val state: StateFlow<FoodSearchUiState> = _state
 
     private val _query = MutableStateFlow("")
+    private val _categoryFilter = MutableStateFlow("")
+    private val _onlyCustom = MutableStateFlow(false)
 
     init {
         val startQuery = savedStateHandle.get<String>("query").orEmpty()
@@ -66,10 +71,10 @@ class FoodSearchViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            _query
-                .debounce(300)
+            combine(_query, _categoryFilter, _onlyCustom) { q, cat, custom -> Triple(q, cat, custom) }
+                .debounce { (q, _, _) -> if (q.isEmpty()) 0L else 300L }
                 .distinctUntilChanged()
-                .flatMapLatest { q -> foodRepository.search(q) }
+                .flatMapLatest { (q, cat, custom) -> foodRepository.search(q, cat, custom) }
                 .collect { results -> _state.update { it.copy(results = results, isLoading = false) } }
         }
 
@@ -79,6 +84,12 @@ class FoodSearchViewModel @Inject constructor(
 
         viewModelScope.launch {
             foodRepository.getFavorites().collect { favs -> _state.update { it.copy(favorites = favs) } }
+        }
+
+        viewModelScope.launch {
+            foodRepository.getDistinctCategories().collect { cats ->
+                _state.update { it.copy(categories = cats) }
+            }
         }
 
         // Observe daily totals + goal for nutritional preview
@@ -107,6 +118,18 @@ class FoodSearchViewModel @Inject constructor(
     fun onQueryChange(q: String) {
         _state.update { it.copy(query = q, isLoading = q.isNotEmpty()) }
         _query.value = q
+    }
+
+    fun onCategorySelect(category: String) {
+        val new = if (_categoryFilter.value == category) "" else category
+        _categoryFilter.value = new
+        _state.update { it.copy(categoryFilter = new) }
+    }
+
+    fun onCustomToggle() {
+        val new = !_onlyCustom.value
+        _onlyCustom.value = new
+        _state.update { it.copy(onlyCustom = new) }
     }
 
     fun selectFood(food: Food) {

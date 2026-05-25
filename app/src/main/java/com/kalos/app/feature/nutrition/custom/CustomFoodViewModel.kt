@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class CustomFoodState(
+    val editingFoodId: Long = 0,
     val name: String = "",
     val brand: String = "",
     val category: String = "Divers",
@@ -27,6 +28,8 @@ data class CustomFoodState(
     val isEditing: Boolean = false,
     val isSaving: Boolean = false,
     val savedSuccessfully: Boolean = false,
+    val deletedSuccessfully: Boolean = false,
+    val duplicateFood: Food? = null,
 )
 
 @HiltViewModel
@@ -43,6 +46,7 @@ class CustomFoodViewModel @Inject constructor(
             foodRepository.getById(foodId)?.let { food ->
                 _state.update {
                     it.copy(
+                        editingFoodId = food.id,
                         name = food.name, brand = food.brand, category = food.category,
                         kcal = food.kcalPer100g.toString(), protein = food.proteinPer100g.toString(),
                         carbs = food.carbsPer100g.toString(), fat = food.fatPer100g.toString(),
@@ -84,30 +88,60 @@ class CustomFoodViewModel @Inject constructor(
 
     fun save() {
         val s = _state.value
+        viewModelScope.launch {
+            _state.update { it.copy(isSaving = true) }
+            // Duplicate check on create only
+            if (!s.isEditing) {
+                val duplicate = foodRepository.findDuplicate(s.name.trim())
+                if (duplicate != null) {
+                    _state.update { it.copy(isSaving = false, duplicateFood = duplicate) }
+                    return@launch
+                }
+            }
+            doSave()
+        }
+    }
+
+    fun onConfirmSaveAnyway() {
+        _state.update { it.copy(duplicateFood = null) }
+        viewModelScope.launch { doSave() }
+    }
+
+    fun onDismissDuplicate() = _state.update { it.copy(duplicateFood = null, isSaving = false) }
+
+    fun delete() {
+        val foodId = _state.value.editingFoodId
+        if (foodId <= 0) return
+        viewModelScope.launch {
+            foodRepository.archiveOrDelete(foodId)
+            _state.update { it.copy(deletedSuccessfully = true) }
+        }
+    }
+
+    private suspend fun doSave() {
+        val s = _state.value
         val tags = buildList {
             if (s.containsPork) add("pork")
             if (s.containsAlcohol) add("alcohol")
             if (s.isVegetarian) add("vegetarian")
             if (s.isVegan) add("vegan")
         }
-        viewModelScope.launch {
-            _state.update { it.copy(isSaving = true) }
-            foodRepository.save(
-                Food(
-                    name = s.name.trim(), brand = s.brand.trim(), category = s.category,
-                    kcalPer100g = s.kcal.parseFloat() ?: 0f,
-                    proteinPer100g = s.protein.parseFloat() ?: 0f,
-                    carbsPer100g = s.carbs.parseFloat() ?: 0f,
-                    fatPer100g = s.fat.parseFloat() ?: 0f,
-                    fiberPer100g = s.fiber.parseFloat() ?: 0f,
-                    defaultServingG = s.serving.parseFloat() ?: 100f,
-                    servingUnit = s.unit,
-                    isCustom = true,
-                    tags = tags,
-                )
+        foodRepository.save(
+            Food(
+                id = s.editingFoodId,
+                name = s.name.trim(), brand = s.brand.trim(), category = s.category,
+                kcalPer100g = s.kcal.parseFloat() ?: 0f,
+                proteinPer100g = s.protein.parseFloat() ?: 0f,
+                carbsPer100g = s.carbs.parseFloat() ?: 0f,
+                fatPer100g = s.fat.parseFloat() ?: 0f,
+                fiberPer100g = s.fiber.parseFloat() ?: 0f,
+                defaultServingG = s.serving.parseFloat() ?: 100f,
+                servingUnit = s.unit,
+                isCustom = true,
+                tags = tags,
             )
-            _state.update { it.copy(isSaving = false, savedSuccessfully = true) }
-        }
+        )
+        _state.update { it.copy(isSaving = false, savedSuccessfully = true) }
     }
 }
 

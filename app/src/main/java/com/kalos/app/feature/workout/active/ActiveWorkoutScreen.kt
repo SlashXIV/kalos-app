@@ -1,6 +1,7 @@
 package com.kalos.app.feature.workout.active
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -12,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -86,32 +88,50 @@ fun ActiveWorkoutScreen(
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             val tabIndex = state.currentExIndex.coerceIn(0, state.exercises.size - 1)
 
-            // Tab row + add-exercise button outside the scroll area
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                ScrollableTabRow(
-                    selectedTabIndex = tabIndex,
-                    modifier = Modifier.weight(1f),
+            // Tab row + add-exercise button — unified surface bar
+            Column {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface),
                 ) {
-                    state.exercises.forEachIndexed { i, ep ->
-                        val textColor = when (ep.status) {
-                            ExerciseStatus.SKIPPED -> MaterialTheme.colorScheme.onSurfaceVariant
-                            ExerciseStatus.REPLACED -> MaterialTheme.colorScheme.tertiary
-                            ExerciseStatus.ADDED -> MaterialTheme.colorScheme.primary
-                            ExerciseStatus.PLANNED -> MaterialTheme.colorScheme.onSurface
+                    ScrollableTabRow(
+                        selectedTabIndex = tabIndex,
+                        modifier = Modifier.weight(1f),
+                        containerColor = Color.Transparent,
+                        divider = {},
+                    ) {
+                        state.exercises.forEachIndexed { i, ep ->
+                            val textColor = when (ep.status) {
+                                ExerciseStatus.SKIPPED -> MaterialTheme.colorScheme.onSurfaceVariant
+                                ExerciseStatus.REPLACED -> MaterialTheme.colorScheme.tertiary
+                                ExerciseStatus.ADDED -> MaterialTheme.colorScheme.primary
+                                ExerciseStatus.PLANNED -> MaterialTheme.colorScheme.onSurface
+                            }
+                            Tab(
+                                selected = tabIndex == i,
+                                onClick = { viewModel.selectExercise(i) },
+                                text = {
+                                    Text(ep.templateExercise.exercise.name, maxLines = 1, color = textColor)
+                                },
+                            )
                         }
-                        Tab(
-                            selected = tabIndex == i,
-                            onClick = { viewModel.selectExercise(i) },
-                            text = {
-                                Text(ep.templateExercise.exercise.name, maxLines = 1, color = textColor)
-                            },
-                        )
+                    }
+                    VerticalDivider(
+                        modifier = Modifier.height(28.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                    )
+                    IconButton(
+                        onClick = viewModel::openAddPicker,
+                        modifier = Modifier.size(48.dp),
+                    ) {
+                        Icon(Icons.Filled.Add, "Ajouter un exercice",
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.primary)
                     }
                 }
-                IconButton(onClick = viewModel::openAddPicker) {
-                    Icon(Icons.Filled.Add, "Ajouter un exercice",
-                        tint = MaterialTheme.colorScheme.primary)
-                }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
 
             val exIdx = tabIndex

@@ -23,4 +23,6 @@ data class WorkoutLogExEntity(
     val exerciseId: Long,
     val exerciseName: String,
     val orderIndex: Int,
+    val status: String = "PLANNED",
+    val replacedExerciseName: String = "",
 )

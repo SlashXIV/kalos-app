@@ -31,6 +31,8 @@ data class ExerciseDraft(
     val restSeconds: Int,
     val notes: String,
     val sets: List<SetDraft>,
+    val status: String = "PLANNED",
+    val originalExerciseName: String = "",
 )
 
 @Serializable

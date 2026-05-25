@@ -1,6 +1,6 @@
 # Product Audit
 
-> Version: 3.0.0 — 25 May 2026
+> Version: 3.1.0 — 25 May 2026
 
 ---
 
@@ -28,9 +28,7 @@ The only notable gap: the 60-day history screen lists daily summaries but a tap 
 
 The builder → active tracker → summary path works well. The draft auto-save and resume dialog (with staleness detection beyond 24 h) are particularly solid. Total volume is calculated and persisted correctly.
 
-Gaps:
-- **Custom programs** creation and editing are partially implemented.
-- **Home body weight card** not yet surfaced on the dashboard.
+Session flexibility (v3.1.0): exercises can be replaced, skipped, or added mid-session without modifying the template. Skipped and replaced exercises are logged with explicit status badges in the history detail view.
 
 ### Calendar
 
@@ -63,6 +61,7 @@ Gaps:
 | ~~Low~~ | ~~Exercise favorites~~ | Done in v2.7.0 — heart icon toggle + Favoris filter chip |
 | ~~Low~~ | ~~Advanced food filters~~ | Done in v2.9.0 — category chips + Perso toggle |
 | ~~Medium~~ | ~~Custom food management~~ | Done in v3.0.0 — "Mes aliments" screen, delete (hard/soft), duplicate detection, Perso badge |
+| ~~Medium~~ | ~~Workout session flexibility~~ | Done in v3.1.0 — replace / skip / add exercise, status badges in history |
 
 ---
 

@@ -186,6 +186,7 @@ class BackupImporter @Inject constructor(
                     WorkoutLogExEntity(
                         id = 0, logId = newLogId, exerciseId = ex.exerciseId,
                         exerciseName = ex.exerciseName, orderIndex = ex.orderIndex,
+                        status = ex.status, replacedExerciseName = ex.replacedExerciseName,
                     )
                 )
                 ex.sets.forEach { s ->

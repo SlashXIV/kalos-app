@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.kalos.app.core.domain.model.ExerciseStatus
 import com.kalos.app.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,65 +84,122 @@ fun ActiveWorkoutScreen(
         }
 
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            ScrollableTabRow(selectedTabIndex = state.currentExIndex.coerceIn(0, state.exercises.size - 1)) {
-                state.exercises.forEachIndexed { i, ep ->
-                    Tab(
-                        selected = state.currentExIndex == i,
-                        onClick = { viewModel.selectExercise(i) },
-                        text = { Text(ep.templateExercise.exercise.name, maxLines = 1) },
-                    )
+            val tabIndex = state.currentExIndex.coerceIn(0, state.exercises.size - 1)
+
+            // Tab row + add-exercise button outside the scroll area
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                ScrollableTabRow(
+                    selectedTabIndex = tabIndex,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    state.exercises.forEachIndexed { i, ep ->
+                        val textColor = when (ep.status) {
+                            ExerciseStatus.SKIPPED -> MaterialTheme.colorScheme.onSurfaceVariant
+                            ExerciseStatus.REPLACED -> MaterialTheme.colorScheme.tertiary
+                            ExerciseStatus.ADDED -> MaterialTheme.colorScheme.primary
+                            ExerciseStatus.PLANNED -> MaterialTheme.colorScheme.onSurface
+                        }
+                        Tab(
+                            selected = tabIndex == i,
+                            onClick = { viewModel.selectExercise(i) },
+                            text = {
+                                Text(ep.templateExercise.exercise.name, maxLines = 1, color = textColor)
+                            },
+                        )
+                    }
+                }
+                IconButton(onClick = viewModel::openAddPicker) {
+                    Icon(Icons.Filled.Add, "Ajouter un exercice",
+                        tint = MaterialTheme.colorScheme.primary)
                 }
             }
 
-            val exIdx = state.currentExIndex.coerceIn(0, state.exercises.size - 1)
+            val exIdx = tabIndex
             val ep = state.exercises[exIdx]
 
-            LazyColumn(
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.weight(1f),
-            ) {
-                item {
-                    Text(ep.templateExercise.exercise.primaryMuscle,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(Modifier.height(4.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("N°", modifier = Modifier.width(24.dp),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("Poids (kg)", modifier = Modifier.weight(1.5f),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("Reps", modifier = Modifier.weight(1.5f),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                    HorizontalDivider(modifier = Modifier.padding(top = 4.dp))
-                }
+            // Per-exercise action bar (replace / skip / undo)
+            ExerciseActionBar(
+                ep = ep,
+                onReplace = { viewModel.openReplacePicker(exIdx) },
+                onSkip = { viewModel.skipExercise(exIdx) },
+                onUndoReplace = { viewModel.undoReplace(exIdx) },
+            )
 
-                itemsIndexed(ep.sets) { setIdx, si ->
-                    SetRow(
-                        setNumber = setIdx + 1,
-                        set = si,
-                        onRepsChange = { viewModel.onRepsChange(exIdx, setIdx, it) },
-                        onWeightChange = { viewModel.onWeightChange(exIdx, setIdx, it) },
-                        onToggleComplete = { viewModel.toggleSetCompleted(exIdx, setIdx) },
-                        onRemove = if (ep.sets.size > 1) {
-                            { viewModel.removeSet(exIdx, setIdx) }
-                        } else null,
-                    )
-                }
-
-                item {
-                    OutlinedButton(
-                        onClick = { viewModel.addSet(exIdx) },
+            if (ep.status == ExerciseStatus.SKIPPED) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().weight(1f).padding(24.dp),
+                    contentAlignment = Alignment.TopCenter,
+                ) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = MaterialTheme.shapes.medium,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Icon(Icons.Filled.Add, null, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("Ajouter une série")
+                        Column(
+                            modifier = Modifier.padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Icon(Icons.Filled.SkipNext, null,
+                                modifier = Modifier.size(32.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("Exercice passé",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            OutlinedButton(onClick = { viewModel.undoSkip(exIdx) }) {
+                                Text("Annuler")
+                            }
+                        }
+                    }
+                }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f),
+                ) {
+                    item {
+                        Text(ep.templateExercise.exercise.primaryMuscle,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(Modifier.height(4.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("N°", modifier = Modifier.width(24.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("Poids (kg)", modifier = Modifier.weight(1.5f),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("Reps", modifier = Modifier.weight(1.5f),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                        HorizontalDivider(modifier = Modifier.padding(top = 4.dp))
+                    }
+
+                    itemsIndexed(ep.sets) { setIdx, si ->
+                        SetRow(
+                            setNumber = setIdx + 1,
+                            set = si,
+                            onRepsChange = { viewModel.onRepsChange(exIdx, setIdx, it) },
+                            onWeightChange = { viewModel.onWeightChange(exIdx, setIdx, it) },
+                            onToggleComplete = { viewModel.toggleSetCompleted(exIdx, setIdx) },
+                            onRemove = if (ep.sets.size > 1) {
+                                { viewModel.removeSet(exIdx, setIdx) }
+                            } else null,
+                        )
+                    }
+
+                    item {
+                        OutlinedButton(
+                            onClick = { viewModel.addSet(exIdx) },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Icon(Icons.Filled.Add, null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Ajouter une série")
+                        }
                     }
                 }
             }
@@ -174,6 +232,34 @@ fun ActiveWorkoutScreen(
                 }
             }
         }
+    }
+
+    // Exercise picker bottom sheet
+    if (state.exercisePickerExIndex >= 0) {
+        ExercisePickerSheet(
+            muscleFilter = state.exercisePickerMuscle,
+            onExerciseSelected = viewModel::onExercisePicked,
+            onDismiss = viewModel::dismissPicker,
+        )
+    }
+
+    // Confirm dialog: replace exercise that already has set data
+    if (state.confirmReplaceExercise != null) {
+        val currentName = state.exercises.getOrNull(state.confirmReplaceExIndex)
+            ?.templateExercise?.exercise?.name ?: ""
+        AlertDialog(
+            onDismissRequest = viewModel::cancelReplace,
+            title = { Text("Remplacer l'exercice ?") },
+            text = { Text("Les séries déjà saisies pour « $currentName » seront perdues.") },
+            confirmButton = {
+                TextButton(onClick = viewModel::confirmReplace) {
+                    Text("Remplacer", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::cancelReplace) { Text("Annuler") }
+            },
+        )
     }
 
     if (state.resumeAvailable) {
@@ -227,12 +313,85 @@ fun ActiveWorkoutScreen(
     }
 
     if (state.isSaving) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
+    }
+}
+
+@Composable
+private fun ExerciseActionBar(
+    ep: ExerciseProgress,
+    onReplace: () -> Unit,
+    onSkip: () -> Unit,
+    onUndoReplace: () -> Unit,
+) {
+    when (ep.status) {
+        ExerciseStatus.PLANNED -> {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                OutlinedButton(
+                    onClick = onReplace,
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+                ) {
+                    Icon(Icons.Filled.SwapHoriz, null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("Remplacer", style = MaterialTheme.typography.labelMedium)
+                }
+                OutlinedButton(
+                    onClick = onSkip,
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+                ) {
+                    Icon(Icons.Filled.SkipNext, null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("Passer", style = MaterialTheme.typography.labelMedium)
+                }
+            }
+        }
+        ExerciseStatus.REPLACED -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+            ) {
+                Text(
+                    "Remplace : ${ep.originalExerciseName}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.tertiary,
+                )
+                if (ep.originalTemplateExercise != null) {
+                    TextButton(
+                        onClick = onUndoReplace,
+                        contentPadding = PaddingValues(0.dp),
+                    ) {
+                        Text("Annuler le remplacement",
+                            style = MaterialTheme.typography.labelMedium)
+                    }
+                }
+            }
+        }
+        ExerciseStatus.ADDED -> {
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                shape = MaterialTheme.shapes.small,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+            ) {
+                Text(
+                    "Hors programme",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                )
+            }
+        }
+        ExerciseStatus.SKIPPED -> { /* handled by the skipped card in the main body */ }
     }
 }
 

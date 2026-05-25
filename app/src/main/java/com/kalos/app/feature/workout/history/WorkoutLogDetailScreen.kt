@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -18,6 +19,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.kalos.app.core.domain.model.ExerciseStatus
 import com.kalos.app.core.domain.model.LogExercise
 import com.kalos.app.core.domain.model.WorkoutLog
 import com.kalos.app.core.domain.repository.WorkoutRepository
@@ -223,7 +225,45 @@ private fun ExerciseDetailCard(
                 }
             }
 
-            if (completedSets.isEmpty()) {
+            // Status badge — only shown for non-PLANNED statuses
+            if (logExercise.status != ExerciseStatus.PLANNED) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    when (logExercise.status) {
+                        ExerciseStatus.SKIPPED -> StatusBadge(
+                            "Passé",
+                            MaterialTheme.colorScheme.surfaceVariant,
+                            MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        ExerciseStatus.REPLACED -> {
+                            StatusBadge(
+                                "Remplacé",
+                                MaterialTheme.colorScheme.tertiaryContainer,
+                                MaterialTheme.colorScheme.onTertiaryContainer,
+                            )
+                            if (logExercise.replacedExerciseName.isNotBlank()) {
+                                Text(
+                                    "à la place de : ${logExercise.replacedExerciseName}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                        ExerciseStatus.ADDED -> StatusBadge(
+                            "Hors programme",
+                            MaterialTheme.colorScheme.primaryContainer,
+                            MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                        else -> {}
+                    }
+                }
+            }
+
+            if (logExercise.status == ExerciseStatus.SKIPPED) {
+                // No sets to display for a skipped exercise
+            } else if (completedSets.isEmpty()) {
                 Text(
                     "Aucune série complétée",
                     style = MaterialTheme.typography.bodySmall,
@@ -261,6 +301,18 @@ private fun ExerciseDetailCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun StatusBadge(text: String, containerColor: Color, contentColor: Color) {
+    Surface(color = containerColor, shape = MaterialTheme.shapes.extraSmall) {
+        Text(
+            text,
+            style = MaterialTheme.typography.labelSmall,
+            color = contentColor,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+        )
     }
 }
 

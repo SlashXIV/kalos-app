@@ -92,7 +92,9 @@ class WorkoutRepositoryImpl @Inject constructor(
             }
             LogExercise(id = le.id, logId = entity.id,
                 exercise = ex?.toDomain() ?: Exercise(id = le.exerciseId, name = le.exerciseName, primaryMuscle = ""),
-                orderIndex = le.orderIndex, sets = sets)
+                orderIndex = le.orderIndex, sets = sets,
+                status = runCatching { ExerciseStatus.valueOf(le.status) }.getOrDefault(ExerciseStatus.PLANNED),
+                replacedExerciseName = le.replacedExerciseName)
         }
         return WorkoutLog(id = entity.id, templateId = entity.templateId, templateName = entity.templateName,
             date = entity.date, startedAt = entity.startedAt, finishedAt = entity.finishedAt,
@@ -107,7 +109,9 @@ class WorkoutRepositoryImpl @Inject constructor(
         log.exercises.forEachIndexed { i, le ->
             logDao.insertLogExercise(WorkoutLogExEntity(
                 logId = logId, exerciseId = le.exercise.id,
-                exerciseName = le.exercise.name, orderIndex = i))
+                exerciseName = le.exercise.name, orderIndex = i,
+                status = le.status.name,
+                replacedExerciseName = le.replacedExerciseName))
         }
         return logId
     }

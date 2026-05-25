@@ -137,6 +137,8 @@ data class LogExerciseBackup(
     val exerciseName: String,
     val orderIndex: Int,
     val sets: List<LogSetBackup>,
+    val status: String = "PLANNED",
+    val replacedExerciseName: String = "",
 )
 
 @Serializable

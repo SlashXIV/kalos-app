@@ -116,6 +116,7 @@ class BackupExporter @Inject constructor(
                         LogExerciseBackup(
                             exerciseId = ex.exerciseId, exerciseName = ex.exerciseName,
                             orderIndex = ex.orderIndex,
+                            status = ex.status, replacedExerciseName = ex.replacedExerciseName,
                             sets = (setsByLogEx[ex.id] ?: emptyList()).map { s ->
                                 LogSetBackup(
                                     setNumber = s.setNumber, reps = s.reps,

@@ -25,6 +25,10 @@ data class SetInput(
 data class ExerciseProgress(
     val templateExercise: TemplateExercise,
     val sets: List<SetInput>,
+    val status: ExerciseStatus = ExerciseStatus.PLANNED,
+    val originalExerciseName: String = "",
+    val originalTemplateExercise: TemplateExercise? = null, // in-memory only, not persisted to draft
+    val originalSets: List<SetInput> = emptyList(),         // in-memory only
 )
 
 data class ActiveWorkoutUiState(
@@ -40,6 +44,10 @@ data class ActiveWorkoutUiState(
     val resumeAvailable: Boolean = false,
     val resumeStartedAt: Long = 0L,
     val resumeIsStale: Boolean = false,
+    val exercisePickerExIndex: Int = -1,  // -1=closed, ADD_EXERCISE_SENTINEL=add, else=replace
+    val exercisePickerMuscle: String = "",
+    val confirmReplaceExIndex: Int = -1,
+    val confirmReplaceExercise: Exercise? = null,
 )
 
 @HiltViewModel
@@ -47,6 +55,10 @@ class ActiveWorkoutViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository,
     private val store: ActiveWorkoutStore,
 ) : ViewModel() {
+
+    companion object {
+        const val ADD_EXERCISE_SENTINEL = Int.MAX_VALUE
+    }
 
     private val _state = MutableStateFlow(ActiveWorkoutUiState())
     val state: StateFlow<ActiveWorkoutUiState> = _state
@@ -59,7 +71,6 @@ class ActiveWorkoutViewModel @Inject constructor(
     private var restDurationSecs: Int = 0
 
     init {
-        // Auto-persist state on every meaningful change, debounced to avoid flooding IO
         viewModelScope.launch {
             _state
                 .filter { !it.isLoading && !it.isSaving && it.savedLogId == null && !it.resumeAvailable }
@@ -75,7 +86,6 @@ class ActiveWorkoutViewModel @Inject constructor(
             val draft = store.load()
             when {
                 draft != null && draft.templateId == id -> {
-                    // Offer resume — workout for this exact template was in progress
                     val isStale = System.currentTimeMillis() - draft.startedAt > ActiveWorkoutStore.EXPIRY_MS
                     _state.update {
                         it.copy(
@@ -88,7 +98,6 @@ class ActiveWorkoutViewModel @Inject constructor(
                     }
                 }
                 draft != null -> {
-                    // Draft for a different template — discard silently and start fresh
                     store.clear()
                     startFresh(id)
                 }
@@ -118,6 +127,9 @@ class ActiveWorkoutViewModel @Inject constructor(
                     notes = ed.notes,
                 ),
                 sets = ed.sets.map { SetInput(reps = it.reps, weight = it.weight, isCompleted = it.isCompleted) },
+                status = runCatching { ExerciseStatus.valueOf(ed.status) }.getOrDefault(ExerciseStatus.PLANNED),
+                originalExerciseName = ed.originalExerciseName,
+                // originalTemplateExercise and originalSets not restored — undo unavailable after kill
             )
         }
         _state.update {
@@ -129,7 +141,6 @@ class ActiveWorkoutViewModel @Inject constructor(
                 isLoading = false,
             )
         }
-        // Restore rest timer if it was active and still has time left
         if (draft.restStartedAt != null) {
             val elapsed = ((System.currentTimeMillis() - draft.restStartedAt) / 1000).toInt()
             val left = (draft.restDurationSecs - elapsed).coerceAtLeast(0)
@@ -177,7 +188,6 @@ class ActiveWorkoutViewModel @Inject constructor(
         startTimer()
     }
 
-    // Timer computed from wall-clock delta — correct even after background/lock
     private fun startTimer() {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
@@ -214,6 +224,141 @@ class ActiveWorkoutViewModel @Inject constructor(
         restJob?.cancel()
         _state.update { it.copy(isResting = false, restSecsLeft = 0) }
     }
+
+    // ── Exercise management ──────────────────────────────────────────────────
+
+    fun skipExercise(exIndex: Int) {
+        _state.update { s ->
+            val exercises = s.exercises.toMutableList()
+            val ep = exercises.getOrNull(exIndex) ?: return@update s
+            exercises[exIndex] = ep.copy(status = ExerciseStatus.SKIPPED, sets = emptyList())
+            val nextIndex = if (exIndex < exercises.size - 1) exIndex + 1 else exIndex
+            s.copy(exercises = exercises, currentExIndex = nextIndex)
+        }
+    }
+
+    fun undoSkip(exIndex: Int) {
+        _state.update { s ->
+            val exercises = s.exercises.toMutableList()
+            val ep = exercises.getOrNull(exIndex) ?: return@update s
+            val te = ep.templateExercise
+            val restoredSets = List(te.defaultSets) {
+                SetInput(
+                    reps = te.defaultReps.toString(),
+                    weight = if (te.defaultWeightKg > 0f) te.defaultWeightKg.toString() else "",
+                )
+            }
+            exercises[exIndex] = ep.copy(status = ExerciseStatus.PLANNED, sets = restoredSets)
+            s.copy(exercises = exercises)
+        }
+    }
+
+    fun openReplacePicker(exIndex: Int) {
+        val muscle = _state.value.exercises.getOrNull(exIndex)
+            ?.templateExercise?.exercise?.primaryMuscle ?: ""
+        _state.update { it.copy(exercisePickerExIndex = exIndex, exercisePickerMuscle = muscle) }
+    }
+
+    fun openAddPicker() {
+        _state.update { it.copy(exercisePickerExIndex = ADD_EXERCISE_SENTINEL, exercisePickerMuscle = "") }
+    }
+
+    fun dismissPicker() {
+        _state.update { it.copy(exercisePickerExIndex = -1, exercisePickerMuscle = "") }
+    }
+
+    fun onExercisePicked(exercise: Exercise) {
+        val s = _state.value
+        val exIndex = s.exercisePickerExIndex
+        _state.update { it.copy(exercisePickerExIndex = -1, exercisePickerMuscle = "") }
+
+        if (exIndex == ADD_EXERCISE_SENTINEL) {
+            confirmAddExercise(exercise)
+            return
+        }
+
+        val ep = s.exercises.getOrNull(exIndex) ?: return
+        val hasData = ep.sets.any { it.reps.isNotBlank() || it.weight.isNotBlank() || it.isCompleted }
+        if (hasData) {
+            _state.update { it.copy(confirmReplaceExIndex = exIndex, confirmReplaceExercise = exercise) }
+        } else {
+            doReplaceExercise(exIndex, exercise)
+        }
+    }
+
+    fun confirmReplace() {
+        val s = _state.value
+        val exIndex = s.confirmReplaceExIndex
+        val exercise = s.confirmReplaceExercise ?: return
+        _state.update { it.copy(confirmReplaceExIndex = -1, confirmReplaceExercise = null) }
+        doReplaceExercise(exIndex, exercise)
+    }
+
+    fun cancelReplace() {
+        _state.update { it.copy(confirmReplaceExIndex = -1, confirmReplaceExercise = null) }
+    }
+
+    private fun doReplaceExercise(exIndex: Int, newExercise: Exercise) {
+        _state.update { s ->
+            val exercises = s.exercises.toMutableList()
+            val ep = exercises.getOrNull(exIndex) ?: return@update s
+            val newTe = ep.templateExercise.copy(exercise = newExercise, defaultWeightKg = 0f)
+            val newSets = List(ep.templateExercise.defaultSets) {
+                SetInput(reps = ep.templateExercise.defaultReps.toString(), weight = "")
+            }
+            exercises[exIndex] = ExerciseProgress(
+                templateExercise = newTe,
+                sets = newSets,
+                status = ExerciseStatus.REPLACED,
+                originalExerciseName = ep.originalExerciseName.ifBlank { ep.templateExercise.exercise.name },
+                originalTemplateExercise = ep.originalTemplateExercise ?: ep.templateExercise,
+                originalSets = ep.originalSets.ifEmpty { ep.sets },
+            )
+            s.copy(exercises = exercises)
+        }
+    }
+
+    fun undoReplace(exIndex: Int) {
+        _state.update { s ->
+            val exercises = s.exercises.toMutableList()
+            val ep = exercises.getOrNull(exIndex) ?: return@update s
+            val origTe = ep.originalTemplateExercise ?: return@update s
+            exercises[exIndex] = ep.copy(
+                templateExercise = origTe,
+                sets = ep.originalSets,
+                status = ExerciseStatus.PLANNED,
+                originalExerciseName = "",
+                originalTemplateExercise = null,
+                originalSets = emptyList(),
+            )
+            s.copy(exercises = exercises)
+        }
+    }
+
+    private fun confirmAddExercise(exercise: Exercise) {
+        _state.update { s ->
+            val newTe = TemplateExercise(
+                id = 0,
+                templateId = loadedTemplateId,
+                exercise = exercise,
+                orderIndex = s.exercises.size,
+                defaultSets = 3,
+                defaultReps = 10,
+                defaultWeightKg = 0f,
+                restSeconds = 90,
+                notes = "",
+            )
+            val newEp = ExerciseProgress(
+                templateExercise = newTe,
+                sets = List(3) { SetInput(reps = "10", weight = "") },
+                status = ExerciseStatus.ADDED,
+            )
+            val exercises = s.exercises + newEp
+            s.copy(exercises = exercises, currentExIndex = exercises.size - 1)
+        }
+    }
+
+    // ── Set editing ──────────────────────────────────────────────────────────
 
     fun onRepsChange(exIndex: Int, setIndex: Int, value: String) =
         updateSet(exIndex, setIndex) { it.copy(reps = value) }
@@ -265,6 +410,8 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     fun selectExercise(index: Int) = _state.update { it.copy(currentExIndex = index) }
 
+    // ── Finish ───────────────────────────────────────────────────────────────
+
     fun finish() {
         timerJob?.cancel()
         restJob?.cancel()
@@ -278,6 +425,8 @@ class ActiveWorkoutViewModel @Inject constructor(
                     exercise = ep.templateExercise.exercise,
                     orderIndex = i,
                     sets = emptyList(),
+                    status = ep.status,
+                    replacedExerciseName = ep.originalExerciseName,
                 )
             }
             val logId = workoutRepository.startLog(
@@ -294,7 +443,9 @@ class ActiveWorkoutViewModel @Inject constructor(
             if (savedLog != null) {
                 var totalVolume = 0f
                 savedLog.exercises.forEachIndexed { exIdx, le ->
-                    s.exercises.getOrNull(exIdx)?.sets?.forEachIndexed { setIdx, si ->
+                    val ep = s.exercises.getOrNull(exIdx) ?: return@forEachIndexed
+                    if (ep.status == ExerciseStatus.SKIPPED) return@forEachIndexed
+                    ep.sets.forEachIndexed { setIdx, si ->
                         val reps = si.reps.toIntOrNull() ?: 0
                         val weight = si.weight.toFloatOrNull() ?: 0f
                         if (si.isCompleted) totalVolume += reps * weight
@@ -316,6 +467,8 @@ class ActiveWorkoutViewModel @Inject constructor(
         }
     }
 
+    // ── Draft persistence ────────────────────────────────────────────────────
+
     private fun persistDraft(s: ActiveWorkoutUiState) {
         if (loadedTemplateId == -2L || s.exercises.isEmpty()) return
         val exercises = s.exercises.map { ep ->
@@ -331,6 +484,8 @@ class ActiveWorkoutViewModel @Inject constructor(
                 restSeconds = ep.templateExercise.restSeconds,
                 notes = ep.templateExercise.notes,
                 sets = ep.sets.map { SetDraft(reps = it.reps, weight = it.weight, isCompleted = it.isCompleted) },
+                status = ep.status.name,
+                originalExerciseName = ep.originalExerciseName,
             )
         }
         store.save(

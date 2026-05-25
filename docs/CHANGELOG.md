@@ -2,6 +2,19 @@
 
 ---
 
+## v3.1.0 — 25 May 2026
+
+### Added
+- Remplacement d'exercice pendant la séance : bouton "Remplacer" par exercice, bottom sheet de sélection (suggestions par groupe musculaire + recherche), confirmation si des séries ont déjà été saisies
+- Passage d'exercice : bouton "Passer" par exercice, l'exercice est logué avec `status = SKIPPED` dans l'historique (sans séries)
+- Ajout d'exercice hors-programme : bouton `+` en dehors de la `ScrollableTabRow`, exercice inséré avec `status = ADDED`
+- Annulation de remplacement : bouton "Annuler le remplacement" disponible tant que la séance est en mémoire (undo non disponible après kill applicatif)
+- Badges de statut dans le détail de séance : "Passé" (gris), "Remplacé" (tertiaire, avec nom de l'exercice d'origine), "Hors programme" (vert), "Planifié" sans badge
+- DB version 11, `MIGRATION_10_11` : `ALTER TABLE workout_log_exercise ADD COLUMN status TEXT NOT NULL DEFAULT 'PLANNED'` et `ADD COLUMN replacedExerciseName TEXT NOT NULL DEFAULT ''`
+- `ExerciseStatus` enum : `PLANNED`, `SKIPPED`, `REPLACED`, `ADDED`
+
+---
+
 ## v3.0.0 — 25 May 2026
 
 ### Added

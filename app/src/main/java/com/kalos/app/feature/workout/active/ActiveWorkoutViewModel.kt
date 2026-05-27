@@ -353,8 +353,12 @@ class ActiveWorkoutViewModel @Inject constructor(
                 sets = List(3) { SetInput(reps = "10", weight = "") },
                 status = ExerciseStatus.ADDED,
             )
-            val exercises = s.exercises + newEp
-            s.copy(exercises = exercises, currentExIndex = exercises.size - 1)
+            // Don't change currentExIndex here: ScrollableTabRow's SubcomposeLayout measures
+            // tabPositions from the previous frame's tabs. Jumping the index in the same update
+            // causes tabPositions[newIndex] to be called before the new tab has been laid out,
+            // triggering IndexOutOfBoundsException. Navigation to the new tab happens via
+            // LaunchedEffect in the Screen, after the first render with the updated tab list.
+            s.copy(exercises = s.exercises + newEp)
         }
     }
 

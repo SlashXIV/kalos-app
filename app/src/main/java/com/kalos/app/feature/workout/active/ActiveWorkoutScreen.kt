@@ -34,6 +34,18 @@ fun ActiveWorkoutScreen(
     var showFinishDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(templateId) { viewModel.loadTemplate(templateId) }
+
+    // Navigate to a newly added exercise after the tab list has been laid out.
+    // Doing this in the same state update that grows the exercises list causes
+    // ScrollableTabRow's SubcomposeLayout to access tabPositions[newIndex] before the
+    // new tab has been measured (still uses the previous frame's tabPositions → IOOB crash).
+    LaunchedEffect(state.exercises.size) {
+        val lastIdx = state.exercises.size - 1
+        if (lastIdx > 0 && state.exercises.getOrNull(lastIdx)?.status == ExerciseStatus.ADDED) {
+            viewModel.selectExercise(lastIdx)
+        }
+    }
+
     LaunchedEffect(state.savedLogId) {
         if (state.savedLogId != null) {
             navController.navigate(Screen.WorkoutSummary.route(state.savedLogId!!)) {

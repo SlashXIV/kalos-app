@@ -1,6 +1,6 @@
 # Features
 
-> Version: 3.2.0
+> Version: 3.5.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -42,7 +42,7 @@ Statuses: **Done** · **Partial** · **Planned**
 
 | Feature | Status | Notes |
 |---|---|---|
-| Text search with debounce (300 ms) | Done | |
+| Text search with debounce (300 ms) | Done | Food search only |
 | Recent foods (shown when query is empty) | Done | |
 | Favorite foods (shown when query is empty) | Done | |
 | Food detail sheet | Done | Portion / grams mode toggle |
@@ -81,7 +81,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Feature | Status | Notes |
 |---|---|---|
 | ~100 seeded exercises | Done | |
-| Text search | Done | |
+| Text search | Done | Accent-insensitive (nameNormalized), no debounce |
 | Filter by muscle group (13 options) | Done | |
 | Filter by type (5 options) | Done | |
 | Exercise detail screen | Done | Muscles, equipment, description, progression chart |
@@ -105,7 +105,7 @@ Statuses: **Done** · **Partial** · **Planned**
 |---|---|---|
 | Session timer (wall-clock, survives lock screen) | Done | |
 | Tab navigation between exercises | Done | |
-| Weight / reps input per set | Done | |
+| Weight / reps input per set | Done | Select-all on focus to prevent appended digits |
 | Mark set as completed | Done | |
 | Add / remove sets | Done | |
 | Automatic rest timer (triggered on set completion) | Done | Duration configurable per exercise |
@@ -119,14 +119,14 @@ Statuses: **Done** · **Partial** · **Planned**
 | Feature | Status | Notes |
 |---|---|---|
 | Summary screen (duration, total volume, exercises) | Done | |
-| Per-exercise set detail | Done | |
+| Per-exercise set detail | Done | Tappable rows — edit reps / weight inline via dialog |
 
 ### Workout history
 
 | Feature | Status | Notes |
 |---|---|---|
 | Past sessions list | Done | Tappable cards with formatted dates |
-| Session detail view | Done | Name, date, duration, volume, sets per exercise, PR per exercise |
+| Session detail view | Done | Name, date, duration, volume, sets per exercise, PR per exercise; set rows tappable to edit reps / weight |
 | Weekly volume chart | Done | Bar chart, last 8 weeks, shown from 2 weeks of data |
 
 ### Training programs
@@ -177,7 +177,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |
 | Data import / restore | Done | Confirmation dialog (destructive) |
-| Version display | Done | Kalos 3.0.0 |
+| Version display | Done | Kalos 3.5.0 |
 
 ---
 

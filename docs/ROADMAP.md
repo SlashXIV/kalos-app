@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: v3.2.0 — 25 May 2026
+> Last updated: v3.5.0 — 27 May 2026
 
 Priorities are based on user impact relative to implementation effort. The list is intentionally short — only changes worth doing next.
 

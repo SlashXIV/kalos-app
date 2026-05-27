@@ -2,6 +2,41 @@
 
 ---
 
+## v3.5.0 — 27 May 2026
+
+### Added
+- Édition d'une série depuis le résumé de séance (`WorkoutSummaryScreen`) : taper sur une série complétée ouvre une dialog de modification reps / poids ; sauvegarde via `upsertSet` + recalcul du volume total (`finishLog`)
+- Édition d'une série depuis le détail d'une séance passée (`WorkoutLogDetailScreen`) : même comportement, idem recalcul volume
+- Icône crayon discrète (11 dp, 45 % d'opacité) en trailing sur chaque ligne de série cliquable
+
+### Fixed
+- Saisie parasites dans les champs reps / poids de `SetRow` : focus sur un champ sélectionne désormais tout le texte (pattern `TextFieldValue` + `onFocusChanged`), ce qui évite le cas « 10 » → taper « 8 » → « 108 »
+- Seed exercises : suppression de 2 exercices en double, ajout de 12 variantes manquantes
+
+---
+
+## v3.4.0 — 26 May 2026
+
+### Fixed
+- Export : `appVersion` prenait la valeur codée en dur `"1.7.0"` — remplacé par `PackageManager.getPackageInfo().versionName`
+- Export : `FoodBackup` ne sauvegardait pas `sugarPer100g` → champ absent à l'import
+- Export : `TrainingProgramBackup` ne sauvegardait pas `isCustom` → les programmes personnalisés perdaient leur statut à la restauration
+
+---
+
+## v3.3.0 — 26 May 2026
+
+### Added
+- Recherche d'exercices insensible aux accents : colonne `nameNormalized` sur `ExerciseEntity`, remplie via `normalizeForSearch()` (NFKD + strip diacritiques + lowercase + collapse espaces)
+- Seeder v3 : backfill `nameNormalized` pour les installations existantes à la mise à jour
+- DB version 13, `MIGRATION_12_13` : `ALTER TABLE exercise ADD COLUMN nameNormalized TEXT NOT NULL DEFAULT ''`
+- Requêtes de filtre (`ExerciseDao`) portées sur `nameNormalized` ; query normalisée dans `ExerciseCatalogViewModel` et `ExercisePickerViewModel`
+
+### Changed
+- Suppression du debounce 300 ms sur la recherche d'exercices : la recherche SQLite locale (< 5 ms) n'en a pas besoin — la frappe est désormais immédiatement reflétée dans les résultats
+
+---
+
 ## v3.2.0 — 25 May 2026
 
 ### Added

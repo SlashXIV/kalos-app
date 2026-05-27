@@ -174,7 +174,8 @@ fun NutritionScreen(
                     isGoalReached = state.isWaterGoalReached,
                     displayTotal = state.waterDisplayTotal,
                     displayGoal = state.waterDisplayGoal,
-                    isWaterEditable = true,
+                    isToday = state.isToday,
+                    dateLabel = dateLabel,
                     isGoalEditable = state.isToday,
                     onAdd = viewModel::addWater,
                     onSetGoal = viewModel::setWaterGoal,
@@ -296,7 +297,8 @@ private fun HydrationCard(
     isGoalReached: Boolean,
     displayTotal: String,
     displayGoal: String,
-    isWaterEditable: Boolean,
+    isToday: Boolean,
+    dateLabel: String,
     isGoalEditable: Boolean,
     onAdd: (Int) -> Unit,
     onSetGoal: (Int) -> Unit,
@@ -335,6 +337,13 @@ private fun HydrationCard(
                             contentDescription = "Objectif atteint",
                             modifier = Modifier.size(16.dp),
                             tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    if (!isToday) {
+                        Text(
+                            "· $dateLabel",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -379,33 +388,31 @@ private fun HydrationCard(
                 )
             }
 
-            // Quick-add buttons — hidden only when water editing is explicitly disabled
-            if (isWaterEditable) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    listOf(250, 500, 750).forEach { ml ->
-                        OutlinedButton(
-                            onClick = { onAdd(ml) },
-                            modifier = Modifier.weight(1f),
-                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
-                            border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.dp),
-                        ) {
-                            Text("+${ml}ml", style = MaterialTheme.typography.labelMedium)
-                        }
-                    }
-                    FilledTonalButton(
-                        onClick = { showCustomDialog = true },
+            // Quick-add buttons — target the currently displayed date
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                listOf(250, 500, 750).forEach { ml ->
+                    OutlinedButton(
+                        onClick = { onAdd(ml) },
                         modifier = Modifier.weight(1f),
                         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
-                        colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        ),
+                        border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.dp),
                     ) {
-                        Text("Autre", style = MaterialTheme.typography.labelMedium)
+                        Text("+${ml}ml", style = MaterialTheme.typography.labelMedium)
                     }
+                }
+                FilledTonalButton(
+                    onClick = { showCustomDialog = true },
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
+                ) {
+                    Text("Autre", style = MaterialTheme.typography.labelMedium)
                 }
             }
         }

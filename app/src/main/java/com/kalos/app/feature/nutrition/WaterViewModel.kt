@@ -37,7 +37,7 @@ class WaterViewModel @Inject constructor(
     )
 
     fun addWater(amountMl: Int) {
-        viewModelScope.launch { waterRepository.addWater(amountMl) }
+        viewModelScope.launch { waterRepository.addWater(amountMl, java.time.LocalDate.now().toString()) }
     }
 
     fun setGoal(goalMl: Int) {

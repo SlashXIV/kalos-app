@@ -110,7 +110,8 @@ class NutritionViewModel @Inject constructor(
     }
 
     fun addWater(amountMl: Int) {
-        viewModelScope.launch { waterRepository.addWater(amountMl) }
+        val date = _date.value
+        viewModelScope.launch { waterRepository.addWater(amountMl, date) }
     }
 
     fun setWaterGoal(goalMl: Int) {

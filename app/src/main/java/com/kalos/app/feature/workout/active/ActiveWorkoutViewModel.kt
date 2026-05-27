@@ -365,7 +365,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     // ── Set editing ──────────────────────────────────────────────────────────
 
     fun onRepsChange(exIndex: Int, setIndex: Int, value: String) =
-        updateSet(exIndex, setIndex) { it.copy(reps = value) }
+        updateSet(exIndex, setIndex) { it.copy(reps = value.filter { c -> c.isDigit() }) }
 
     fun onWeightChange(exIndex: Int, setIndex: Int, value: String) =
         updateSet(exIndex, setIndex) { it.copy(weight = value) }

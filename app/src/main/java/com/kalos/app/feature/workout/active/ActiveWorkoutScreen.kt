@@ -13,9 +13,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -436,6 +439,19 @@ private fun SetRow(
     onToggleComplete: () -> Unit,
     onRemove: (() -> Unit)?,
 ) {
+    // TextFieldValue is kept locally so we can control selection (select-all on focus).
+    // LaunchedEffect syncs back if the ViewModel changes the value externally (undo, reset…)
+    // without interfering with the cursor during normal typing.
+    var weightValue by remember { mutableStateOf(TextFieldValue(set.weight, TextRange(set.weight.length))) }
+    var repsValue   by remember { mutableStateOf(TextFieldValue(set.reps,   TextRange(set.reps.length)))  }
+
+    LaunchedEffect(set.weight) {
+        if (weightValue.text != set.weight) weightValue = TextFieldValue(set.weight, TextRange(set.weight.length))
+    }
+    LaunchedEffect(set.reps) {
+        if (repsValue.text != set.reps) repsValue = TextFieldValue(set.reps, TextRange(set.reps.length))
+    }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -449,17 +465,27 @@ private fun SetRow(
             else MaterialTheme.colorScheme.onSurface,
         )
         OutlinedTextField(
-            value = set.weight,
-            onValueChange = onWeightChange,
-            modifier = Modifier.weight(1.5f),
+            value = weightValue,
+            onValueChange = { tv -> weightValue = tv; onWeightChange(tv.text) },
+            modifier = Modifier
+                .weight(1.5f)
+                .onFocusChanged { fs ->
+                    if (fs.isFocused)
+                        weightValue = weightValue.copy(selection = TextRange(0, weightValue.text.length))
+                },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true,
             placeholder = { Text("0") },
         )
         OutlinedTextField(
-            value = set.reps,
-            onValueChange = onRepsChange,
-            modifier = Modifier.weight(1.5f),
+            value = repsValue,
+            onValueChange = { tv -> repsValue = tv; onRepsChange(tv.text) },
+            modifier = Modifier
+                .weight(1.5f)
+                .onFocusChanged { fs ->
+                    if (fs.isFocused)
+                        repsValue = repsValue.copy(selection = TextRange(0, repsValue.text.length))
+                },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true,
             placeholder = { Text("0") },

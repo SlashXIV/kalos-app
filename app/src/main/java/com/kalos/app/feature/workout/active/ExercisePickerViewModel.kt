@@ -7,7 +7,6 @@ import com.kalos.app.core.domain.model.Exercise
 import com.kalos.app.core.domain.repository.ExerciseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
@@ -21,9 +20,8 @@ class ExercisePickerViewModel @Inject constructor(
 
     val query: StateFlow<String> = _query
 
-    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
     val searchResults: StateFlow<List<Exercise>> = _query
-        .debounce(300)
         .flatMapLatest { q ->
             if (q.isBlank()) flowOf(emptyList())
             else exerciseRepository.filter(query = q.normalizeForSearch(), muscle = "", type = "", equipment = "")

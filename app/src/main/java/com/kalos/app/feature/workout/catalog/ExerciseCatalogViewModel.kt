@@ -7,7 +7,6 @@ import com.kalos.app.core.domain.model.Exercise
 import com.kalos.app.core.domain.repository.ExerciseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,7 +23,7 @@ data class CatalogUiState(
     val isLoading: Boolean = true,
 )
 
-@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ExerciseCatalogViewModel @Inject constructor(
     private val exerciseRepository: ExerciseRepository,
@@ -41,7 +40,7 @@ class ExerciseCatalogViewModel @Inject constructor(
 
     private data class Filters(val query: String, val muscle: String, val type: String, val equipment: String, val onlyFavorites: Boolean)
 
-    private val filters = combine(_query.debounce(300), _muscle, _type, _equipment, _onlyFavorites) { q, m, t, e, fav ->
+    private val filters = combine(_query, _muscle, _type, _equipment, _onlyFavorites) { q, m, t, e, fav ->
         Filters(q.normalizeForSearch(), m, t, e, fav)
     }
 

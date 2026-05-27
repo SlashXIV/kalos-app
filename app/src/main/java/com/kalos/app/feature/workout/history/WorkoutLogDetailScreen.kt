@@ -1,8 +1,10 @@
 package com.kalos.app.feature.workout.history
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -10,9 +12,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -22,11 +28,13 @@ import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.ExerciseStatus
 import com.kalos.app.core.domain.model.LogExercise
 import com.kalos.app.core.domain.model.WorkoutLog
+import com.kalos.app.core.domain.model.WorkoutSet
 import com.kalos.app.core.domain.repository.WorkoutRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -35,10 +43,14 @@ import javax.inject.Inject
 
 // ─── ViewModel ───────────────────────────────────────────────────────────────
 
+data class PendingSetEdit(val set: WorkoutSet, val exerciseId: Long)
+
 data class WorkoutLogDetailUiState(
     val log: WorkoutLog? = null,
     val maxWeights: Map<Long, Float?> = emptyMap(),
     val isLoading: Boolean = true,
+    val pendingEdit: PendingSetEdit? = null,
+    val isSavingEdit: Boolean = false,
 )
 
 @HiltViewModel
@@ -63,6 +75,41 @@ class WorkoutLogDetailViewModel @Inject constructor(
                 )
             } else {
                 _uiState.value = WorkoutLogDetailUiState(isLoading = false)
+            }
+        }
+    }
+
+    fun openEditDialog(set: WorkoutSet, exerciseId: Long) {
+        _uiState.update { it.copy(pendingEdit = PendingSetEdit(set, exerciseId)) }
+    }
+
+    fun dismissEditDialog() {
+        _uiState.update { it.copy(pendingEdit = null) }
+    }
+
+    fun saveSetEdit(newReps: Int, newWeightKg: Float) {
+        val pending = _uiState.value.pendingEdit ?: return
+        val log = _uiState.value.log ?: return
+        _uiState.update { it.copy(pendingEdit = null, isSavingEdit = true) }
+        viewModelScope.launch {
+            workoutRepository.upsertSet(
+                logId = log.id,
+                exerciseId = pending.exerciseId,
+                set = pending.set.copy(reps = newReps, weightKg = newWeightKg),
+            )
+            val reloaded = workoutRepository.getLog(log.id)
+            if (reloaded != null) {
+                val newVolume = reloaded.exercises.flatMap { it.sets }
+                    .filter { it.isCompleted }
+                    .sumOf { (it.reps * it.weightKg).toDouble() }.toFloat()
+                workoutRepository.finishLog(log.id, log.durationSecs, newVolume)
+                val finalLog = workoutRepository.getLog(log.id)
+                val maxWeights = finalLog?.exercises?.associate { le ->
+                    le.exercise.id to workoutRepository.getMaxWeight(le.exercise.id)
+                } ?: emptyMap()
+                _uiState.update { it.copy(log = finalLog, maxWeights = maxWeights, isSavingEdit = false) }
+            } else {
+                _uiState.update { it.copy(isSavingEdit = false) }
             }
         }
     }
@@ -114,8 +161,21 @@ fun WorkoutLogDetailScreen(
             else -> LogDetailContent(
                 log = state.log!!,
                 maxWeights = state.maxWeights,
+                onEditSet = viewModel::openEditDialog,
                 modifier = Modifier.padding(padding),
             )
+        }
+        state.pendingEdit?.let { pending ->
+            EditSetDialog(
+                set = pending.set,
+                onDismiss = viewModel::dismissEditDialog,
+                onConfirm = { reps, weight -> viewModel.saveSetEdit(reps, weight) },
+            )
+        }
+        if (state.isSavingEdit) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
         }
     }
 }
@@ -126,6 +186,7 @@ fun WorkoutLogDetailScreen(
 private fun LogDetailContent(
     log: WorkoutLog,
     maxWeights: Map<Long, Float?>,
+    onEditSet: (WorkoutSet, Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -148,6 +209,7 @@ private fun LogDetailContent(
                 ExerciseDetailCard(
                     logExercise = le,
                     maxWeight = maxWeights[le.exercise.id],
+                    onEditSet = { set -> onEditSet(set, le.exercise.id) },
                 )
             }
         }
@@ -190,6 +252,7 @@ private fun SessionHeaderCard(log: WorkoutLog) {
 private fun ExerciseDetailCard(
     logExercise: LogExercise,
     maxWeight: Float?,
+    onEditSet: (WorkoutSet) -> Unit = {},
 ) {
     val completedSets = logExercise.sets.filter { it.isCompleted }
 
@@ -273,18 +336,33 @@ private fun ExerciseDetailCard(
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
                 completedSets.forEachIndexed { i, set ->
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onEditSet(set) }
+                            .padding(vertical = 2.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
                             "Série ${i + 1}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                        Text(
-                            formatSet(set.reps, set.weightKg),
-                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            Text(
+                                formatSet(set.reps, set.weightKg),
+                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                            )
+                            Icon(
+                                Icons.Filled.Edit,
+                                contentDescription = "Modifier",
+                                modifier = Modifier.size(11.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+                            )
+                        }
                     }
                 }
                 if (logExercise.totalVolume > 0f) {
@@ -327,12 +405,78 @@ private fun DetailStat(icon: ImageVector, text: String) {
     }
 }
 
+// ─── Edit set dialog ─────────────────────────────────────────────────────────
+
+@Composable
+private fun EditSetDialog(
+    set: WorkoutSet,
+    onDismiss: () -> Unit,
+    onConfirm: (reps: Int, weightKg: Float) -> Unit,
+) {
+    val initWeight = set.weightKg.toWeightInput()
+    var repsValue by remember {
+        mutableStateOf(TextFieldValue(set.reps.toString(), TextRange(set.reps.toString().length)))
+    }
+    var weightValue by remember {
+        mutableStateOf(TextFieldValue(initWeight, TextRange(initWeight.length)))
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Série ${set.setNumber}") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = repsValue,
+                    onValueChange = { tv ->
+                        val filtered = tv.text.filter { it.isDigit() }
+                        repsValue = TextFieldValue(filtered, TextRange(filtered.length))
+                    },
+                    modifier = Modifier.fillMaxWidth().onFocusChanged { fs ->
+                        if (fs.isFocused)
+                            repsValue = repsValue.copy(selection = TextRange(0, repsValue.text.length))
+                    },
+                    label = { Text("Répétitions") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                )
+                OutlinedTextField(
+                    value = weightValue,
+                    onValueChange = { weightValue = it },
+                    modifier = Modifier.fillMaxWidth().onFocusChanged { fs ->
+                        if (fs.isFocused)
+                            weightValue = weightValue.copy(selection = TextRange(0, weightValue.text.length))
+                    },
+                    label = { Text("Poids (kg)") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                val reps = repsValue.text.toIntOrNull() ?: set.reps
+                val weight = weightValue.text.replace(',', '.').toFloatOrNull() ?: set.weightKg
+                onConfirm(reps, weight)
+            }) { Text("Confirmer") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Annuler") }
+        },
+    )
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 private fun formatDuration(secs: Long): String {
     val h = secs / 3600
     val m = (secs % 3600) / 60
     return if (h > 0) "${h}h%02d".format(m) else "${m}min"
+}
+
+private fun Float.toWeightInput(): String = when {
+    this <= 0f -> ""
+    this == toLong().toFloat() -> toLong().toString()   // 180.0 → "180"
+    else -> "%.1f".format(this)                         // 82.5  → "82.5"
 }
 
 private fun formatSet(reps: Int, weightKg: Float): String = when {

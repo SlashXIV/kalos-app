@@ -25,14 +25,72 @@ class DatabaseSeeder @Inject constructor(
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 
+    private fun readAsset(name: String): String =
+        context.assets.open(name).bufferedReader().readText().trimStart('﻿')
+
+    // Bump this whenever seed_exercises.json gains new entries.
+    private val SEED_EXERCISES_VERSION = 2
+
     suspend fun seedIfEmpty() = withContext(Dispatchers.IO) {
         if (foodDao.count() == 0) seedFoods()
-        if (exerciseDao.count() == 0) seedExercises()
+        seedExercisesDifferential()
         if (programDao.count() == 0) seedPrograms()
     }
 
+    private suspend fun seedExercisesDifferential() {
+        val prefs = context.getSharedPreferences("kalos_seed", Context.MODE_PRIVATE)
+        if (prefs.getInt("seed_exercises_version", 0) >= SEED_EXERCISES_VERSION) return
+
+        val raw = readAsset("seed_exercises.json")
+        val seeds: List<SeedExercise> = json.decodeFromString(raw)
+
+        if (exerciseDao.count() == 0) {
+            // Fresh install: bulk-insert all exercises with seedId populated.
+            val entities = seeds.map { s ->
+                ExerciseEntity(
+                    name = s.name, primaryMuscle = s.primaryMuscle,
+                    secondaryMuscles = json.encodeToString(s.secondaryMuscles),
+                    equipment = s.equipment, level = s.level, type = s.type,
+                    description = s.description, instructions = s.instructions,
+                    seedId = s.id.ifEmpty { null },
+                )
+            }
+            exerciseDao.insertAll(entities)
+        } else {
+            // Existing install: two-phase differential update.
+            //
+            // Phase 1 – backfill: assign seedId to existing seed rows (isCustom=0, seedId=NULL)
+            // matched by exact name. This prevents Phase 2 from re-inserting exercises already
+            // present from a previous build that lacked seedId.
+            for (seed in seeds) {
+                if (seed.id.isEmpty()) continue
+                val existing = exerciseDao.findSeedByNameNoSeedId(seed.name)
+                if (existing != null) {
+                    exerciseDao.updateSeedId(existing.id, seed.id)
+                }
+            }
+
+            // Phase 2 – insert: add exercises whose seedId is not yet in the database.
+            val existingIds = exerciseDao.getAllSeedIds().toSet()
+            for (seed in seeds) {
+                if (seed.id.isEmpty() || seed.id in existingIds) continue
+                exerciseDao.upsert(
+                    ExerciseEntity(
+                        name = seed.name, primaryMuscle = seed.primaryMuscle,
+                        secondaryMuscles = json.encodeToString(seed.secondaryMuscles),
+                        equipment = seed.equipment, level = seed.level, type = seed.type,
+                        description = seed.description, instructions = seed.instructions,
+                        seedId = seed.id,
+                    )
+                )
+            }
+        }
+
+        prefs.edit().putInt("seed_exercises_version", SEED_EXERCISES_VERSION).apply()
+    }
+
     private suspend fun seedFoods() {
-        val raw = context.assets.open("seed_foods.json").bufferedReader().readText()
+        val raw = readAsset("seed_foods.json")
         val seeds: List<SeedFood> = json.decodeFromString(raw)
         val entities = seeds.map { s ->
             FoodEntity(
@@ -46,22 +104,8 @@ class DatabaseSeeder @Inject constructor(
         foodDao.insertAll(entities)
     }
 
-    private suspend fun seedExercises() {
-        val raw = context.assets.open("seed_exercises.json").bufferedReader().readText()
-        val seeds: List<SeedExercise> = json.decodeFromString(raw)
-        val entities = seeds.map { s ->
-            ExerciseEntity(
-                name = s.name, primaryMuscle = s.primaryMuscle,
-                secondaryMuscles = json.encodeToString(s.secondaryMuscles),
-                equipment = s.equipment, level = s.level, type = s.type,
-                description = s.description, instructions = s.instructions,
-            )
-        }
-        exerciseDao.insertAll(entities)
-    }
-
     private suspend fun seedPrograms() {
-        val raw = context.assets.open("seed_programs.json").bufferedReader().readText()
+        val raw = readAsset("seed_programs.json")
         val seeds: List<SeedProgram> = json.decodeFromString(raw)
         for (seed in seeds) {
             programDao.upsert(
@@ -70,7 +114,6 @@ class DatabaseSeeder @Inject constructor(
                     durationWeeks = seed.durationWeeks, daysPerWeek = seed.daysPerWeek,
                 )
             )
-            // No WorkoutTemplate created here — users link their own sessions via the builder
         }
     }
 }

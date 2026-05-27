@@ -27,7 +27,7 @@ import com.kalos.app.core.database.entity.*
         ProgramWorkoutEntity::class,
         WaterIntakeEntity::class,
     ],
-    version = 11,
+    version = 12,
     exportSchema = false,
 )
 abstract class KalosDatabase : RoomDatabase() {
@@ -52,6 +52,39 @@ abstract class KalosDatabase : RoomDatabase() {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE workout_log_exercise ADD COLUMN status TEXT NOT NULL DEFAULT 'PLANNED'")
                 database.execSQL("ALTER TABLE workout_log_exercise ADD COLUMN replacedExerciseName TEXT NOT NULL DEFAULT ''")
+            }
+        }
+        val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Recreate exercise table to:
+                //  - add nullable seedId column (no explicit DEFAULT → Room expects 'undefined')
+                //  - heal the pre-existing isFavorite DEFAULT 0 from MIGRATION_7_8 (same reason)
+                //  - avoid a standalone UNIQUE INDEX which Room would reject (not in @Entity indices=[])
+                database.execSQL("""
+                    CREATE TABLE exercise_new (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        name TEXT NOT NULL,
+                        primaryMuscle TEXT NOT NULL,
+                        secondaryMuscles TEXT NOT NULL,
+                        equipment TEXT NOT NULL,
+                        level TEXT NOT NULL,
+                        type TEXT NOT NULL,
+                        description TEXT NOT NULL,
+                        instructions TEXT NOT NULL,
+                        imageUrl TEXT NOT NULL,
+                        isCustom INTEGER NOT NULL,
+                        isFavorite INTEGER NOT NULL,
+                        seedId TEXT
+                    )
+                """.trimIndent())
+                database.execSQL("""
+                    INSERT INTO exercise_new
+                    SELECT id, name, primaryMuscle, secondaryMuscles, equipment, level, type,
+                           description, instructions, imageUrl, isCustom, isFavorite, NULL
+                    FROM exercise
+                """.trimIndent())
+                database.execSQL("DROP TABLE exercise")
+                database.execSQL("ALTER TABLE exercise_new RENAME TO exercise")
             }
         }
     }

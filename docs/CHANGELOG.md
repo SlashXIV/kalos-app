@@ -2,6 +2,17 @@
 
 ---
 
+## v3.2.0 — 25 May 2026
+
+### Added
+- Migration de seed différentielle pour les exercices : les utilisateurs existants reçoivent désormais les nouveaux exercices ajoutés en base à chaque mise à jour, sans écraser les exercices personnalisés
+- Champ `seedId` (slug stable) sur chaque exercice seed dans `seed_exercises.json` et `ExerciseEntity`, avec index UNIQUE partiel (`WHERE seedId IS NOT NULL`) pour ne pas contraindre les exercices custom (`seedId = NULL`)
+- `DatabaseSeeder.seedExercisesDifferential()` : phase 1 backfill (attribution du `seedId` aux lignes existantes par correspondance de nom), phase 2 insertion des nouveaux exercices absents de la DB ; version trackée dans `SharedPreferences "kalos_seed"` (`seed_exercises_version = 2`)
+- DB version 12, `MIGRATION_11_12` : `ALTER TABLE exercise ADD COLUMN seedId TEXT DEFAULT NULL` + index UNIQUE partiel
+- 143 exercices seed avec IDs stables (slugs normalisés, sans accents, sans espaces)
+
+---
+
 ## v3.1.0 — 25 May 2026
 
 ### Added

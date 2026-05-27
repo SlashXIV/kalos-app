@@ -18,6 +18,7 @@ data class SeedFood(
 
 @Serializable
 data class SeedExercise(
+    val id: String = "",
     val name: String,
     val primaryMuscle: String,
     val secondaryMuscles: List<String> = emptyList(),

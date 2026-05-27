@@ -17,4 +17,5 @@ data class ExerciseEntity(
     val imageUrl: String = "",
     val isCustom: Boolean = false,
     val isFavorite: Boolean = false,
+    val seedId: String? = null,
 )

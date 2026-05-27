@@ -55,4 +55,13 @@ interface ExerciseDao {
 
     @Query("SELECT COUNT(*) FROM exercise")
     suspend fun count(): Int
+
+    @Query("SELECT seedId FROM exercise WHERE seedId IS NOT NULL")
+    suspend fun getAllSeedIds(): List<String>
+
+    @Query("SELECT * FROM exercise WHERE isCustom = 0 AND seedId IS NULL AND name = :name LIMIT 1")
+    suspend fun findSeedByNameNoSeedId(name: String): ExerciseEntity?
+
+    @Query("UPDATE exercise SET seedId = :seedId WHERE id = :id")
+    suspend fun updateSeedId(id: Long, seedId: String)
 }

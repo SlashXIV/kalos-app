@@ -1,6 +1,6 @@
 # Product Audit
 
-> Version: 3.1.0 — 25 May 2026
+> Version: 3.2.0 — 25 May 2026
 
 ---
 
@@ -62,6 +62,7 @@ Session flexibility (v3.1.0): exercises can be replaced, skipped, or added mid-s
 | ~~Low~~ | ~~Advanced food filters~~ | Done in v2.9.0 — category chips + Perso toggle |
 | ~~Medium~~ | ~~Custom food management~~ | Done in v3.0.0 — "Mes aliments" screen, delete (hard/soft), duplicate detection, Perso badge |
 | ~~Medium~~ | ~~Workout session flexibility~~ | Done in v3.1.0 — replace / skip / add exercise, status badges in history |
+| ~~Low~~ | ~~Differential seed migration~~ | Done in v3.2.0 — stable seedId, backfill + insert on update, custom exercises untouched |
 
 ---
 

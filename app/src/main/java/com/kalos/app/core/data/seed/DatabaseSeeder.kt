@@ -28,8 +28,8 @@ class DatabaseSeeder @Inject constructor(
     private fun readAsset(name: String): String =
         context.assets.open(name).bufferedReader().readText().trimStart('﻿')
 
-    // Bump this whenever seed_exercises.json gains new entries.
-    private val SEED_EXERCISES_VERSION = 2
+    // Bump this whenever seed_exercises.json gains new entries or nameNormalized needs backfilling.
+    private val SEED_EXERCISES_VERSION = 3
 
     suspend fun seedIfEmpty() = withContext(Dispatchers.IO) {
         if (foodDao.count() == 0) seedFoods()
@@ -45,7 +45,7 @@ class DatabaseSeeder @Inject constructor(
         val seeds: List<SeedExercise> = json.decodeFromString(raw)
 
         if (exerciseDao.count() == 0) {
-            // Fresh install: bulk-insert all exercises with seedId populated.
+            // Fresh install: bulk-insert all exercises with seedId + nameNormalized populated.
             val entities = seeds.map { s ->
                 ExerciseEntity(
                     name = s.name, primaryMuscle = s.primaryMuscle,
@@ -53,11 +53,12 @@ class DatabaseSeeder @Inject constructor(
                     equipment = s.equipment, level = s.level, type = s.type,
                     description = s.description, instructions = s.instructions,
                     seedId = s.id.ifEmpty { null },
+                    nameNormalized = s.name.normalizeForSearch(),
                 )
             }
             exerciseDao.insertAll(entities)
         } else {
-            // Existing install: two-phase differential update.
+            // Existing install: three-phase differential update.
             //
             // Phase 1 – backfill: assign seedId to existing seed rows (isCustom=0, seedId=NULL)
             // matched by exact name. This prevents Phase 2 from re-inserting exercises already
@@ -81,8 +82,18 @@ class DatabaseSeeder @Inject constructor(
                         equipment = seed.equipment, level = seed.level, type = seed.type,
                         description = seed.description, instructions = seed.instructions,
                         seedId = seed.id,
+                        nameNormalized = seed.name.normalizeForSearch(),
                     )
                 )
+            }
+
+            // Phase 3 – backfill nameNormalized for all rows that have an empty value
+            // (exercises inserted before this column existed).
+            val all = exerciseDao.getAllOnce()
+            for (ex in all) {
+                if (ex.nameNormalized.isEmpty()) {
+                    exerciseDao.updateNameNormalized(ex.id, ex.name.normalizeForSearch())
+                }
             }
         }
 

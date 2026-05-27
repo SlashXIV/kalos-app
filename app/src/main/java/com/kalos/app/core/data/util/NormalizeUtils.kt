@@ -10,4 +10,5 @@ fun String.normalizeForSearch(): String =
         .replace("ø", "o").replace("Ø", "o")
         .replace("ß", "ss")
         .lowercase()
+        .replace(Regex("\\s+"), " ")        // collapse multiple spaces
         .trim()

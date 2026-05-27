@@ -20,7 +20,7 @@ interface ExerciseDao {
 
     @Query("""
         SELECT * FROM exercise
-        WHERE (:query = '' OR name LIKE '%' || :query || '%')
+        WHERE (:query = '' OR nameNormalized LIKE '%' || :query || '%')
         AND (:muscle = '' OR primaryMuscle = :muscle)
         AND (:type = '' OR type = :type)
         AND (:equipment = '' OR equipment = :equipment)
@@ -64,4 +64,10 @@ interface ExerciseDao {
 
     @Query("UPDATE exercise SET seedId = :seedId WHERE id = :id")
     suspend fun updateSeedId(id: Long, seedId: String)
+
+    @Query("SELECT * FROM exercise ORDER BY id ASC")
+    suspend fun getAllOnce(): List<ExerciseEntity>
+
+    @Query("UPDATE exercise SET nameNormalized = :nameNormalized WHERE id = :id")
+    suspend fun updateNameNormalized(id: Long, nameNormalized: String)
 }

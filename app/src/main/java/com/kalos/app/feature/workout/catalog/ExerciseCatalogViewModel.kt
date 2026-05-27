@@ -2,6 +2,7 @@ package com.kalos.app.feature.workout.catalog
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kalos.app.core.data.util.normalizeForSearch
 import com.kalos.app.core.domain.model.Exercise
 import com.kalos.app.core.domain.repository.ExerciseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,7 +42,7 @@ class ExerciseCatalogViewModel @Inject constructor(
     private data class Filters(val query: String, val muscle: String, val type: String, val equipment: String, val onlyFavorites: Boolean)
 
     private val filters = combine(_query.debounce(300), _muscle, _type, _equipment, _onlyFavorites) { q, m, t, e, fav ->
-        Filters(q, m, t, e, fav)
+        Filters(q.normalizeForSearch(), m, t, e, fav)
     }
 
     val uiState: StateFlow<CatalogUiState> = combine(

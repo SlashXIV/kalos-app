@@ -2,6 +2,7 @@ package com.kalos.app.feature.workout.active
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kalos.app.core.data.util.normalizeForSearch
 import com.kalos.app.core.domain.model.Exercise
 import com.kalos.app.core.domain.repository.ExerciseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +26,7 @@ class ExercisePickerViewModel @Inject constructor(
         .debounce(300)
         .flatMapLatest { q ->
             if (q.isBlank()) flowOf(emptyList())
-            else exerciseRepository.filter(query = q, muscle = "", type = "", equipment = "")
+            else exerciseRepository.filter(query = q.normalizeForSearch(), muscle = "", type = "", equipment = "")
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 

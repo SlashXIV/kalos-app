@@ -27,7 +27,7 @@ import com.kalos.app.core.database.entity.*
         ProgramWorkoutEntity::class,
         WaterIntakeEntity::class,
     ],
-    version = 12,
+    version = 13,
     exportSchema = false,
 )
 abstract class KalosDatabase : RoomDatabase() {
@@ -52,6 +52,11 @@ abstract class KalosDatabase : RoomDatabase() {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE workout_log_exercise ADD COLUMN status TEXT NOT NULL DEFAULT 'PLANNED'")
                 database.execSQL("ALTER TABLE workout_log_exercise ADD COLUMN replacedExerciseName TEXT NOT NULL DEFAULT ''")
+            }
+        }
+        val MIGRATION_12_13 = object : Migration(12, 13) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE exercise ADD COLUMN nameNormalized TEXT NOT NULL DEFAULT ''")
             }
         }
         val MIGRATION_11_12 = object : Migration(11, 12) {

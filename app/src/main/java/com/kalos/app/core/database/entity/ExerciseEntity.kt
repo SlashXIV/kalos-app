@@ -18,4 +18,5 @@ data class ExerciseEntity(
     val isCustom: Boolean = false,
     val isFavorite: Boolean = false,
     val seedId: String? = null,
+    val nameNormalized: String = "",
 )

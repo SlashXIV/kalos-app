@@ -59,6 +59,7 @@ data class FoodBackup(
     val carbsPer100g: Float,
     val fatPer100g: Float,
     val fiberPer100g: Float,
+    val sugarPer100g: Float = 0f,  // added v3.3 — default preserves old backups
     val defaultServingG: Float,
     val servingUnit: String,
     val isFavorite: Boolean,
@@ -159,6 +160,7 @@ data class TrainingProgramBackup(
     val durationWeeks: Int,
     val daysPerWeek: Int,
     val isActive: Boolean,
+    val isCustom: Boolean = false,  // added v3.3 — default preserves old backups
     val createdAt: Long,
     val workouts: List<ProgramWorkoutBackup>,
 )

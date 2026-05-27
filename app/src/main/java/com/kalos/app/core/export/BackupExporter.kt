@@ -52,7 +52,9 @@ class BackupExporter @Inject constructor(
         val workoutsByProg  = programWorkouts.groupBy { it.programId }
 
         return KalosBackup(
-            appVersion    = "1.7.0",
+            appVersion    = runCatching {
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "unknown"
+            }.getOrDefault("unknown"),
             exportedAt    = Instant.now().toString(),
             profile       = profile?.let {
                 ProfileBackup(
@@ -75,7 +77,8 @@ class BackupExporter @Inject constructor(
                     id = it.id, name = it.name, brand = it.brand, category = it.category,
                     kcalPer100g = it.kcalPer100g, proteinPer100g = it.proteinPer100g,
                     carbsPer100g = it.carbsPer100g, fatPer100g = it.fatPer100g,
-                    fiberPer100g = it.fiberPer100g, defaultServingG = it.defaultServingG,
+                    fiberPer100g = it.fiberPer100g, sugarPer100g = it.sugarPer100g,
+                    defaultServingG = it.defaultServingG,
                     servingUnit = it.servingUnit, isFavorite = it.isFavorite, tags = it.tags,
                 )
             },
@@ -132,7 +135,7 @@ class BackupExporter @Inject constructor(
                 TrainingProgramBackup(
                     id = prog.id, name = prog.name, description = prog.description,
                     durationWeeks = prog.durationWeeks, daysPerWeek = prog.daysPerWeek,
-                    isActive = prog.isActive, createdAt = prog.createdAt,
+                    isActive = prog.isActive, isCustom = prog.isCustom, createdAt = prog.createdAt,
                     workouts = (workoutsByProg[prog.id] ?: emptyList()).map { w ->
                         ProgramWorkoutBackup(
                             templateId = w.templateId, dayOfWeek = w.dayOfWeek,

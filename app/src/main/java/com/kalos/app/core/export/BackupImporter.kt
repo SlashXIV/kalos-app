@@ -110,7 +110,8 @@ class BackupImporter @Inject constructor(
                     brand = f.brand, category = f.category,
                     kcalPer100g = f.kcalPer100g, proteinPer100g = f.proteinPer100g,
                     carbsPer100g = f.carbsPer100g, fatPer100g = f.fatPer100g,
-                    fiberPer100g = f.fiberPer100g, defaultServingG = f.defaultServingG,
+                    fiberPer100g = f.fiberPer100g, sugarPer100g = f.sugarPer100g,
+                    defaultServingG = f.defaultServingG,
                     servingUnit = f.servingUnit, isFavorite = f.isFavorite,
                     isCustom = true, tags = f.tags,
                 )
@@ -207,7 +208,7 @@ class BackupImporter @Inject constructor(
                 TrainingProgramEntity(
                     id = 0, name = prog.name, description = prog.description,
                     durationWeeks = prog.durationWeeks, daysPerWeek = prog.daysPerWeek,
-                    isActive = prog.isActive, createdAt = prog.createdAt,
+                    isActive = prog.isActive, isCustom = prog.isCustom, createdAt = prog.createdAt,
                 )
             )
             prog.workouts.forEach { w ->

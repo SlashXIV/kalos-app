@@ -31,6 +31,7 @@ data class FoodSearchUiState(
     val servingCount: String = "1",
     val isLoading: Boolean = false,
     val addedSuccessfully: Boolean = false,
+    val errorMessage: String? = null,
     val categoryFilter: String = "",
     val onlyCustom: Boolean = false,
     val categories: List<String> = emptyList(),
@@ -160,20 +161,38 @@ class FoodSearchViewModel @Inject constructor(
             ServingMode.GRAMS -> _state.value.amountG.toFloatOrNull() ?: return
         }
         viewModelScope.launch {
-            val entryId = mealRepository.getOrCreateMealEntry(date, MealType.valueOf(mealType))
-            mealRepository.addItemToMeal(
-                mealEntryId = entryId,
-                item = MealItem(
+            runCatching {
+                val entryId = mealRepository.getOrCreateMealEntry(date, MealType.valueOf(mealType))
+                mealRepository.addItemToMeal(
                     mealEntryId = entryId,
-                    food = food,
-                    amountG = amount,
-                    kcal = food.kcalForAmount(amount),
-                    proteinG = food.proteinForAmount(amount),
-                    carbsG = food.carbsForAmount(amount),
-                    fatG = food.fatForAmount(amount),
+                    item = MealItem(
+                        mealEntryId = entryId,
+                        food = food,
+                        amountG = amount,
+                        kcal = food.kcalForAmount(amount),
+                        proteinG = food.proteinForAmount(amount),
+                        carbsG = food.carbsForAmount(amount),
+                        fatG = food.fatForAmount(amount),
+                    )
                 )
-            )
-            _state.update { it.copy(selectedFood = null, amountG = "100", addedSuccessfully = true) }
+            }
+                .onSuccess {
+                    _state.update { it.copy(selectedFood = null, amountG = "100", addedSuccessfully = true) }
+                }
+                .onFailure { e ->
+                    _state.update {
+                        it.copy(
+                            errorMessage = e.message?.takeIf { msg -> msg.isNotBlank() }
+                                ?: "Impossible d'ajouter l'aliment au repas",
+                        )
+                    }
+                }
         }
     }
+
+    /** Called by the screen after the success event was handled (e.g. popBackStack).
+     *  Resets the flag so reusing the screen doesn't re-trigger the navigation. */
+    fun onAddHandled() = _state.update { it.copy(addedSuccessfully = false) }
+
+    fun onErrorShown() = _state.update { it.copy(errorMessage = null) }
 }

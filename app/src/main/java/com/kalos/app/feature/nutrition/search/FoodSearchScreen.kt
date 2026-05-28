@@ -36,9 +36,21 @@ fun FoodSearchScreen(
     viewModel: FoodSearchViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(state.addedSuccessfully) {
-        if (state.addedSuccessfully) navController.popBackStack()
+        if (state.addedSuccessfully) {
+            // Reset before popping so the screen isn't re-triggered if it's ever reused
+            // (deep link, back navigation onto the same destination, etc.).
+            viewModel.onAddHandled()
+            navController.popBackStack()
+        }
+    }
+    LaunchedEffect(state.errorMessage) {
+        state.errorMessage?.let { msg ->
+            snackbarHostState.showSnackbar(msg)
+            viewModel.onErrorShown()
+        }
     }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -63,7 +75,8 @@ fun FoodSearchScreen(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
             modifier = Modifier

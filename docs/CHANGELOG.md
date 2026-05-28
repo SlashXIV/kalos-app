@@ -2,6 +2,23 @@
 
 ---
 
+## v3.8.1 — 28 May 2026
+
+Petite vague de nettoyage post-audit — 3 fixes ciblés sur les items moyens restants.
+
+### Performance
+- `MealRepositoryImpl.getMealsForDate` : fin du N+1 sur les `food`. Les items étaient résolus 1 par 1 via `foodDao.getById` (15 items = 15 requêtes synchrones par émission du Flow). Désormais un seul `foodDao.getByIds(distinct)` + `Map<Long, FoodEntity>` lookup. Les items sont également groupés par `mealEntryId` une seule fois au lieu de filtrer N fois
+- `FoodDao.getByIds(ids)` : nouvelle requête `WHERE id IN (...)`
+
+### Robustesse
+- `FoodRepositoryImpl.archiveOrDelete` : encapsulé dans `database.withTransaction { }`. Sans transaction, une `addItemToMeal` concurrente entre `countUsage` et `delete` aurait pu déclencher une violation FK RESTRICT
+- `FoodSearchViewModel.addToMeal` : pattern `runCatching` + champ `errorMessage` dans le state, surfacé via snackbar dans `FoodSearchScreen`. Plus de faux succès silencieux si l'écriture échoue
+
+### Fixed
+- `FoodSearchViewModel.addedSuccessfully` : flag réinitialisé via `onAddHandled()` après le `popBackStack`. Évite un re-déclenchement de la navigation si l'écran est réutilisé (deep link, back twice, etc.)
+
+---
+
 ## v3.8.0 — 28 May 2026
 
 ### Changed (atomicité opérations workout)

@@ -1,8 +1,10 @@
 package com.kalos.app.core.data.repository
 
+import androidx.room.withTransaction
 import com.kalos.app.core.data.mapper.toDomain
 import com.kalos.app.core.data.mapper.toEntity
 import com.kalos.app.core.data.util.normalizeForSearch
+import com.kalos.app.core.database.KalosDatabase
 import com.kalos.app.core.database.dao.FoodDao
 import com.kalos.app.core.domain.model.Food
 import com.kalos.app.core.domain.repository.FoodRepository
@@ -10,7 +12,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class FoodRepositoryImpl @Inject constructor(private val dao: FoodDao) : FoodRepository {
+class FoodRepositoryImpl @Inject constructor(
+    private val database: KalosDatabase,
+    private val dao: FoodDao,
+) : FoodRepository {
     override fun search(query: String, category: String, onlyCustom: Boolean): Flow<List<Food>> =
         dao.search(query.normalizeForSearch(), category, if (onlyCustom) 1 else 0).map { list -> list.map { it.toDomain() } }
     override fun getDistinctCategories(): Flow<List<String>> = dao.getDistinctCategories()
@@ -24,7 +29,10 @@ class FoodRepositoryImpl @Inject constructor(private val dao: FoodDao) : FoodRep
         return if (entity.id > 0L) { dao.update(entity); entity.id } else dao.upsert(entity)
     }
     override suspend fun delete(food: Food) = dao.delete(food.toEntity())
-    override suspend fun archiveOrDelete(id: Long) {
+    override suspend fun archiveOrDelete(id: Long) = database.withTransaction {
+        // Transaction so countUsage + delete is atomic — without it, a concurrent
+        // addItemToMeal between the count and the delete could trigger an FK RESTRICT
+        // violation (food already referenced by a meal item).
         if (dao.countUsage(id) == 0) {
             dao.getById(id)?.let { dao.delete(it) }
         } else {

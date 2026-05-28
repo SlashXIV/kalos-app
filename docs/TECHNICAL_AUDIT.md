@@ -236,7 +236,7 @@ En pratique l'appel est toujours fait avec `id = 0` donc le risque est théoriqu
 
 ## Findings moyennes (cleanup / robustesse)
 
-### M1. `MealRepositoryImpl.getMealsForDate` : N+1 query sur les foods
+### M1. `MealRepositoryImpl.getMealsForDate` : N+1 query sur les foods `[FIXED v3.8.1]`
 
 **Fichier** : `core/data/repository/MealRepositoryImpl.kt:23-30` (lu via agent)
 
@@ -278,7 +278,7 @@ Tant que toutes les data classes `*Backup` ont des defaults pour les nouveaux ch
 
 ---
 
-### M4. `FoodRepositoryImpl.archiveOrDelete` non transactionnel
+### M4. `FoodRepositoryImpl.archiveOrDelete` non transactionnel `[FIXED v3.8.1]`
 
 **Fichier** : `core/data/repository/FoodRepositoryImpl.kt:24-30`
 
@@ -343,7 +343,7 @@ La phase 1 (backfill seedId) itère **systématiquement** sur tous les seeds mê
 
 ---
 
-### M8. `LaunchedEffect(addedSuccessfully)` sans reset
+### M8. `LaunchedEffect(addedSuccessfully)` sans reset `[FIXED v3.8.1]`
 
 **Fichier** : `feature/nutrition/search/FoodSearchScreen.kt` (vu via agent)
 

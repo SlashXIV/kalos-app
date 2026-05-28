@@ -34,6 +34,9 @@ interface FoodDao {
     @Query("SELECT * FROM food WHERE id = :id")
     suspend fun getById(id: Long): FoodEntity?
 
+    @Query("SELECT * FROM food WHERE id IN (:ids)")
+    suspend fun getByIds(ids: List<Long>): List<FoodEntity>
+
     @Query("SELECT * FROM food ORDER BY name ASC")
     fun getAll(): Flow<List<FoodEntity>>
 

@@ -25,10 +25,16 @@ class MealRepositoryImpl @Inject constructor(
             mealDao.getEntriesForDate(date),
             mealDao.getAllItemsForDate(date),
         ) { entries, allItems ->
+            // Batch all foods in one query instead of N getById calls per emission.
+            val itemsByEntry = allItems.groupBy { it.mealEntryId }
+            val foodIds = allItems.map { it.foodId }.distinct()
+            val foodMap = if (foodIds.isEmpty()) emptyMap()
+                          else foodDao.getByIds(foodIds).associateBy { it.id }
+
             entries.map { entry ->
-                val items = allItems.filter { it.mealEntryId == entry.id }
+                val items = itemsByEntry[entry.id] ?: emptyList()
                 val mealItems = items.mapNotNull { item ->
-                    val food = foodDao.getById(item.foodId) ?: return@mapNotNull null
+                    val food = foodMap[item.foodId] ?: return@mapNotNull null
                     MealItem(
                         id = item.id,
                         mealEntryId = item.mealEntryId,

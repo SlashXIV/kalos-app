@@ -29,14 +29,16 @@ class FoodRepositoryImpl @Inject constructor(
         return if (entity.id > 0L) { dao.update(entity); entity.id } else dao.upsert(entity)
     }
     override suspend fun delete(food: Food) = dao.delete(food.toEntity())
-    override suspend fun archiveOrDelete(id: Long) = database.withTransaction {
+    override suspend fun archiveOrDelete(id: Long) {
         // Transaction so countUsage + delete is atomic — without it, a concurrent
         // addItemToMeal between the count and the delete could trigger an FK RESTRICT
         // violation (food already referenced by a meal item).
-        if (dao.countUsage(id) == 0) {
-            dao.getById(id)?.let { dao.delete(it) }
-        } else {
-            dao.setArchived(id, true)
+        database.withTransaction {
+            if (dao.countUsage(id) == 0) {
+                dao.getById(id)?.let { dao.delete(it) }
+            } else {
+                dao.setArchived(id, true)
+            }
         }
     }
     override suspend fun findDuplicate(name: String): Food? =

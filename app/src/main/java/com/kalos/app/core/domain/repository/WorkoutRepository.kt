@@ -19,6 +19,24 @@ interface WorkoutRepository {
     suspend fun finishLog(logId: Long, durationSecs: Long, totalVolume: Float)
     suspend fun upsertSet(logId: Long, exerciseId: Long, set: WorkoutSet): Long
     suspend fun getMaxWeight(exerciseId: Long): Float?
+    suspend fun getMaxWeightsForExercises(exerciseIds: List<Long>): Map<Long, Float?>
+
+    /**
+     * Persists a complete workout atomically: log + exercises + sets + duration/volume.
+     * On any failure, the entire transaction rolls back — no partial logs in history.
+     *
+     * The caller passes a [WorkoutLog] with id=0, exercises filled out (with their sets,
+     * statuses, etc.). The repository computes totalVolume from completed sets.
+     *
+     * @return the new logId.
+     */
+    suspend fun completeWorkout(log: WorkoutLog, durationSecs: Long): Long
+
+    /**
+     * Updates a single set and recomputes the log's totalVolume atomically.
+     * Returns the reloaded log on success, null if the log was not found.
+     */
+    suspend fun editSet(logId: Long, exerciseId: Long, set: WorkoutSet): WorkoutLog?
 
     // Exercise progression
     suspend fun getExerciseProgression(exerciseId: Long): List<Pair<String, Float>>

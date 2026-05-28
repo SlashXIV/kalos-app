@@ -59,7 +59,7 @@ Aucun de ces points n'est bloquant pour l'usage actuel, mais ils méritent une v
 
 ---
 
-### C2. Aucune transaction sur les opérations multi-writes `[PARTIAL — b FIXED v3.7.0]`
+### C2. Aucune transaction sur les opérations multi-writes `[FIXED — b v3.7.0, a+c v3.8.0]`
 
 Trois zones enchaînent plusieurs writes sans `@Transaction` ni `database.withTransaction { }` :
 
@@ -136,7 +136,7 @@ Même problème sur `templateId` et `resolvedTemplateId`.
 
 ## Findings hautes (à programmer dans les 2-3 prochaines releases)
 
-### H1. Duplication massive entre `WorkoutSummaryViewModel` et `WorkoutLogDetailViewModel`
+### H1. Duplication massive entre `WorkoutSummaryViewModel` et `WorkoutLogDetailViewModel` `[FIXED v3.8.0]`
 
 **Fichiers** : `feature/workout/active/WorkoutSummaryScreen.kt:46-89` et `feature/workout/history/WorkoutLogDetailScreen.kt:56-115`
 
@@ -199,7 +199,7 @@ Le doc est figé à v3.2.0. Tous les "gaps identifiés" sont marqués Done. Le d
 
 ---
 
-### H5. `ActiveWorkoutStore.load()` catch silencieux
+### H5. `ActiveWorkoutStore.load()` catch silencieux `[FIXED v3.8.0]`
 
 **Fichier** : `feature/workout/active/ActiveWorkoutStore.kt` (vu via agent, lignes ~56-59)
 
@@ -217,7 +217,7 @@ Toute exception de désérialisation du draft (par exemple suite à un nouveau c
 
 ---
 
-### H6. `@Insert(REPLACE)` sur tables avec enfants CASCADE
+### H6. `@Insert(REPLACE)` sur tables avec enfants CASCADE `[FIXED v3.8.0]`
 
 **Fichiers** : `WorkoutLogDao.kt:24, 40` ; `MealEntryDao.kt:17`
 
@@ -248,7 +248,7 @@ Chaque item de chaque entry fait un `foodDao.getById(item.foodId)` séquentiel. 
 
 ---
 
-### M2. `WorkoutLogDetailViewModel` : N+1 sur `maxWeight`
+### M2. `WorkoutLogDetailViewModel` : N+1 sur `maxWeight` `[FIXED v3.8.0]`
 
 **Fichier** : `feature/workout/history/WorkoutLogDetailScreen.kt:68-70`
 
@@ -313,7 +313,7 @@ Le `MealEntryEntity` n'a pas de contrainte unique sur `(date, mealType)` (à vé
 
 ---
 
-### M6. `WorkoutLogDetailScreen` et `WorkoutSummaryScreen` redéfinissent `toWeightInput()`
+### M6. `WorkoutLogDetailScreen` et `WorkoutSummaryScreen` redéfinissent `toWeightInput()` `[FIXED v3.8.0]`
 
 **Fichiers** : `WorkoutLogDetailScreen.kt` et `WorkoutSummaryScreen.kt`
 

@@ -14,7 +14,9 @@ interface MealEntryDao {
     @Query("SELECT * FROM meal_entry WHERE date = :date AND mealType = :mealType LIMIT 1")
     suspend fun getEntry(date: String, mealType: String): MealEntryEntity?
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    // ABORT: caller always passes id=0. REPLACE would CASCADE-delete every item of the
+    // conflicting entry — a footgun if anyone ever passes an explicit id.
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertEntry(entry: MealEntryEntity): Long
 
     @Delete
@@ -27,7 +29,9 @@ interface MealEntryDao {
     @Query("SELECT mei.* FROM meal_entry_item mei JOIN meal_entry me ON mei.mealEntryId = me.id WHERE me.date = :date")
     fun getAllItemsForDate(date: String): Flow<List<MealEntryItemEntity>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    // ABORT: caller always passes id=0. No children, but the asymmetry with sibling DAOs is
+    // confusing — keep ABORT for consistency.
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertItem(item: MealEntryItemEntity): Long
 
     @Delete

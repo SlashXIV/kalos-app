@@ -1,6 +1,7 @@
 package com.kalos.app.core.data
 
 import android.content.Context
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -47,7 +48,13 @@ class ActiveWorkoutStore @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
     private val prefs = context.getSharedPreferences("kalos_active_workout", Context.MODE_PRIVATE)
-    private val json = Json { ignoreUnknownKeys = true }
+
+    // ignoreUnknownKeys: tolerate new fields added in future builds.
+    // coerceInputValues: tolerate null sent on non-null fields with defaults.
+    private val json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+    }
 
     fun save(draft: WorkoutDraft) {
         prefs.edit().putString(KEY, json.encodeToString(WorkoutDraft.serializer(), draft)).apply()
@@ -55,13 +62,21 @@ class ActiveWorkoutStore @Inject constructor(
 
     fun load(): WorkoutDraft? {
         val raw = prefs.getString(KEY, null) ?: return null
-        return try { json.decodeFromString(WorkoutDraft.serializer(), raw) } catch (_: Exception) { null }
+        return try {
+            json.decodeFromString(WorkoutDraft.serializer(), raw)
+        } catch (e: Exception) {
+            // Don't silently return null — a corrupt or incompatible draft used to delete
+            // the user's in-progress session without warning. Log so it surfaces in bug reports.
+            Log.w(TAG, "Failed to decode active-workout draft, discarding", e)
+            null
+        }
     }
 
     fun clear() = prefs.edit().remove(KEY).apply()
 
     companion object {
         private const val KEY = "draft"
+        private const val TAG = "ActiveWorkoutStore"
         const val EXPIRY_MS = 24 * 60 * 60 * 1000L
     }
 }

@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -12,13 +11,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -30,6 +25,7 @@ import com.kalos.app.core.domain.model.LogExercise
 import com.kalos.app.core.domain.model.WorkoutLog
 import com.kalos.app.core.domain.model.WorkoutSet
 import com.kalos.app.core.domain.repository.WorkoutRepository
+import com.kalos.app.core.ui.component.EditWorkoutSetDialog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -66,9 +62,9 @@ class WorkoutLogDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val log = workoutRepository.getLog(logId)
             if (log != null) {
-                val maxWeights = log.exercises.associate { le ->
-                    le.exercise.id to workoutRepository.getMaxWeight(le.exercise.id)
-                }
+                val maxWeights = workoutRepository.getMaxWeightsForExercises(
+                    log.exercises.map { it.exercise.id }
+                )
                 _uiState.value = WorkoutLogDetailUiState(
                     log = log,
                     maxWeights = maxWeights,
@@ -94,20 +90,13 @@ class WorkoutLogDetailViewModel @Inject constructor(
         _uiState.update { it.copy(pendingEdit = null, isSavingEdit = true, errorMessage = null) }
         viewModelScope.launch {
             runCatching {
-                workoutRepository.upsertSet(
+                val finalLog = workoutRepository.editSet(
                     logId = log.id,
                     exerciseId = pending.exerciseId,
                     set = pending.set.copy(reps = newReps, weightKg = newWeightKg),
                 )
-                val reloaded = workoutRepository.getLog(log.id)
-                    ?: error("Séance introuvable après mise à jour")
-                val newVolume = reloaded.exercises.flatMap { it.sets }
-                    .filter { it.isCompleted }
-                    .sumOf { (it.reps * it.weightKg).toDouble() }.toFloat()
-                workoutRepository.finishLog(log.id, log.durationSecs, newVolume)
-                val finalLog = workoutRepository.getLog(log.id)
-                val maxWeights = finalLog?.exercises?.associate { le ->
-                    le.exercise.id to workoutRepository.getMaxWeight(le.exercise.id)
+                val maxWeights = finalLog?.let {
+                    workoutRepository.getMaxWeightsForExercises(it.exercises.map { le -> le.exercise.id })
                 } ?: emptyMap()
                 finalLog to maxWeights
             }
@@ -190,7 +179,7 @@ fun WorkoutLogDetailScreen(
             )
         }
         state.pendingEdit?.let { pending ->
-            EditSetDialog(
+            EditWorkoutSetDialog(
                 set = pending.set,
                 onDismiss = viewModel::dismissEditDialog,
                 onConfirm = { reps, weight -> viewModel.saveSetEdit(reps, weight) },
@@ -429,78 +418,12 @@ private fun DetailStat(icon: ImageVector, text: String) {
     }
 }
 
-// ─── Edit set dialog ─────────────────────────────────────────────────────────
-
-@Composable
-private fun EditSetDialog(
-    set: WorkoutSet,
-    onDismiss: () -> Unit,
-    onConfirm: (reps: Int, weightKg: Float) -> Unit,
-) {
-    val initWeight = set.weightKg.toWeightInput()
-    var repsValue by remember {
-        mutableStateOf(TextFieldValue(set.reps.toString(), TextRange(set.reps.toString().length)))
-    }
-    var weightValue by remember {
-        mutableStateOf(TextFieldValue(initWeight, TextRange(initWeight.length)))
-    }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Série ${set.setNumber}") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = repsValue,
-                    onValueChange = { tv ->
-                        val filtered = tv.text.filter { it.isDigit() }
-                        repsValue = TextFieldValue(filtered, TextRange(filtered.length))
-                    },
-                    modifier = Modifier.fillMaxWidth().onFocusChanged { fs ->
-                        if (fs.isFocused)
-                            repsValue = repsValue.copy(selection = TextRange(0, repsValue.text.length))
-                    },
-                    label = { Text("Répétitions") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
-                )
-                OutlinedTextField(
-                    value = weightValue,
-                    onValueChange = { weightValue = it },
-                    modifier = Modifier.fillMaxWidth().onFocusChanged { fs ->
-                        if (fs.isFocused)
-                            weightValue = weightValue.copy(selection = TextRange(0, weightValue.text.length))
-                    },
-                    label = { Text("Poids (kg)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true,
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                val reps = repsValue.text.toIntOrNull() ?: set.reps
-                val weight = weightValue.text.replace(',', '.').toFloatOrNull() ?: set.weightKg
-                onConfirm(reps, weight)
-            }) { Text("Confirmer") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Annuler") }
-        },
-    )
-}
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 private fun formatDuration(secs: Long): String {
     val h = secs / 3600
     val m = (secs % 3600) / 60
     return if (h > 0) "${h}h%02d".format(m) else "${m}min"
-}
-
-private fun Float.toWeightInput(): String = when {
-    this <= 0f -> ""
-    this == toLong().toFloat() -> toLong().toString()   // 180.0 → "180"
-    else -> "%.1f".format(this)                         // 82.5  → "82.5"
 }
 
 private fun formatSet(reps: Int, weightKg: Float): String = when {

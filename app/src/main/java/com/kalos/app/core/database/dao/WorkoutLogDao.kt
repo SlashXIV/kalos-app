@@ -21,7 +21,9 @@ interface WorkoutLogDao {
     @Query("SELECT * FROM workout_log WHERE id = :id")
     suspend fun getById(id: Long): WorkoutLogEntity?
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    // ABORT: caller always passes id=0 (autoincrement). A non-zero id implies a programming
+    // error — REPLACE would silently CASCADE-delete every exercise + set of the conflicting log.
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertLog(log: WorkoutLogEntity): Long
 
     @Update
@@ -37,7 +39,8 @@ interface WorkoutLogDao {
     @Query("SELECT * FROM workout_log_exercise WHERE logId = :logId ORDER BY orderIndex ASC")
     suspend fun getExercisesForLogOnce(logId: Long): List<WorkoutLogExEntity>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    // ABORT: caller passes id=0. REPLACE here would CASCADE-delete every set of the conflicting row.
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertLogExercise(ex: WorkoutLogExEntity): Long
 
     // Sets
@@ -63,6 +66,18 @@ interface WorkoutLogDao {
         LIMIT 1
     """)
     suspend fun getMaxWeight(exerciseId: Long): Float?
+
+    data class MaxWeightRow(val exerciseId: Long, val maxWeight: Float)
+
+    // Batch version of [getMaxWeight] — eliminates N+1 when computing PRs for a whole log.
+    @Query("""
+        SELECT wle.exerciseId AS exerciseId, MAX(wls.weightKg) AS maxWeight
+        FROM workout_log_set wls
+        JOIN workout_log_exercise wle ON wls.logExerciseId = wle.id
+        WHERE wle.exerciseId IN (:exerciseIds) AND wls.isCompleted = 1
+        GROUP BY wle.exerciseId
+    """)
+    suspend fun getMaxWeights(exerciseIds: List<Long>): List<MaxWeightRow>
 
     // Exercise progression
     data class ExerciseProgressionRow(val date: String, val maxWeight: Float)

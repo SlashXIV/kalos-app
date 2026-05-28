@@ -1,6 +1,6 @@
 # Features
 
-> Version: 3.7.0
+> Version: 3.8.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -177,7 +177,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |
 | Data import / restore | Done | Confirmation dialog (destructive) |
-| Version display | Done | Kalos 3.7.0 |
+| Version display | Done | Kalos 3.8.0 |
 
 ---
 

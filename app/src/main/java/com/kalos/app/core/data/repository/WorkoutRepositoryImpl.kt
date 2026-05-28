@@ -1,7 +1,9 @@
 package com.kalos.app.core.data.repository
 
+import androidx.room.withTransaction
 import com.kalos.app.core.data.mapper.toDomain
 import com.kalos.app.core.data.mapper.toEntity
+import com.kalos.app.core.database.KalosDatabase
 import com.kalos.app.core.database.dao.ExerciseDao
 import com.kalos.app.core.database.dao.WorkoutLogDao
 import com.kalos.app.core.database.dao.WorkoutTemplateDao
@@ -13,6 +15,7 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class WorkoutRepositoryImpl @Inject constructor(
+    private val database: KalosDatabase,
     private val templateDao: WorkoutTemplateDao,
     private val logDao: WorkoutLogDao,
     private val exerciseDao: ExerciseDao,
@@ -130,6 +133,64 @@ class WorkoutRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getMaxWeight(exerciseId: Long): Float? = logDao.getMaxWeight(exerciseId)
+
+    override suspend fun getMaxWeightsForExercises(exerciseIds: List<Long>): Map<Long, Float?> {
+        if (exerciseIds.isEmpty()) return emptyMap()
+        val rows = logDao.getMaxWeights(exerciseIds)
+        val byId = rows.associate { it.exerciseId to (it.maxWeight as Float?) }
+        // Ensure every requested id is present, even if no completed set exists for it.
+        return exerciseIds.associateWith { byId[it] }
+    }
+
+    override suspend fun completeWorkout(log: WorkoutLog, durationSecs: Long): Long =
+        database.withTransaction {
+            val logId = logDao.insertLog(WorkoutLogEntity(
+                templateId = log.templateId, templateName = log.templateName,
+                date = log.date, startedAt = log.startedAt))
+
+            var totalVolume = 0f
+            log.exercises.forEachIndexed { i, le ->
+                val logExId = logDao.insertLogExercise(WorkoutLogExEntity(
+                    logId = logId, exerciseId = le.exercise.id,
+                    exerciseName = le.exercise.name, orderIndex = i,
+                    status = le.status.name,
+                    replacedExerciseName = le.replacedExerciseName))
+
+                if (le.status == ExerciseStatus.SKIPPED) return@forEachIndexed
+                le.sets.forEach { set ->
+                    if (set.isCompleted) totalVolume += set.reps * set.weightKg
+                    logDao.upsertSet(WorkoutLogSetEntity(
+                        id = 0, logExerciseId = logExId, setNumber = set.setNumber,
+                        reps = set.reps, weightKg = set.weightKg,
+                        durationSecs = set.durationSecs,
+                        isCompleted = set.isCompleted, rpe = set.rpe))
+                }
+            }
+
+            val entity = logDao.getById(logId) ?: error("Log $logId disparu en cours de transaction")
+            logDao.updateLog(entity.copy(
+                finishedAt = System.currentTimeMillis(),
+                durationSecs = durationSecs,
+                totalVolumeKg = totalVolume,
+            ))
+            logId
+        }
+
+    override suspend fun editSet(logId: Long, exerciseId: Long, set: WorkoutSet): WorkoutLog? =
+        database.withTransaction {
+            logDao.upsertSet(WorkoutLogSetEntity(
+                id = set.id, logExerciseId = set.logExerciseId, setNumber = set.setNumber,
+                reps = set.reps, weightKg = set.weightKg, durationSecs = set.durationSecs,
+                isCompleted = set.isCompleted, rpe = set.rpe))
+
+            val reloaded = getLog(logId) ?: return@withTransaction null
+            val newVolume = reloaded.exercises.flatMap { it.sets }
+                .filter { it.isCompleted }
+                .sumOf { (it.reps * it.weightKg).toDouble() }.toFloat()
+            val entity = logDao.getById(logId) ?: return@withTransaction null
+            logDao.updateLog(entity.copy(totalVolumeKg = newVolume))
+            getLog(logId)
+        }
 
     override suspend fun getExerciseProgression(exerciseId: Long): List<Pair<String, Float>> =
         logDao.getExerciseProgression(exerciseId).map { it.date to it.maxWeight }

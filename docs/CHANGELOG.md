@@ -2,6 +2,28 @@
 
 ---
 
+## v3.8.0 — 28 May 2026
+
+### Changed (atomicité opérations workout)
+- `WorkoutRepository.completeWorkout(log, durationSecs)` : nouvelle API transactionnelle pour terminer une séance — insère le log, ses exercices, ses sets, et met à jour `durationSecs` + `totalVolumeKg` dans une seule transaction Room. Rollback automatique en cas d'échec, plus de séances partielles dans l'historique
+- `WorkoutRepository.editSet(logId, exerciseId, set)` : upsert d'une série + recalcul du volume total dans la même transaction. Remplace la séquence non-atomique `upsertSet + getLog + finishLog`
+- `WorkoutLogDao.getMaxWeights(exerciseIds)` : nouvelle requête batch qui retourne `Map<exerciseId, maxWeight>` en une passe — élimine le N+1 sur `WorkoutLogDetailScreen` (un log avec 15 exercices générait 1+15 requêtes, désormais 1)
+
+### Refactored (déduplication)
+- `core/ui/component/EditWorkoutSetDialog.kt` : composable partagé extrait depuis `WorkoutSummaryScreen` et `WorkoutLogDetailScreen` — fin du dialog dupliqué, fin du `Float.toWeightInput()` dupliqué
+- Bugfix dans l'un = bugfix partout
+
+### Hardened (Insert REPLACE → ABORT sur parents avec CASCADE)
+- `WorkoutLogDao.insertLog` et `insertLogExercise` : `OnConflictStrategy.REPLACE` → `ABORT`. Un appel avec un id non-nul (programming error) lèvera désormais une exception au lieu de CASCADE-supprimer silencieusement tous les enfants
+- `MealEntryDao.insertEntry` et `insertItem` : idem
+- `WorkoutLogDao.upsertSet` reste en REPLACE (intentionnel pour l'édition de série, pas d'enfants à cascader)
+
+### Fixed (`ActiveWorkoutStore`)
+- `load()` : l'exception de désérialisation est désormais loggée (`Log.w("ActiveWorkoutStore", ...)`) au lieu d'être silencieusement avalée — un draft corrompu sera visible dans les bug reports plutôt que perdu sans trace
+- `Json { coerceInputValues = true }` ajouté pour tolérer les `null` envoyés sur des champs non-null avec default
+
+---
+
 ## v3.7.0 — 28 May 2026
 
 ### Changed (robustesse persistance)

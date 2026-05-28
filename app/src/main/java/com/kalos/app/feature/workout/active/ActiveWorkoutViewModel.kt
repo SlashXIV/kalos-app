@@ -425,49 +425,35 @@ class ActiveWorkoutViewModel @Inject constructor(
             _state.update { it.copy(isSaving = true, errorMessage = null) }
             runCatching {
                 val logExercises = s.exercises.mapIndexed { i, ep ->
+                    val sets = ep.sets.mapIndexed { setIdx, si ->
+                        WorkoutSet(
+                            id = 0, logExerciseId = 0,  // logExerciseId assigned inside the transaction
+                            setNumber = setIdx + 1,
+                            reps = si.reps.toIntOrNull() ?: 0,
+                            weightKg = si.weight.toFloatOrNull() ?: 0f,
+                            isCompleted = si.isCompleted,
+                        )
+                    }
                     LogExercise(
                         id = 0, logId = 0,
                         exercise = ep.templateExercise.exercise,
                         orderIndex = i,
-                        sets = emptyList(),
+                        sets = sets,
                         status = ep.status,
                         replacedExerciseName = ep.originalExerciseName,
                     )
                 }
-                val logId = workoutRepository.startLog(
-                    WorkoutLog(
+                workoutRepository.completeWorkout(
+                    log = WorkoutLog(
                         id = 0,
                         templateId = if (loadedTemplateId > 0) loadedTemplateId else null,
                         templateName = s.templateName,
                         date = LocalDate.now().toString(),
                         startedAt = workoutStartTime,
                         exercises = logExercises,
-                    )
+                    ),
+                    durationSecs = s.elapsedSecs.toLong(),
                 )
-                val savedLog = workoutRepository.getLog(logId)
-                    ?: error("Séance créée mais introuvable (id=$logId)")
-                var totalVolume = 0f
-                savedLog.exercises.forEachIndexed { exIdx, le ->
-                    val ep = s.exercises.getOrNull(exIdx) ?: return@forEachIndexed
-                    if (ep.status == ExerciseStatus.SKIPPED) return@forEachIndexed
-                    ep.sets.forEachIndexed { setIdx, si ->
-                        val reps = si.reps.toIntOrNull() ?: 0
-                        val weight = si.weight.toFloatOrNull() ?: 0f
-                        if (si.isCompleted) totalVolume += reps * weight
-                        workoutRepository.upsertSet(
-                            logId = logId,
-                            exerciseId = le.exercise.id,
-                            set = WorkoutSet(
-                                id = 0, logExerciseId = le.id,
-                                setNumber = setIdx + 1,
-                                reps = reps, weightKg = weight,
-                                isCompleted = si.isCompleted,
-                            )
-                        )
-                    }
-                }
-                workoutRepository.finishLog(logId, s.elapsedSecs.toLong(), totalVolume)
-                logId
             }
                 .onSuccess { logId ->
                     // Only clear the draft after a confirmed write.

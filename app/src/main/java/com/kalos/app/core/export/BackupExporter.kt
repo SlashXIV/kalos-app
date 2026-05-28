@@ -62,6 +62,7 @@ class BackupExporter @Inject constructor(
                     heightCm = it.heightCm, weightKg = it.weightKg,
                     targetWeightKg = it.targetWeightKg, activityLevel = it.activityLevel,
                     goal = it.goal, createdAt = it.createdAt,
+                    onboardingCompleted = it.onboardingCompleted,
                 )
             },
             nutritionGoal = goal?.let {
@@ -80,6 +81,7 @@ class BackupExporter @Inject constructor(
                     fiberPer100g = it.fiberPer100g, sugarPer100g = it.sugarPer100g,
                     defaultServingG = it.defaultServingG,
                     servingUnit = it.servingUnit, isFavorite = it.isFavorite, tags = it.tags,
+                    lastUsedAt = it.lastUsedAt,
                 )
             },
             mealEntries = allEntries.map { entry ->

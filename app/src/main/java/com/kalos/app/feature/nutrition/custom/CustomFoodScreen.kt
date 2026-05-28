@@ -25,10 +25,17 @@ fun CustomFoodScreen(
     viewModel: CustomFoodViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(foodId) { if (foodId > 0) viewModel.loadFood(foodId) }
     LaunchedEffect(state.savedSuccessfully) { if (state.savedSuccessfully) navController.popBackStack() }
     LaunchedEffect(state.deletedSuccessfully) { if (state.deletedSuccessfully) navController.popBackStack() }
+    LaunchedEffect(state.errorMessage) {
+        state.errorMessage?.let { msg ->
+            snackbarHostState.showSnackbar(msg)
+            viewModel.onErrorShown()
+        }
+    }
 
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
@@ -84,7 +91,8 @@ fun CustomFoodScreen(
                     }
                 },
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
             modifier = Modifier

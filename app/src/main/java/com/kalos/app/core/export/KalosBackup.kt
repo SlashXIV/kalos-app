@@ -36,6 +36,7 @@ data class ProfileBackup(
     val activityLevel: String,
     val goal: String,
     val createdAt: Long,
+    val onboardingCompleted: Boolean = true,  // added v3.7 — default preserves old backups
 )
 
 @Serializable
@@ -64,6 +65,7 @@ data class FoodBackup(
     val servingUnit: String,
     val isFavorite: Boolean,
     val tags: String,              // comma-separated token string
+    val lastUsedAt: Long = 0L,     // added v3.7 — preserves "Recents" ordering after restore
 )
 
 @Serializable

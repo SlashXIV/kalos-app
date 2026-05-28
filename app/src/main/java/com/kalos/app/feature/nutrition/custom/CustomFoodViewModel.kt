@@ -32,6 +32,7 @@ data class CustomFoodState(
     val savedSuccessfully: Boolean = false,
     val deletedSuccessfully: Boolean = false,
     val duplicateFood: Food? = null,
+    val errorMessage: String? = null,
 )
 
 @HiltViewModel
@@ -93,10 +94,14 @@ class CustomFoodViewModel @Inject constructor(
     fun save() {
         val s = _state.value
         viewModelScope.launch {
-            _state.update { it.copy(isSaving = true) }
+            _state.update { it.copy(isSaving = true, errorMessage = null) }
             // Duplicate check on create only
             if (!s.isEditing) {
-                val duplicate = foodRepository.findDuplicate(s.name.trim())
+                val duplicate = runCatching { foodRepository.findDuplicate(s.name.trim()) }
+                    .getOrElse { e ->
+                        _state.update { it.copy(isSaving = false, errorMessage = e.toUserMessage("Erreur lors de la vérification du doublon")) }
+                        return@launch
+                    }
                 if (duplicate != null) {
                     _state.update { it.copy(isSaving = false, duplicateFood = duplicate) }
                     return@launch
@@ -107,18 +112,23 @@ class CustomFoodViewModel @Inject constructor(
     }
 
     fun onConfirmSaveAnyway() {
-        _state.update { it.copy(duplicateFood = null) }
+        _state.update { it.copy(duplicateFood = null, errorMessage = null) }
         viewModelScope.launch { doSave() }
     }
 
     fun onDismissDuplicate() = _state.update { it.copy(duplicateFood = null, isSaving = false) }
 
+    fun onErrorShown() = _state.update { it.copy(errorMessage = null) }
+
     fun delete() {
         val foodId = _state.value.editingFoodId
         if (foodId <= 0) return
         viewModelScope.launch {
-            foodRepository.archiveOrDelete(foodId)
-            _state.update { it.copy(deletedSuccessfully = true) }
+            runCatching { foodRepository.archiveOrDelete(foodId) }
+                .onSuccess { _state.update { it.copy(deletedSuccessfully = true) } }
+                .onFailure { e ->
+                    _state.update { it.copy(errorMessage = e.toUserMessage("Impossible de supprimer l'aliment")) }
+                }
         }
     }
 
@@ -130,26 +140,34 @@ class CustomFoodViewModel @Inject constructor(
             if (s.isVegetarian) add("vegetarian")
             if (s.isVegan) add("vegan")
         }
-        foodRepository.save(
-            Food(
-                id = s.editingFoodId,
-                name = s.name.trim(), brand = s.brand.trim(), category = s.category,
-                kcalPer100g = s.kcal.parseFloat() ?: 0f,
-                proteinPer100g = s.protein.parseFloat() ?: 0f,
-                carbsPer100g = s.carbs.parseFloat() ?: 0f,
-                fatPer100g = s.fat.parseFloat() ?: 0f,
-                fiberPer100g = s.fiber.parseFloat() ?: 0f,
-                defaultServingG = s.serving.parseFloat() ?: 100f,
-                servingUnit = s.unit,
-                isCustom = true,
-                isFavorite = s.isFavorite,
-                lastUsedAt = s.lastUsedAt,
-                tags = tags,
+        runCatching {
+            foodRepository.save(
+                Food(
+                    id = s.editingFoodId,
+                    name = s.name.trim(), brand = s.brand.trim(), category = s.category,
+                    kcalPer100g = s.kcal.parseFloat() ?: 0f,
+                    proteinPer100g = s.protein.parseFloat() ?: 0f,
+                    carbsPer100g = s.carbs.parseFloat() ?: 0f,
+                    fatPer100g = s.fat.parseFloat() ?: 0f,
+                    fiberPer100g = s.fiber.parseFloat() ?: 0f,
+                    defaultServingG = s.serving.parseFloat() ?: 100f,
+                    servingUnit = s.unit,
+                    isCustom = true,
+                    isFavorite = s.isFavorite,
+                    lastUsedAt = s.lastUsedAt,
+                    tags = tags,
+                )
             )
-        )
-        _state.update { it.copy(isSaving = false, savedSuccessfully = true) }
+        }
+            .onSuccess { _state.update { it.copy(isSaving = false, savedSuccessfully = true) } }
+            .onFailure { e ->
+                _state.update { it.copy(isSaving = false, errorMessage = e.toUserMessage("Impossible d'enregistrer l'aliment")) }
+            }
     }
 }
 
 // Accepts both "7.5" and "7,5" (French decimal separator)
 private fun String.parseFloat(): Float? = replace(',', '.').toFloatOrNull()
+
+internal fun Throwable.toUserMessage(fallback: String): String =
+    message?.takeIf { it.isNotBlank() } ?: fallback

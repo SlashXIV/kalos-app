@@ -1,7 +1,8 @@
 # Technical Audit — Kalos
 
-> Date : 28 May 2026
-> Version auditée : 3.6.0 (post-commit `5703775`, post-release v3.6.0)
+> Date initial : 28 May 2026
+> Version auditée : 3.6.0
+> Sprint critique appliqué dans v3.7.0 — items marqués `[FIXED v3.7.0]` ci-dessous
 > Périmètre : code Kotlin (app/src/main), schéma DB, export/import, navigation, documentation `docs/`
 > Méthode : lecture directe + exploration ciblée par agents, vérification croisée des claims contre le code
 
@@ -41,7 +42,7 @@ Aucun de ces points n'est bloquant pour l'usage actuel, mais ils méritent une v
 
 ## Findings critiques (à corriger en priorité)
 
-### C1. `fallbackToDestructiveMigration()` + `exportSchema = false`
+### C1. `fallbackToDestructiveMigration()` + `exportSchema = false` `[FIXED v3.7.0]`
 
 **Fichier** : `core/database/KalosDatabase.kt:31`, `di/DatabaseModule.kt:24`
 
@@ -58,7 +59,7 @@ Aucun de ces points n'est bloquant pour l'usage actuel, mais ils méritent une v
 
 ---
 
-### C2. Aucune transaction sur les opérations multi-writes
+### C2. Aucune transaction sur les opérations multi-writes `[PARTIAL — b FIXED v3.7.0]`
 
 Trois zones enchaînent plusieurs writes sans `@Transaction` ni `database.withTransaction { }` :
 
@@ -93,7 +94,7 @@ Si un autre thread modifie un set entre la lecture et le `finishLog`, le volume 
 
 ---
 
-### C3. Aucun `try/catch` dans les ViewModels
+### C3. Aucun `try/catch` dans les ViewModels `[FIXED v3.7.0 sur les 4 VMs critiques]`
 
 `grep -r "runCatching\|try {\|catch (" app/src/main/java/com/kalos/app/feature/` ne renvoie qu'**un seul fichier** : `ActiveWorkoutViewModel.kt` (pour la désérialisation du draft). Tous les autres VMs lancent leurs `viewModelScope.launch { repo.foo(); _state.update { ... } }` à nu.
 
@@ -113,7 +114,7 @@ Exemples flagrants :
 
 ---
 
-### C4. Import orphelins → crash + DB déjà purgée
+### C4. Import orphelins → crash + DB déjà purgée `[FIXED v3.7.0]`
 
 **Fichier** : `core/export/BackupImporter.kt:129` et `:178` et `:215`
 
@@ -160,7 +161,7 @@ Le ViewModel `WorkoutLogDetailViewModel` calcule en plus les `maxWeights` par ex
 
 ---
 
-### H2. `lastUsedAt` non backupé
+### H2. `lastUsedAt` non backupé `[FIXED v3.7.0]`
 
 **Fichier** : `core/export/KalosBackup.kt` (FoodBackup) + `BackupImporter.kt:105-118`
 
@@ -174,7 +175,7 @@ Le ViewModel `WorkoutLogDetailViewModel` calcule en plus les `maxWeights` par ex
 
 ---
 
-### H3. `UserProfileEntity.onboardingCompleted` forcé à `true` à l'import
+### H3. `UserProfileEntity.onboardingCompleted` forcé à `true` à l'import `[FIXED v3.7.0]`
 
 **Fichier** : `BackupImporter.kt:80`
 
@@ -186,7 +187,7 @@ Pas de gros impact (un user qui restaure un backup a évidemment passé l'onboar
 
 ---
 
-### H4. `PRODUCT_AUDIT.md` est obsolète
+### H4. `PRODUCT_AUDIT.md` est obsolète `[FIXED v3.7.0 — supprimé]`
 
 **Fichier** : `docs/PRODUCT_AUDIT.md`
 
@@ -259,7 +260,7 @@ Boucle `forEach { le -> getMaxWeight(le.exercise.id) }` → 1 + N requêtes par 
 
 ---
 
-### M3. `BackupImporter` : pas de `coerceInputValues`
+### M3. `BackupImporter` : pas de `coerceInputValues` `[FIXED v3.7.0]`
 
 **Fichier** : `core/export/BackupImporter.kt:27`
 

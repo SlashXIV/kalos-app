@@ -51,6 +51,7 @@ data class WorkoutLogDetailUiState(
     val isLoading: Boolean = true,
     val pendingEdit: PendingSetEdit? = null,
     val isSavingEdit: Boolean = false,
+    val errorMessage: String? = null,
 )
 
 @HiltViewModel
@@ -90,15 +91,16 @@ class WorkoutLogDetailViewModel @Inject constructor(
     fun saveSetEdit(newReps: Int, newWeightKg: Float) {
         val pending = _uiState.value.pendingEdit ?: return
         val log = _uiState.value.log ?: return
-        _uiState.update { it.copy(pendingEdit = null, isSavingEdit = true) }
+        _uiState.update { it.copy(pendingEdit = null, isSavingEdit = true, errorMessage = null) }
         viewModelScope.launch {
-            workoutRepository.upsertSet(
-                logId = log.id,
-                exerciseId = pending.exerciseId,
-                set = pending.set.copy(reps = newReps, weightKg = newWeightKg),
-            )
-            val reloaded = workoutRepository.getLog(log.id)
-            if (reloaded != null) {
+            runCatching {
+                workoutRepository.upsertSet(
+                    logId = log.id,
+                    exerciseId = pending.exerciseId,
+                    set = pending.set.copy(reps = newReps, weightKg = newWeightKg),
+                )
+                val reloaded = workoutRepository.getLog(log.id)
+                    ?: error("Séance introuvable après mise à jour")
                 val newVolume = reloaded.exercises.flatMap { it.sets }
                     .filter { it.isCompleted }
                     .sumOf { (it.reps * it.weightKg).toDouble() }.toFloat()
@@ -107,12 +109,26 @@ class WorkoutLogDetailViewModel @Inject constructor(
                 val maxWeights = finalLog?.exercises?.associate { le ->
                     le.exercise.id to workoutRepository.getMaxWeight(le.exercise.id)
                 } ?: emptyMap()
-                _uiState.update { it.copy(log = finalLog, maxWeights = maxWeights, isSavingEdit = false) }
-            } else {
-                _uiState.update { it.copy(isSavingEdit = false) }
+                finalLog to maxWeights
             }
+                .onSuccess { (finalLog, maxWeights) ->
+                    _uiState.update {
+                        it.copy(log = finalLog, maxWeights = maxWeights, isSavingEdit = false)
+                    }
+                }
+                .onFailure { e ->
+                    _uiState.update {
+                        it.copy(
+                            isSavingEdit = false,
+                            errorMessage = e.message?.takeIf { msg -> msg.isNotBlank() }
+                                ?: "Échec de la modification de la série",
+                        )
+                    }
+                }
         }
     }
+
+    fun onErrorShown() = _uiState.update { it.copy(errorMessage = null) }
 }
 
 // ─── Screen ──────────────────────────────────────────────────────────────────
@@ -125,7 +141,14 @@ fun WorkoutLogDetailScreen(
     viewModel: WorkoutLogDetailViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(logId) { viewModel.load(logId) }
+    LaunchedEffect(state.errorMessage) {
+        state.errorMessage?.let { msg ->
+            snackbarHostState.showSnackbar(msg)
+            viewModel.onErrorShown()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -139,7 +162,8 @@ fun WorkoutLogDetailScreen(
                     }
                 },
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         when {
             state.isLoading -> Box(

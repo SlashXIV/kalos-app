@@ -41,6 +41,7 @@ data class WorkoutSummaryUiState(
     val log: WorkoutLog? = null,
     val pendingEdit: SummaryPendingEdit? = null,
     val isSavingEdit: Boolean = false,
+    val errorMessage: String? = null,
 )
 
 @HiltViewModel
@@ -68,25 +69,38 @@ class WorkoutSummaryViewModel @Inject constructor(
     fun saveSetEdit(newReps: Int, newWeightKg: Float) {
         val pending = _uiState.value.pendingEdit ?: return
         val log = _uiState.value.log ?: return
-        _uiState.update { it.copy(pendingEdit = null, isSavingEdit = true) }
+        _uiState.update { it.copy(pendingEdit = null, isSavingEdit = true, errorMessage = null) }
         viewModelScope.launch {
-            workoutRepository.upsertSet(
-                logId = log.id,
-                exerciseId = pending.exerciseId,
-                set = pending.set.copy(reps = newReps, weightKg = newWeightKg),
-            )
-            val reloaded = workoutRepository.getLog(log.id)
-            if (reloaded != null) {
+            runCatching {
+                workoutRepository.upsertSet(
+                    logId = log.id,
+                    exerciseId = pending.exerciseId,
+                    set = pending.set.copy(reps = newReps, weightKg = newWeightKg),
+                )
+                val reloaded = workoutRepository.getLog(log.id)
+                    ?: error("Séance introuvable après mise à jour")
                 val newVolume = reloaded.exercises.flatMap { it.sets }
                     .filter { it.isCompleted }
                     .sumOf { (it.reps * it.weightKg).toDouble() }.toFloat()
                 workoutRepository.finishLog(log.id, log.durationSecs, newVolume)
-                _uiState.update { it.copy(log = workoutRepository.getLog(log.id), isSavingEdit = false) }
-            } else {
-                _uiState.update { it.copy(isSavingEdit = false) }
+                workoutRepository.getLog(log.id)
             }
+                .onSuccess { finalLog ->
+                    _uiState.update { it.copy(log = finalLog, isSavingEdit = false) }
+                }
+                .onFailure { e ->
+                    _uiState.update {
+                        it.copy(
+                            isSavingEdit = false,
+                            errorMessage = e.message?.takeIf { msg -> msg.isNotBlank() }
+                                ?: "Échec de la modification de la série",
+                        )
+                    }
+                }
         }
     }
+
+    fun onErrorShown() = _uiState.update { it.copy(errorMessage = null) }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,7 +112,14 @@ fun WorkoutSummaryScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val log = state.log
+    val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(logId) { viewModel.loadLog(logId) }
+    LaunchedEffect(state.errorMessage) {
+        state.errorMessage?.let { msg ->
+            snackbarHostState.showSnackbar(msg)
+            viewModel.onErrorShown()
+        }
+    }
 
     state.pendingEdit?.let { pending ->
         SummaryEditSetDialog(
@@ -120,7 +141,8 @@ fun WorkoutSummaryScreen(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         if (log == null) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {

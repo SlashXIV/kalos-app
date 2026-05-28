@@ -35,8 +35,16 @@ fun ActiveWorkoutScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var showFinishDialog by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(templateId) { viewModel.loadTemplate(templateId) }
+
+    LaunchedEffect(state.errorMessage) {
+        state.errorMessage?.let { msg ->
+            snackbarHostState.showSnackbar(msg)
+            viewModel.onErrorShown()
+        }
+    }
 
     // Navigate to a newly added exercise after the tab list has been laid out.
     // Doing this in the same state update that grows the exercises list causes
@@ -83,7 +91,8 @@ fun ActiveWorkoutScreen(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         if (state.isLoading) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {

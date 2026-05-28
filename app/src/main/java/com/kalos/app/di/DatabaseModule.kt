@@ -20,8 +20,18 @@ object DatabaseModule {
     @Provides
     fun provideDatabase(@ApplicationContext context: Context): KalosDatabase =
         Room.databaseBuilder(context, KalosDatabase::class.java, "kalos.db")
-            .addMigrations(KalosDatabase.MIGRATION_7_8, KalosDatabase.MIGRATION_8_9, KalosDatabase.MIGRATION_9_10, KalosDatabase.MIGRATION_10_11, KalosDatabase.MIGRATION_11_12, KalosDatabase.MIGRATION_12_13)
-            .fallbackToDestructiveMigration()
+            .addMigrations(
+                KalosDatabase.MIGRATION_7_8,
+                KalosDatabase.MIGRATION_8_9,
+                KalosDatabase.MIGRATION_9_10,
+                KalosDatabase.MIGRATION_10_11,
+                KalosDatabase.MIGRATION_11_12,
+                KalosDatabase.MIGRATION_12_13,
+            )
+            // Keep a safety net for downgrades only (dev/sideload scenarios).
+            // Upgrades MUST be covered by an explicit migration — a missing one will crash
+            // loudly at startup instead of silently wiping user data.
+            .fallbackToDestructiveMigrationOnDowngrade()
             .build()
 
     @Provides fun provideUserProfileDao(db: KalosDatabase) = db.userProfileDao()

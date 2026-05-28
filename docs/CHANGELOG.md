@@ -2,6 +2,52 @@
 
 ---
 
+## v3.7.0 — 28 May 2026
+
+### Changed (robustesse persistance)
+- Backup import désormais **atomique** : la séquence "purge + ré-insertion" est encapsulée dans `database.withTransaction { }` — toute exception en cours d'import rollback complètement, les données précédentes sont préservées
+- Validation préalable des FK : `BackupImporter.validateReferences` vérifie tous les `foodId` (meal items) et `templateId` (program workouts) **avant** la purge ; en cas d'orphelin, l'import échoue sans toucher à la DB
+- `BackupImporter.json` : ajout de `coerceInputValues = true` (tolère les `null` sur des champs non-null avec defaults)
+- Migrations Room : retrait de `fallbackToDestructiveMigration()` au profit de `fallbackToDestructiveMigrationOnDowngrade()` — une migration manquante crashera désormais bruyamment au démarrage au lieu de wiper silencieusement les données utilisateur
+- `@Database(exportSchema = true)` + KSP `room.schemaLocation = $projectDir/schemas` : les schémas Room sont désormais exportés sous `app/schemas/` (diffables en PR, requis pour MigrationTestHelper)
+
+### Added (backup fidélité)
+- `FoodBackup.lastUsedAt` : préserve l'ordre "Récents" après une restauration
+- `ProfileBackup.onboardingCompleted` : préserve l'état réel (n'est plus forcé à `true`)
+- Les deux champs ont des defaults pour préserver la compat des backups existants
+
+### Fixed (gestion d'erreurs UI)
+- `CustomFoodViewModel` : `save()` / `delete()` ne perdent plus silencieusement les erreurs DB — snackbar d'erreur dans `CustomFoodScreen`, l'utilisateur reste sur le formulaire
+- `ActiveWorkoutViewModel.finish()` : le draft n'est plus effacé avant la confirmation du write ; si l'enregistrement échoue, le draft est conservé pour permettre le retry, snackbar d'erreur
+- `WorkoutSummaryViewModel.saveSetEdit()` et `WorkoutLogDetailViewModel.saveSetEdit()` : pattern `runCatching` + snackbar d'erreur identique
+- `errorMessage: String?` ajouté aux `UiState` des 4 ViewModels concernés, `onErrorShown()` pour le reset
+
+### Removed
+- `docs/PRODUCT_AUDIT.md` : doc obsolète (figé à v3.2.0, tous les items marqués Done) — remplacé par `docs/TECHNICAL_AUDIT.md` ; un nouvel audit produit sera créé le jour où il y a un besoin réel
+
+---
+
+## v3.6.1 — 27 May 2026
+
+### Fixed
+- Crash à l'édition d'un aliment custom déjà utilisé dans la journée : `FoodRepositoryImpl.save` utilisait `@Insert(REPLACE)` qui DELETE+INSERT, violant la FK RESTRICT depuis `meal_entry_item` → désormais `@Update` quand l'id existe, `REPLACE` réservé aux créations
+- Édition d'un aliment custom : `isFavorite` et `lastUsedAt` étaient réinitialisés silencieusement à chaque save — désormais préservés via le state du `CustomFoodViewModel`
+
+---
+
+## v3.6.0 — 27 May 2026
+
+### Added
+- Historique nutritionnel : bouton de copie dans la TopAppBar — exporte les 14 derniers jours en TSV (Date, Kcal, Protéines, Glucides, Lipides) avec lignes Moyenne et Total, prêt à coller dans un tableur
+- Historique sport (vue standalone) : bouton de copie dans la TopAppBar
+- Historique sport (onglet) : icône de copie inline au-dessus du chart
+- Format sport : résumé lisible humain des 10 dernières séances — date, nom, durée, volume total, puis meilleure série complétée par exercice
+
+### Roadmap
+- Note produit ajoutée dans les Deferred : densité calorique & aide au volume eating (signal de densité, tri, indice de satiété, comparaison volume / calories)
+
+---
+
 ## v3.5.0 — 27 May 2026
 
 ### Added

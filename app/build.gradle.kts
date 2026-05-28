@@ -7,6 +7,12 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+ksp {
+    // Room schema JSONs are committed under app/schemas/ so migrations can be
+    // diffed in PRs and verified via MigrationTestHelper.
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 android {
     namespace = "com.kalos.app"
     compileSdk = 35

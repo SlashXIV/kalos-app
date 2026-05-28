@@ -48,6 +48,7 @@ data class ActiveWorkoutUiState(
     val exercisePickerMuscle: String = "",
     val confirmReplaceExIndex: Int = -1,
     val confirmReplaceExercise: Exercise? = null,
+    val errorMessage: String? = null,
 )
 
 @HiltViewModel
@@ -419,32 +420,32 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun finish() {
         timerJob?.cancel()
         restJob?.cancel()
-        store.clear()
         val s = _state.value
         viewModelScope.launch {
-            _state.update { it.copy(isSaving = true) }
-            val logExercises = s.exercises.mapIndexed { i, ep ->
-                LogExercise(
-                    id = 0, logId = 0,
-                    exercise = ep.templateExercise.exercise,
-                    orderIndex = i,
-                    sets = emptyList(),
-                    status = ep.status,
-                    replacedExerciseName = ep.originalExerciseName,
+            _state.update { it.copy(isSaving = true, errorMessage = null) }
+            runCatching {
+                val logExercises = s.exercises.mapIndexed { i, ep ->
+                    LogExercise(
+                        id = 0, logId = 0,
+                        exercise = ep.templateExercise.exercise,
+                        orderIndex = i,
+                        sets = emptyList(),
+                        status = ep.status,
+                        replacedExerciseName = ep.originalExerciseName,
+                    )
+                }
+                val logId = workoutRepository.startLog(
+                    WorkoutLog(
+                        id = 0,
+                        templateId = if (loadedTemplateId > 0) loadedTemplateId else null,
+                        templateName = s.templateName,
+                        date = LocalDate.now().toString(),
+                        startedAt = workoutStartTime,
+                        exercises = logExercises,
+                    )
                 )
-            }
-            val logId = workoutRepository.startLog(
-                WorkoutLog(
-                    id = 0,
-                    templateId = if (loadedTemplateId > 0) loadedTemplateId else null,
-                    templateName = s.templateName,
-                    date = LocalDate.now().toString(),
-                    startedAt = workoutStartTime,
-                    exercises = logExercises,
-                )
-            )
-            val savedLog = workoutRepository.getLog(logId)
-            if (savedLog != null) {
+                val savedLog = workoutRepository.getLog(logId)
+                    ?: error("Séance créée mais introuvable (id=$logId)")
                 var totalVolume = 0f
                 savedLog.exercises.forEachIndexed { exIdx, le ->
                     val ep = s.exercises.getOrNull(exIdx) ?: return@forEachIndexed
@@ -466,10 +467,27 @@ class ActiveWorkoutViewModel @Inject constructor(
                     }
                 }
                 workoutRepository.finishLog(logId, s.elapsedSecs.toLong(), totalVolume)
+                logId
             }
-            _state.update { it.copy(isSaving = false, savedLogId = logId) }
+                .onSuccess { logId ->
+                    // Only clear the draft after a confirmed write.
+                    store.clear()
+                    _state.update { it.copy(isSaving = false, savedLogId = logId) }
+                }
+                .onFailure { e ->
+                    // Draft kept so the user can retry without losing input.
+                    _state.update {
+                        it.copy(
+                            isSaving = false,
+                            errorMessage = e.message?.takeIf { msg -> msg.isNotBlank() }
+                                ?: "Échec de l'enregistrement de la séance",
+                        )
+                    }
+                }
         }
     }
+
+    fun onErrorShown() = _state.update { it.copy(errorMessage = null) }
 
     // ── Draft persistence ────────────────────────────────────────────────────
 

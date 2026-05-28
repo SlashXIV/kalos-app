@@ -6,11 +6,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -29,6 +33,9 @@ fun NutritionHistoryScreen(
     viewModel: NutritionHistoryViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val clipboardManager = LocalClipboardManager.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -38,9 +45,20 @@ fun NutritionHistoryScreen(
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
                     }
-                }
+                },
+                actions = {
+                    if (state.summaries.isNotEmpty()) {
+                        IconButton(onClick = {
+                            clipboardManager.setText(AnnotatedString(buildNutritionTsv(state.summaries)))
+                            scope.launch { snackbarHostState.showSnackbar("Copié") }
+                        }) {
+                            Icon(Icons.Filled.ContentCopy, contentDescription = "Copier l'historique")
+                        }
+                    }
+                },
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         if (state.summaries.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
@@ -94,6 +112,34 @@ private fun DaySummaryCard(summary: DailySummaryRow, onClick: () -> Unit) {
             }
         }
     }
+}
+
+private fun buildNutritionTsv(summaries: List<DailySummaryRow>): String {
+    val recent = summaries.take(14)
+    val sb = StringBuilder()
+    sb.appendLine("Kalos — Historique nutritionnel (14 jours)")
+    sb.appendLine("Date\tKcal\tProtéines (g)\tGlucides (g)\tLipides (g)")
+    for (s in recent) {
+        val kcal = (s.totalKcal ?: 0f).roundToInt()
+        val p    = (s.totalProtein ?: 0f).roundToInt()
+        val c    = (s.totalCarbs ?: 0f).roundToInt()
+        val f    = (s.totalFat ?: 0f).roundToInt()
+        sb.appendLine("${s.date}\t$kcal\t$p\t$c\t$f")
+    }
+    if (recent.isNotEmpty()) {
+        val n = recent.size.toDouble()
+        val avgKcal = (recent.sumOf { (it.totalKcal  ?: 0f).toDouble() } / n).toFloat().roundToInt()
+        val avgP    = (recent.sumOf { (it.totalProtein ?: 0f).toDouble() } / n).toFloat().roundToInt()
+        val avgC    = (recent.sumOf { (it.totalCarbs  ?: 0f).toDouble() } / n).toFloat().roundToInt()
+        val avgF    = (recent.sumOf { (it.totalFat    ?: 0f).toDouble() } / n).toFloat().roundToInt()
+        val totKcal = recent.sumOf { (it.totalKcal  ?: 0f).toDouble() }.toFloat().roundToInt()
+        val totP    = recent.sumOf { (it.totalProtein ?: 0f).toDouble() }.toFloat().roundToInt()
+        val totC    = recent.sumOf { (it.totalCarbs  ?: 0f).toDouble() }.toFloat().roundToInt()
+        val totF    = recent.sumOf { (it.totalFat    ?: 0f).toDouble() }.toFloat().roundToInt()
+        sb.appendLine("Moyenne\t$avgKcal\t$avgP\t$avgC\t$avgF")
+        sb.append("Total\t$totKcal\t$totP\t$totC\t$totF")
+    }
+    return sb.toString()
 }
 
 private fun formatHistoryDate(dateStr: String): String {

@@ -12,6 +12,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import kotlinx.coroutines.launch
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -38,6 +41,11 @@ fun WorkoutHistoryScreen(
     navController: NavController,
     viewModel: WorkoutHistoryViewModel = hiltViewModel(),
 ) {
+    val logs by viewModel.logs.collectAsStateWithLifecycle()
+    val clipboardManager = LocalClipboardManager.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -46,9 +54,20 @@ fun WorkoutHistoryScreen(
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour")
                     }
-                }
+                },
+                actions = {
+                    if (logs.isNotEmpty()) {
+                        IconButton(onClick = {
+                            clipboardManager.setText(AnnotatedString(buildWorkoutClipboard(logs)))
+                            scope.launch { snackbarHostState.showSnackbar("Copié") }
+                        }) {
+                            Icon(Icons.Filled.ContentCopy, contentDescription = "Copier l'historique")
+                        }
+                    }
+                },
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         WorkoutHistoryContent(
             viewModel = viewModel,
@@ -63,7 +82,25 @@ fun WorkoutHistoryTabContent(
     navController: NavController,
     viewModel: WorkoutHistoryViewModel = hiltViewModel(),
 ) {
-    WorkoutHistoryContent(viewModel = viewModel, navController = navController)
+    val logs by viewModel.logs.collectAsStateWithLifecycle()
+    val clipboardManager = LocalClipboardManager.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    Box(Modifier.fillMaxSize()) {
+        WorkoutHistoryContent(
+            viewModel = viewModel,
+            navController = navController,
+            onCopyClick = if (logs.isNotEmpty()) ({
+                clipboardManager.setText(AnnotatedString(buildWorkoutClipboard(logs)))
+                scope.launch { snackbarHostState.showSnackbar("Copié") }
+            }) else null,
+        )
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
+    }
 }
 
 @Composable
@@ -71,6 +108,7 @@ private fun WorkoutHistoryContent(
     viewModel: WorkoutHistoryViewModel,
     navController: NavController,
     modifier: Modifier = Modifier,
+    onCopyClick: (() -> Unit)? = null,
 ) {
     val logs by viewModel.logs.collectAsStateWithLifecycle()
     val weeklyVolumes = remember(logs) { computeWeeklyVolumes(logs) }
@@ -89,10 +127,22 @@ private fun WorkoutHistoryContent(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = modifier.fillMaxSize(),
         ) {
-            if (weeklyVolumes.size >= 2) {
+            if (onCopyClick != null) {
                 item {
-                    VolumeChartCard(weeklyVolumes)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        IconButton(onClick = onCopyClick) {
+                            Icon(
+                                Icons.Filled.ContentCopy,
+                                contentDescription = "Copier l'historique",
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                 }
+            }
+            if (weeklyVolumes.size >= 2) {
+                item { VolumeChartCard(weeklyVolumes) }
             }
             items(logs, key = { it.id }) { log ->
                 WorkoutLogCard(
@@ -238,4 +288,35 @@ private fun formatDuration(secs: Long): String {
     val h = secs / 3600
     val m = (secs % 3600) / 60
     return if (h > 0) "${h}h%02d".format(m) else "${m}min"
+}
+
+private fun buildWorkoutClipboard(logs: List<WorkoutLog>): String {
+    val recent = logs.take(10)
+    val headerDate = LocalDate.now()
+        .format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.FRENCH))
+    val sessionFmt = DateTimeFormatter.ofPattern("EEE d MMM", Locale.FRENCH)
+
+    val sb = StringBuilder()
+    sb.appendLine("Kalos — ${recent.size} dernières séances ($headerDate)")
+
+    for (log in recent) {
+        sb.appendLine()
+        val dateLabel = LocalDate.parse(log.date)
+            .format(sessionFmt)
+            .replaceFirstChar { it.uppercase() }
+        val dur = formatDuration(log.durationSecs)
+        val vol = if (log.totalVolumeKg > 0f) " — %.0f kg".format(log.totalVolumeKg) else ""
+        sb.appendLine("$dateLabel — ${log.templateName.ifBlank { "Séance libre" }} — $dur$vol")
+
+        for (le in log.exercises) {
+            val done = le.sets.filter { it.isCompleted }
+            if (done.isEmpty()) continue
+            val best = done.maxByOrNull { it.weightKg } ?: continue
+            val wStr = if (best.weightKg == best.weightKg.toLong().toFloat())
+                "${best.weightKg.toLong()} kg" else "%.1f kg".format(best.weightKg)
+            sb.appendLine("  ${le.exercise.name.take(26).padEnd(26)}   ${done.size} × ${best.reps} @ $wStr")
+        }
+    }
+
+    return sb.toString().trimEnd()
 }

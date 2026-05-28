@@ -19,7 +19,10 @@ class FoodRepositoryImpl @Inject constructor(private val dao: FoodDao) : FoodRep
     override fun getAll(): Flow<List<Food>> = dao.getAll().map { list -> list.map { it.toDomain() } }
     override fun getCustomFoods(): Flow<List<Food>> = dao.getCustomFoods().map { list -> list.map { it.toDomain() } }
     override suspend fun getById(id: Long): Food? = dao.getById(id)?.toDomain()
-    override suspend fun save(food: Food): Long = dao.upsert(food.toEntity())
+    override suspend fun save(food: Food): Long {
+        val entity = food.toEntity()
+        return if (entity.id > 0L) { dao.update(entity); entity.id } else dao.upsert(entity)
+    }
     override suspend fun delete(food: Food) = dao.delete(food.toEntity())
     override suspend fun archiveOrDelete(id: Long) {
         if (dao.countUsage(id) == 0) {

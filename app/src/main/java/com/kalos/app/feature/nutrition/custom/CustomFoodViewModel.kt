@@ -25,6 +25,8 @@ data class CustomFoodState(
     val containsAlcohol: Boolean = false,
     val isVegetarian: Boolean = false,
     val isVegan: Boolean = false,
+    val isFavorite: Boolean = false,
+    val lastUsedAt: Long = 0L,
     val isEditing: Boolean = false,
     val isSaving: Boolean = false,
     val savedSuccessfully: Boolean = false,
@@ -56,6 +58,8 @@ class CustomFoodViewModel @Inject constructor(
                         containsAlcohol = "alcohol" in food.tags,
                         isVegetarian = "vegetarian" in food.tags,
                         isVegan = "vegan" in food.tags,
+                        isFavorite = food.isFavorite,
+                        lastUsedAt = food.lastUsedAt,
                         isEditing = true,
                     )
                 }
@@ -138,6 +142,8 @@ class CustomFoodViewModel @Inject constructor(
                 defaultServingG = s.serving.parseFloat() ?: 100f,
                 servingUnit = s.unit,
                 isCustom = true,
+                isFavorite = s.isFavorite,
+                lastUsedAt = s.lastUsedAt,
                 tags = tags,
             )
         )

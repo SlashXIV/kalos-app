@@ -2,6 +2,22 @@
 
 ---
 
+## v3.9.1 — 3 June 2026
+
+Petite vague UX — deux ajustements pour fluidifier l'usage quotidien.
+
+### Empêcher les doublons d'exercice
+- Workout Builder → Catalogue : les exercices déjà présents dans la séance sont **masqués** de la liste. Le mécanisme passe les `exercise.id` exclus via `savedStateHandle["excluded_exercise_ids"]` entre les deux écrans. Le catalogue standalone (depuis la TopAppBar de l'écran Sport) reste sans filtrage.
+- Séance active → bottom sheet d'ajout/remplacement : les exercices déjà présents sont rendus **gris pâle avec "Déjà ajouté"**, tap désactivé. Couvre aussi le cas SKIPPED (un exercice passé ne peut pas être réajouté en doublon).
+
+### Bannière "Séance en cours" sur l'écran Sport
+- `ActiveWorkoutStore.draftFlow` réactif (`_version: MutableStateFlow` notifié à chaque `save()` / `clear()`).
+- `WorkoutViewModel.uiState` combine désormais templates + draft → `DraftBannerState` (templateId, templateName, exerciseCount, startedAt).
+- `WorkoutScreen` affiche une carte légère `primaryContainer` au-dessus des onglets : `Séance en cours · [Nom] · N exercices · il y a X min`. Tap (carte ou bouton) → reprise dans `ActiveWorkout`, le dialog "Séance en cours" existant prend le relais.
+- Aucun popup automatique : carte non intrusive, présente uniquement si un draft est détecté.
+
+---
+
 ## v3.9.0 — 3 June 2026
 
 ### Added (Bloc 1 — séance C Full Body + variantes câble manquantes)

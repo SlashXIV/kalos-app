@@ -1,6 +1,6 @@
 # Features
 
-> Version: 3.9.0
+> Version: 3.9.1
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -95,7 +95,7 @@ Statuses: **Done** · **Partial** · **Planned**
 |---|---|---|
 | Create workout template | Done | |
 | Edit existing template | Done | |
-| Add / remove exercises | Done | |
+| Add / remove exercises | Done | Duplicate prevention: already-added exercises are hidden in the catalog and disabled in the active-workout picker (v3.9.1) |
 | Edit sets × reps per exercise | Done | |
 | Link template to a program and day | Done | |
 
@@ -113,6 +113,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Skip rest | Done | |
 | Auto-save draft (debounced, 400 ms) | Done | |
 | Resume interrupted session | Done | Dialog with elapsed time, staleness warning if > 24 h |
+| In-progress workout banner on Sport screen | Done | Non-intrusive card above tabs when a draft exists (v3.9.1) |
 | Finish session and save to history | Done | |
 
 ### Post-workout summary
@@ -178,7 +179,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |
 | Data import / restore | Done | Confirmation dialog (destructive) |
-| Version display | Done | Kalos 3.9.0 |
+| Version display | Done | Kalos 3.9.1 |
 
 ---
 

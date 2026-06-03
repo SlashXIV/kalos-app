@@ -19,6 +19,7 @@ import com.kalos.app.core.ui.component.WorkoutTemplateCard
 import com.kalos.app.feature.workout.history.WorkoutHistoryTabContent
 import com.kalos.app.feature.workout.program.ProgramsTabContent
 import com.kalos.app.navigation.Screen
+import androidx.compose.foundation.clickable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,6 +59,14 @@ fun WorkoutScreen(
                 .fillMaxSize()
                 .padding(padding),
         ) {
+            state.draftBanner?.let { banner ->
+                ActiveWorkoutBanner(
+                    banner = banner,
+                    onResume = {
+                        navController.navigate(Screen.ActiveWorkout.route(banner.templateId))
+                    },
+                )
+            }
             TabRow(selectedTabIndex = selectedTab) {
                 tabs.forEachIndexed { i, title ->
                     Tab(
@@ -98,6 +107,66 @@ fun WorkoutScreen(
                 TextButton(onClick = { templateToDelete = null }) { Text("Annuler") }
             },
         )
+    }
+}
+
+@Composable
+private fun ActiveWorkoutBanner(
+    banner: DraftBannerState,
+    onResume: () -> Unit,
+) {
+    val elapsedMin = ((System.currentTimeMillis() - banner.startedAt) / 60_000).toInt()
+    val elapsedLabel = when {
+        elapsedMin < 1 -> "à l'instant"
+        elapsedMin < 60 -> "il y a $elapsedMin min"
+        else -> "il y a ${elapsedMin / 60}h${"%02d".format(elapsedMin % 60)}"
+    }
+    val title = banner.templateName.ifBlank { "Séance libre" }
+    val plural = if (banner.exerciseCount > 1) "exercices" else "exercice"
+
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable(onClick = onResume),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                Icons.Filled.Timer,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.size(20.dp),
+            )
+            Spacer(Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Séance en cours · $title",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+                Text(
+                    "${banner.exerciseCount} $plural · $elapsedLabel",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                )
+            }
+            TextButton(
+                onClick = onResume,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
+            ) {
+                Text("Reprendre")
+            }
+        }
     }
 }
 

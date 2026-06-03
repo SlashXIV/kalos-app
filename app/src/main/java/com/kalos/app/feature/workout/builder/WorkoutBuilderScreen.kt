@@ -143,7 +143,15 @@ fun WorkoutBuilderScreen(
                 ) {
                     Text("Exercices (${state.exercises.size})", style = MaterialTheme.typography.titleSmall)
                     OutlinedButton(
-                        onClick = { navController.navigate(Screen.ExerciseCatalog.route(templateId)) }
+                        onClick = {
+                            // Propagate the current exercise ids so the catalog can hide duplicates.
+                            // Read on the catalog side via previousBackStackEntry.savedStateHandle.
+                            currentEntry?.savedStateHandle?.set(
+                                "excluded_exercise_ids",
+                                state.exercises.map { it.exercise.id }.toLongArray(),
+                            )
+                            navController.navigate(Screen.ExerciseCatalog.route(templateId))
+                        }
                     ) {
                         Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(4.dp))

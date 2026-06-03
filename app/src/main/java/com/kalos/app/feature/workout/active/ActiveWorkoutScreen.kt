@@ -287,6 +287,9 @@ fun ActiveWorkoutScreen(
             muscleFilter = state.exercisePickerMuscle,
             onExerciseSelected = viewModel::onExercisePicked,
             onDismiss = viewModel::dismissPicker,
+            // Greyed-out "Déjà ajouté" for every exercise currently in the session
+            // (including SKIPPED — the user already touched it once, no double-tap).
+            excludedExerciseIds = state.exercises.map { it.templateExercise.exercise.id }.toSet(),
         )
     }
 

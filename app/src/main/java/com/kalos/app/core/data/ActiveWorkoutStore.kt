@@ -3,6 +3,10 @@ package com.kalos.app.core.data
 import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -59,8 +63,16 @@ class ActiveWorkoutStore @Inject constructor(
         coerceInputValues = true
     }
 
+    // Bumped on every save/clear so observers (e.g. WorkoutScreen banner) re-read the draft
+    // without needing a lifecycle hook or polling. Distinct from the draft content itself —
+    // we just emit a version number, then map { load() } to materialize the current state.
+    private val _version = MutableStateFlow(0)
+
+    val draftFlow: Flow<WorkoutDraft?> = _version.map { load() }
+
     fun save(draft: WorkoutDraft) {
         prefs.edit().putString(KEY, json.encodeToString(WorkoutDraft.serializer(), draft)).apply()
+        _version.update { it + 1 }
     }
 
     fun load(): WorkoutDraft? {
@@ -75,7 +87,10 @@ class ActiveWorkoutStore @Inject constructor(
         }
     }
 
-    fun clear() = prefs.edit().remove(KEY).apply()
+    fun clear() {
+        prefs.edit().remove(KEY).apply()
+        _version.update { it + 1 }
+    }
 
     companion object {
         private const val KEY = "draft"

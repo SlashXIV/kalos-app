@@ -37,6 +37,16 @@ fun ExerciseCatalogScreen(
             ?.startsWith("workout/builder") == true
     }
 
+    // Builder context: hide exercises already in the template (passed via savedStateHandle).
+    // Standalone catalog: no key written → empty set → no filtering.
+    val excludedExerciseIds: Set<Long> = remember {
+        navController.previousBackStackEntry
+            ?.savedStateHandle
+            ?.get<LongArray>("excluded_exercise_ids")
+            ?.toSet()
+            ?: emptySet()
+    }
+
     // When ExerciseDetail (opened from builder) passes back an exercise ID, propagate to builder
     LaunchedEffect(Unit) {
         val handle = navController.currentBackStackEntry?.savedStateHandle ?: return@LaunchedEffect
@@ -145,11 +155,22 @@ fun ExerciseCatalogScreen(
             }
             Spacer(Modifier.height(8.dp))
 
-            if (state.exercises.isEmpty()) {
-                EmptyState(title = "Aucun exercice trouvé", subtitle = "Modifiez vos critères de recherche")
+            // Hide exercises already added to the current template (builder context only —
+            // standalone catalog passes an empty exclusion set).
+            val visibleExercises = state.exercises.filter { it.id !in excludedExerciseIds }
+
+            if (visibleExercises.isEmpty()) {
+                EmptyState(
+                    title = if (excludedExerciseIds.isNotEmpty() && state.exercises.isNotEmpty()) {
+                        "Tous les exercices correspondants sont déjà dans la séance"
+                    } else {
+                        "Aucun exercice trouvé"
+                    },
+                    subtitle = "Modifiez vos critères de recherche",
+                )
             } else {
                 LazyColumn {
-                    items(state.exercises, key = { it.id }) { exercise ->
+                    items(visibleExercises, key = { it.id }) { exercise ->
                         ExerciseListItem(
                             exercise = exercise,
                             onClick = {

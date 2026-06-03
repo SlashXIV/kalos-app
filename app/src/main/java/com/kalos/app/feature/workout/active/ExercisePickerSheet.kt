@@ -19,6 +19,7 @@ fun ExercisePickerSheet(
     muscleFilter: String,
     onExerciseSelected: (Exercise) -> Unit,
     onDismiss: () -> Unit,
+    excludedExerciseIds: Set<Long> = emptySet(),
     viewModel: ExercisePickerViewModel = hiltViewModel(),
 ) {
     LaunchedEffect(muscleFilter) { viewModel.setMuscleFilter(muscleFilter) }
@@ -63,19 +64,30 @@ fun ExercisePickerSheet(
                 contentPadding = PaddingValues(bottom = 16.dp),
             ) {
                 items(displayList, key = { it.id }) { ex ->
+                    val isAlreadyAdded = ex.id in excludedExerciseIds
+                    val dimmed = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     ListItem(
-                        headlineContent = { Text(ex.name) },
+                        headlineContent = {
+                            Text(
+                                ex.name,
+                                color = if (isAlreadyAdded) dimmed
+                                        else MaterialTheme.colorScheme.onSurface,
+                            )
+                        },
                         supportingContent = {
                             Text(
-                                buildString {
+                                if (isAlreadyAdded) "Déjà ajouté"
+                                else buildString {
                                     append(ex.primaryMuscle)
                                     if (ex.equipment.isNotBlank()) append(" · ${ex.equipment}")
                                 },
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = if (isAlreadyAdded) dimmed
+                                        else MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         },
-                        modifier = Modifier.clickable { onExerciseSelected(ex) },
+                        modifier = if (isAlreadyAdded) Modifier
+                                   else Modifier.clickable { onExerciseSelected(ex) },
                     )
                     HorizontalDivider()
                 }

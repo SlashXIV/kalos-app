@@ -1,6 +1,6 @@
 # Features
 
-> Version: 3.8.1
+> Version: 3.9.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -106,6 +106,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Session timer (wall-clock, survives lock screen) | Done | |
 | Tab navigation between exercises | Done | |
 | Weight / reps input per set | Done | Select-all on focus to prevent appended digits |
+| Duration input for cardio / isometric holds | Done | Per-exercise `trackingMode` (REPS_WEIGHT / DURATION / DURATION_WEIGHT) drives the input fields (v3.9.0) |
 | Mark set as completed | Done | |
 | Add / remove sets | Done | |
 | Automatic rest timer (triggered on set completion) | Done | Duration configurable per exercise |
@@ -177,7 +178,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |
 | Data import / restore | Done | Confirmation dialog (destructive) |
-| Version display | Done | Kalos 3.8.1 |
+| Version display | Done | Kalos 3.9.0 |
 
 ---
 

@@ -21,11 +21,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.ExerciseStatus
+import com.kalos.app.core.domain.model.ExerciseTrackingMode
 import com.kalos.app.core.domain.model.LogExercise
 import com.kalos.app.core.domain.model.WorkoutLog
 import com.kalos.app.core.domain.model.WorkoutSet
 import com.kalos.app.core.domain.repository.WorkoutRepository
 import com.kalos.app.core.ui.component.EditWorkoutSetDialog
+import com.kalos.app.core.ui.util.formatSecsAsDuration
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,7 +41,11 @@ import javax.inject.Inject
 
 // ─── ViewModel ───────────────────────────────────────────────────────────────
 
-data class PendingSetEdit(val set: WorkoutSet, val exerciseId: Long)
+data class PendingSetEdit(
+    val set: WorkoutSet,
+    val exerciseId: Long,
+    val trackingMode: ExerciseTrackingMode,
+)
 
 data class WorkoutLogDetailUiState(
     val log: WorkoutLog? = null,
@@ -76,15 +82,15 @@ class WorkoutLogDetailViewModel @Inject constructor(
         }
     }
 
-    fun openEditDialog(set: WorkoutSet, exerciseId: Long) {
-        _uiState.update { it.copy(pendingEdit = PendingSetEdit(set, exerciseId)) }
+    fun openEditDialog(set: WorkoutSet, exerciseId: Long, trackingMode: ExerciseTrackingMode) {
+        _uiState.update { it.copy(pendingEdit = PendingSetEdit(set, exerciseId, trackingMode)) }
     }
 
     fun dismissEditDialog() {
         _uiState.update { it.copy(pendingEdit = null) }
     }
 
-    fun saveSetEdit(newReps: Int, newWeightKg: Float) {
+    fun saveSetEdit(newReps: Int, newWeightKg: Float, newDurationSecs: Int) {
         val pending = _uiState.value.pendingEdit ?: return
         val log = _uiState.value.log ?: return
         _uiState.update { it.copy(pendingEdit = null, isSavingEdit = true, errorMessage = null) }
@@ -93,7 +99,11 @@ class WorkoutLogDetailViewModel @Inject constructor(
                 val finalLog = workoutRepository.editSet(
                     logId = log.id,
                     exerciseId = pending.exerciseId,
-                    set = pending.set.copy(reps = newReps, weightKg = newWeightKg),
+                    set = pending.set.copy(
+                        reps = newReps,
+                        weightKg = newWeightKg,
+                        durationSecs = newDurationSecs,
+                    ),
                 )
                 val maxWeights = finalLog?.let {
                     workoutRepository.getMaxWeightsForExercises(it.exercises.map { le -> le.exercise.id })
@@ -181,8 +191,11 @@ fun WorkoutLogDetailScreen(
         state.pendingEdit?.let { pending ->
             EditWorkoutSetDialog(
                 set = pending.set,
+                trackingMode = pending.trackingMode,
                 onDismiss = viewModel::dismissEditDialog,
-                onConfirm = { reps, weight -> viewModel.saveSetEdit(reps, weight) },
+                onConfirm = { reps, weight, durationSecs ->
+                    viewModel.saveSetEdit(reps, weight, durationSecs)
+                },
             )
         }
         if (state.isSavingEdit) {
@@ -199,7 +212,7 @@ fun WorkoutLogDetailScreen(
 private fun LogDetailContent(
     log: WorkoutLog,
     maxWeights: Map<Long, Float?>,
-    onEditSet: (WorkoutSet, Long) -> Unit,
+    onEditSet: (WorkoutSet, Long, ExerciseTrackingMode) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -222,7 +235,7 @@ private fun LogDetailContent(
                 ExerciseDetailCard(
                     logExercise = le,
                     maxWeight = maxWeights[le.exercise.id],
-                    onEditSet = { set -> onEditSet(set, le.exercise.id) },
+                    onEditSet = { set -> onEditSet(set, le.exercise.id, le.exercise.trackingMode) },
                 )
             }
         }
@@ -366,7 +379,7 @@ private fun ExerciseDetailCard(
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             Text(
-                                formatSet(set.reps, set.weightKg),
+                                formatSet(set, logExercise.exercise.trackingMode),
                                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                             )
                             Icon(
@@ -426,11 +439,19 @@ private fun formatDuration(secs: Long): String {
     return if (h > 0) "${h}h%02d".format(m) else "${m}min"
 }
 
-private fun formatSet(reps: Int, weightKg: Float): String = when {
-    reps > 0 && weightKg > 0f -> "$reps × ${"%.1f".format(weightKg)} kg"
-    reps > 0 -> "$reps rép."
-    weightKg > 0f -> "${"%.1f".format(weightKg)} kg"
-    else -> "—"
+private fun formatSet(set: WorkoutSet, mode: ExerciseTrackingMode): String = when (mode) {
+    ExerciseTrackingMode.REPS_WEIGHT -> when {
+        set.reps > 0 && set.weightKg > 0f -> "${set.reps} × ${"%.1f".format(set.weightKg)} kg"
+        set.reps > 0 -> "${set.reps} rép."
+        set.weightKg > 0f -> "${"%.1f".format(set.weightKg)} kg"
+        else -> "—"
+    }
+    ExerciseTrackingMode.DURATION ->
+        formatSecsAsDuration(set.durationSecs).ifEmpty { "—" }
+    ExerciseTrackingMode.DURATION_WEIGHT -> {
+        val dur = formatSecsAsDuration(set.durationSecs).ifEmpty { "—" }
+        if (set.weightKg > 0f) "$dur @ ${"%.1f".format(set.weightKg)} kg" else dur
+    }
 }
 
 fun formatLogDateShort(dateStr: String): String {

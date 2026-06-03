@@ -8,6 +8,7 @@ data class Exercise(
     val equipment: String = "Aucun",
     val level: ExerciseLevel = ExerciseLevel.BEGINNER,
     val type: ExerciseType = ExerciseType.STRENGTH,
+    val trackingMode: ExerciseTrackingMode = ExerciseTrackingMode.REPS_WEIGHT,
     val description: String = "",
     val instructions: String = "",
     val imageUrl: String = "",
@@ -27,4 +28,17 @@ enum class ExerciseType(val label: String) {
     BODYWEIGHT("Poids du corps"),
     MOBILITY("Mobilité"),
     HIIT("HIIT"),
+}
+
+/**
+ * How a set of this exercise is recorded.
+ *
+ * - REPS_WEIGHT : reps × weight (default — musculation).
+ * - DURATION : duration only (cardio, isometric holds like planks).
+ * - DURATION_WEIGHT : duration + weight (weighted carries, weighted holds).
+ */
+enum class ExerciseTrackingMode(val label: String) {
+    REPS_WEIGHT("Reps × poids"),
+    DURATION("Durée"),
+    DURATION_WEIGHT("Durée + poids"),
 }

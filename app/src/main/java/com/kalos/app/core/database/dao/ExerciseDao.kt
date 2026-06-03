@@ -70,4 +70,10 @@ interface ExerciseDao {
 
     @Query("UPDATE exercise SET nameNormalized = :nameNormalized WHERE id = :id")
     suspend fun updateNameNormalized(id: Long, nameNormalized: String)
+
+    @Query("UPDATE exercise SET trackingMode = :trackingMode WHERE id = :id")
+    suspend fun updateTrackingMode(id: Long, trackingMode: String)
+
+    @Query("UPDATE exercise SET trackingMode = :trackingMode WHERE seedId = :seedId")
+    suspend fun updateTrackingModeBySeedId(seedId: String, trackingMode: String)
 }

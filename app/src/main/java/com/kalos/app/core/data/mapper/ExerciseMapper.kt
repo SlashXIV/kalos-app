@@ -3,6 +3,7 @@ package com.kalos.app.core.data.mapper
 import com.kalos.app.core.database.entity.ExerciseEntity
 import com.kalos.app.core.domain.model.Exercise
 import com.kalos.app.core.domain.model.ExerciseLevel
+import com.kalos.app.core.domain.model.ExerciseTrackingMode
 import com.kalos.app.core.domain.model.ExerciseType
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -21,6 +22,8 @@ fun ExerciseEntity.toDomain(): Exercise {
         equipment = equipment,
         level = ExerciseLevel.entries.firstOrNull { it.label == level } ?: ExerciseLevel.BEGINNER,
         type = ExerciseType.entries.firstOrNull { it.label == type } ?: ExerciseType.STRENGTH,
+        trackingMode = runCatching { ExerciseTrackingMode.valueOf(trackingMode) }
+            .getOrDefault(ExerciseTrackingMode.REPS_WEIGHT),
         description = description,
         instructions = instructions,
         imageUrl = imageUrl,
@@ -37,6 +40,7 @@ fun Exercise.toEntity() = ExerciseEntity(
     equipment = equipment,
     level = level.label,
     type = type.label,
+    trackingMode = trackingMode.name,
     description = description,
     instructions = instructions,
     imageUrl = imageUrl,

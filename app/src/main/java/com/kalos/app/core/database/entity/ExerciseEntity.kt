@@ -12,6 +12,7 @@ data class ExerciseEntity(
     val equipment: String = "Aucun",
     val level: String = "Débutant",       // Débutant | Intermédiaire | Avancé
     val type: String = "Musculation",     // Musculation | Cardio | Poids du corps | Mobilité | HIIT
+    val trackingMode: String = "REPS_WEIGHT",  // REPS_WEIGHT | DURATION | DURATION_WEIGHT
     val description: String = "",
     val instructions: String = "",
     val imageUrl: String = "",

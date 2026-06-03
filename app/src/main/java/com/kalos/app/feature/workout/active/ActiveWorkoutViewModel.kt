@@ -8,6 +8,7 @@ import com.kalos.app.core.data.SetDraft
 import com.kalos.app.core.data.WorkoutDraft
 import com.kalos.app.core.domain.model.*
 import com.kalos.app.core.domain.repository.WorkoutRepository
+import com.kalos.app.core.ui.util.parseDurationToSecs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -19,6 +20,7 @@ import javax.inject.Inject
 data class SetInput(
     val reps: String = "",
     val weight: String = "",
+    val duration: String = "",  // "mm:ss" — empty for REPS_WEIGHT exercises
     val isCompleted: Boolean = false,
 )
 
@@ -127,7 +129,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                     restSeconds = ed.restSeconds,
                     notes = ed.notes,
                 ),
-                sets = ed.sets.map { SetInput(reps = it.reps, weight = it.weight, isCompleted = it.isCompleted) },
+                sets = ed.sets.map { SetInput(reps = it.reps, weight = it.weight, duration = it.duration, isCompleted = it.isCompleted) },
                 status = runCatching { ExerciseStatus.valueOf(ed.status) }.getOrDefault(ExerciseStatus.PLANNED),
                 originalExerciseName = ed.originalExerciseName,
                 // originalTemplateExercise and originalSets not restored — undo unavailable after kill
@@ -371,6 +373,13 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun onWeightChange(exIndex: Int, setIndex: Int, value: String) =
         updateSet(exIndex, setIndex) { it.copy(weight = value) }
 
+    fun onDurationChange(exIndex: Int, setIndex: Int, value: String) =
+        // Keep only digits and a single ':'. Tolerates intermediate states while typing.
+        updateSet(exIndex, setIndex) {
+            val cleaned = value.filter { c -> c.isDigit() || c == ':' }
+            it.copy(duration = cleaned)
+        }
+
     fun toggleSetCompleted(exIndex: Int, setIndex: Int) {
         val wasCompleted = _state.value.exercises.getOrNull(exIndex)
             ?.sets?.getOrNull(setIndex)?.isCompleted ?: return
@@ -431,6 +440,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                             setNumber = setIdx + 1,
                             reps = si.reps.toIntOrNull() ?: 0,
                             weightKg = si.weight.toFloatOrNull() ?: 0f,
+                            durationSecs = parseDurationToSecs(si.duration) ?: 0,
                             isCompleted = si.isCompleted,
                         )
                     }
@@ -491,7 +501,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                 defaultWeightKg = ep.templateExercise.defaultWeightKg,
                 restSeconds = ep.templateExercise.restSeconds,
                 notes = ep.templateExercise.notes,
-                sets = ep.sets.map { SetDraft(reps = it.reps, weight = it.weight, isCompleted = it.isCompleted) },
+                sets = ep.sets.map { SetDraft(reps = it.reps, weight = it.weight, duration = it.duration, isCompleted = it.isCompleted) },
                 status = ep.status.name,
                 originalExerciseName = ep.originalExerciseName,
             )

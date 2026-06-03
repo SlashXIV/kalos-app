@@ -36,7 +36,7 @@
     "workouts": [
       { "dayOfWeek": 1, "weekNumber": 1, "templateName": "Full Body A" },
       { "dayOfWeek": 3, "weekNumber": 1, "templateName": "Full Body B" },
-      { "dayOfWeek": 5, "weekNumber": 1, "templateName": "Full Body A" }
+      { "dayOfWeek": 5, "weekNumber": 1, "templateName": "Full Body C" }
     ]
   }
 ]

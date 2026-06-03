@@ -27,7 +27,7 @@ import com.kalos.app.core.database.entity.*
         ProgramWorkoutEntity::class,
         WaterIntakeEntity::class,
     ],
-    version = 13,
+    version = 14,
     exportSchema = true,
 )
 abstract class KalosDatabase : RoomDatabase() {
@@ -57,6 +57,14 @@ abstract class KalosDatabase : RoomDatabase() {
         val MIGRATION_12_13 = object : Migration(12, 13) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE exercise ADD COLUMN nameNormalized TEXT NOT NULL DEFAULT ''")
+            }
+        }
+        val MIGRATION_13_14 = object : Migration(13, 14) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Default REPS_WEIGHT preserves the current behavior for every existing row.
+                // The seeder backfills the actual mode (DURATION / DURATION_WEIGHT) for cardio
+                // and isometric seeds at next launch via seed_exercises_version bump.
+                database.execSQL("ALTER TABLE exercise ADD COLUMN trackingMode TEXT NOT NULL DEFAULT 'REPS_WEIGHT'")
             }
         }
         val MIGRATION_11_12 = object : Migration(11, 12) {

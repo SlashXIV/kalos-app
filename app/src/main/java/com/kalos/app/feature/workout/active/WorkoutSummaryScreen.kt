@@ -18,10 +18,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.kalos.app.core.domain.model.ExerciseTrackingMode
 import com.kalos.app.core.domain.model.WorkoutLog
 import com.kalos.app.core.domain.model.WorkoutSet
 import com.kalos.app.core.domain.repository.WorkoutRepository
 import com.kalos.app.core.ui.component.EditWorkoutSetDialog
+import com.kalos.app.core.ui.util.formatSecsAsDuration
 import com.kalos.app.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +32,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class SummaryPendingEdit(val set: WorkoutSet, val exerciseId: Long)
+data class SummaryPendingEdit(
+    val set: WorkoutSet,
+    val exerciseId: Long,
+    val trackingMode: ExerciseTrackingMode,
+)
 
 data class WorkoutSummaryUiState(
     val log: WorkoutLog? = null,
@@ -53,15 +59,15 @@ class WorkoutSummaryViewModel @Inject constructor(
         }
     }
 
-    fun openEditDialog(set: WorkoutSet, exerciseId: Long) {
-        _uiState.update { it.copy(pendingEdit = SummaryPendingEdit(set, exerciseId)) }
+    fun openEditDialog(set: WorkoutSet, exerciseId: Long, trackingMode: ExerciseTrackingMode) {
+        _uiState.update { it.copy(pendingEdit = SummaryPendingEdit(set, exerciseId, trackingMode)) }
     }
 
     fun dismissEditDialog() {
         _uiState.update { it.copy(pendingEdit = null) }
     }
 
-    fun saveSetEdit(newReps: Int, newWeightKg: Float) {
+    fun saveSetEdit(newReps: Int, newWeightKg: Float, newDurationSecs: Int) {
         val pending = _uiState.value.pendingEdit ?: return
         val log = _uiState.value.log ?: return
         _uiState.update { it.copy(pendingEdit = null, isSavingEdit = true, errorMessage = null) }
@@ -70,7 +76,11 @@ class WorkoutSummaryViewModel @Inject constructor(
                 workoutRepository.editSet(
                     logId = log.id,
                     exerciseId = pending.exerciseId,
-                    set = pending.set.copy(reps = newReps, weightKg = newWeightKg),
+                    set = pending.set.copy(
+                        reps = newReps,
+                        weightKg = newWeightKg,
+                        durationSecs = newDurationSecs,
+                    ),
                 )
             }
                 .onSuccess { finalLog ->
@@ -112,8 +122,11 @@ fun WorkoutSummaryScreen(
     state.pendingEdit?.let { pending ->
         EditWorkoutSetDialog(
             set = pending.set,
+            trackingMode = pending.trackingMode,
             onDismiss = viewModel::dismissEditDialog,
-            onConfirm = { reps, weight -> viewModel.saveSetEdit(reps, weight) },
+            onConfirm = { reps, weight, durationSecs ->
+                viewModel.saveSetEdit(reps, weight, durationSecs)
+            },
         )
     }
 
@@ -177,7 +190,7 @@ fun WorkoutSummaryScreen(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .clickable { viewModel.openEditDialog(s, le.exercise.id) }
+                                            .clickable { viewModel.openEditDialog(s, le.exercise.id, le.exercise.trackingMode) }
                                             .padding(vertical = 1.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically,
@@ -189,7 +202,7 @@ fun WorkoutSummaryScreen(
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                                         ) {
-                                            Text("${s.reps} × ${s.weightKg} kg",
+                                            Text(formatSetSummary(s, le.exercise.trackingMode),
                                                 style = MaterialTheme.typography.bodySmall)
                                             Icon(
                                                 Icons.Filled.Edit,
@@ -232,4 +245,13 @@ private fun formatDuration(secs: Long): String {
     val h = secs / 3600
     val m = (secs % 3600) / 60
     return if (h > 0) "${h}h%02d".format(m) else "${m}min"
+}
+
+private fun formatSetSummary(s: WorkoutSet, mode: ExerciseTrackingMode): String = when (mode) {
+    ExerciseTrackingMode.REPS_WEIGHT ->
+        "${s.reps} × ${s.weightKg} kg"
+    ExerciseTrackingMode.DURATION ->
+        formatSecsAsDuration(s.durationSecs).ifEmpty { "—" }
+    ExerciseTrackingMode.DURATION_WEIGHT ->
+        "${formatSecsAsDuration(s.durationSecs).ifEmpty { "—" }} @ ${s.weightKg} kg"
 }

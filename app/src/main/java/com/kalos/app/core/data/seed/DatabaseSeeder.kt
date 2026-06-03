@@ -28,8 +28,9 @@ class DatabaseSeeder @Inject constructor(
     private fun readAsset(name: String): String =
         context.assets.open(name).bufferedReader().readText().trimStart('﻿')
 
-    // Bump this whenever seed_exercises.json gains new entries or nameNormalized needs backfilling.
-    private val SEED_EXERCISES_VERSION = 3
+    // Bump this whenever seed_exercises.json gains new entries, nameNormalized needs backfilling,
+    // or trackingMode values change.
+    private val SEED_EXERCISES_VERSION = 4
 
     suspend fun seedIfEmpty() = withContext(Dispatchers.IO) {
         if (foodDao.count() == 0) seedFoods()
@@ -45,12 +46,13 @@ class DatabaseSeeder @Inject constructor(
         val seeds: List<SeedExercise> = json.decodeFromString(raw)
 
         if (exerciseDao.count() == 0) {
-            // Fresh install: bulk-insert all exercises with seedId + nameNormalized populated.
+            // Fresh install: bulk-insert all exercises with seedId + nameNormalized + trackingMode populated.
             val entities = seeds.map { s ->
                 ExerciseEntity(
                     name = s.name, primaryMuscle = s.primaryMuscle,
                     secondaryMuscles = json.encodeToString(s.secondaryMuscles),
                     equipment = s.equipment, level = s.level, type = s.type,
+                    trackingMode = s.trackingMode,
                     description = s.description, instructions = s.instructions,
                     seedId = s.id.ifEmpty { null },
                     nameNormalized = s.name.normalizeForSearch(),
@@ -58,7 +60,7 @@ class DatabaseSeeder @Inject constructor(
             }
             exerciseDao.insertAll(entities)
         } else {
-            // Existing install: three-phase differential update.
+            // Existing install: four-phase differential update.
             //
             // Phase 1 – backfill: assign seedId to existing seed rows (isCustom=0, seedId=NULL)
             // matched by exact name. This prevents Phase 2 from re-inserting exercises already
@@ -80,6 +82,7 @@ class DatabaseSeeder @Inject constructor(
                         name = seed.name, primaryMuscle = seed.primaryMuscle,
                         secondaryMuscles = json.encodeToString(seed.secondaryMuscles),
                         equipment = seed.equipment, level = seed.level, type = seed.type,
+                        trackingMode = seed.trackingMode,
                         description = seed.description, instructions = seed.instructions,
                         seedId = seed.id,
                         nameNormalized = seed.name.normalizeForSearch(),
@@ -94,6 +97,15 @@ class DatabaseSeeder @Inject constructor(
                 if (ex.nameNormalized.isEmpty()) {
                     exerciseDao.updateNameNormalized(ex.id, ex.name.normalizeForSearch())
                 }
+            }
+
+            // Phase 4 – align trackingMode for seed rows to the current JSON values.
+            // Run unconditionally each time the version bumps, so corrections to the seed
+            // (e.g. an exercise reclassified from REPS_WEIGHT to DURATION) propagate to
+            // existing installs. Custom exercises (seedId IS NULL) are never touched.
+            for (seed in seeds) {
+                if (seed.id.isEmpty()) continue
+                exerciseDao.updateTrackingModeBySeedId(seed.id, seed.trackingMode)
             }
         }
 

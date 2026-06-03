@@ -2,6 +2,44 @@
 
 ---
 
+## v3.9.0 — 3 June 2026
+
+### Added (Bloc 1 — séance C Full Body + variantes câble manquantes)
+- 5 nouveaux exercices seed :
+  - `pec-deck-rear-delt-fly` — Pec deck arrière (deltoïde postérieur)
+  - `cable-fly-poulie-haute` — Câble fly poulie haute
+  - `cable-fly-poulie-basse` — Câble fly poulie basse
+  - `oiseau-cable-poulie-haute` — Oiseau câble poulie haute (rear delt cable variant)
+  - `leg-press-unilaterale` — Leg press unilatérale
+- Programme seed `Full Body — 3 jours` : la 3e séance bascule de "Full Body A" répété à "Full Body C" (impact nouveaux installs uniquement)
+- `SEED_EXERCISES_VERSION` 3 → 4 → la phase 2 du seeder différentiel ajoute automatiquement les 5 nouveaux exercices chez tous les utilisateurs existants
+
+### Added (Bloc 2 — exercices time-based)
+- Nouveau champ `Exercise.trackingMode` (`ExerciseTrackingMode` enum) : valeurs `REPS_WEIGHT` (défaut, musculation), `DURATION` (cardio + holds isométriques), `DURATION_WEIGHT` (gainage lesté / farmer's walk)
+- `SetRow` (séance active) rend désormais des champs conditionnels selon le `trackingMode` de l'exercice :
+  - `REPS_WEIGHT` → poids + reps (comportement actuel)
+  - `DURATION` → champ unique `mm:ss`
+  - `DURATION_WEIGHT` → poids + `mm:ss`
+- `EditWorkoutSetDialog` (résumé + historique) adopte la même logique conditionnelle
+- Le résumé de séance et le détail historique formattent l'affichage des séries en fonction du `trackingMode` : un set de marche rapide affiche maintenant `25:00` au lieu de `0 × 0.0 kg`
+- Pré-existant : `WorkoutLogSetEntity.durationSecs` était déjà dans le schéma — la valeur n'était jamais consommée, c'est désormais le cas
+
+### Migration DB
+- v13 → v14 : `ALTER TABLE exercise ADD COLUMN trackingMode TEXT NOT NULL DEFAULT 'REPS_WEIGHT'`
+- Phase 4 nouvelle dans `DatabaseSeeder.seedExercisesDifferential()` : aligne le `trackingMode` des rows seed sur les valeurs du JSON courant. Tourne à chaque bump de version. Exercices custom (`seedId IS NULL`) jamais touchés.
+
+### Seed updates (trackingMode populé)
+- `DURATION` : `course-a-pied`, `velo-elliptique`, `rameur`, `velo-stationnaire`, `corde-a-sauter`, `ski-erg`, `natation-crawl`, `jumping-jacks`, `marche-rapide`, `mountain-climber`, `sprint-100m`, `assault-bike`, `hiit-tabata`, `planche`, `planche-laterale`, `copenhagen-plank`
+- `DURATION_WEIGHT` : `farmer-s-walk`
+
+### Notes
+- Le volume total continue d'être calculé sur `reps × weight` — les exercices cardio contribuent 0, comportement attendu (pas de régression)
+- Les exercices `DURATION` n'affichent pas de PR pondéral (max weight) — la progression chart par exercice reste basée sur le poids
+- Pour les utilisateurs existants : le programme Full Body 3-jours **ne sera pas modifié automatiquement** côté templates. Le template "Full Body C" doit être créé manuellement via Workout Builder
+- Backup compatible : `LogSetBackup.durationSecs` existait déjà → aucun changement de format JSON
+
+---
+
 ## v3.8.1 — 28 May 2026
 
 Petite vague de nettoyage post-audit — 3 fixes ciblés sur les items moyens restants.

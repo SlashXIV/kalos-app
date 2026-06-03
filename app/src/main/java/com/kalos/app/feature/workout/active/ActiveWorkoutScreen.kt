@@ -24,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.ExerciseStatus
+import com.kalos.app.core.domain.model.ExerciseTrackingMode
 import com.kalos.app.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -226,8 +227,10 @@ fun ActiveWorkoutScreen(
                         SetRow(
                             setNumber = setIdx + 1,
                             set = si,
+                            trackingMode = ep.templateExercise.exercise.trackingMode,
                             onRepsChange = { viewModel.onRepsChange(exIdx, setIdx, it) },
                             onWeightChange = { viewModel.onWeightChange(exIdx, setIdx, it) },
+                            onDurationChange = { viewModel.onDurationChange(exIdx, setIdx, it) },
                             onToggleComplete = { viewModel.toggleSetCompleted(exIdx, setIdx) },
                             onRemove = if (ep.sets.size > 1) {
                                 { viewModel.removeSet(exIdx, setIdx) }
@@ -443,8 +446,10 @@ private fun ExerciseActionBar(
 private fun SetRow(
     setNumber: Int,
     set: SetInput,
+    trackingMode: ExerciseTrackingMode,
     onRepsChange: (String) -> Unit,
     onWeightChange: (String) -> Unit,
+    onDurationChange: (String) -> Unit,
     onToggleComplete: () -> Unit,
     onRemove: (() -> Unit)?,
 ) {
@@ -453,6 +458,7 @@ private fun SetRow(
     // without interfering with the cursor during normal typing.
     var weightValue by remember { mutableStateOf(TextFieldValue(set.weight, TextRange(set.weight.length))) }
     var repsValue   by remember { mutableStateOf(TextFieldValue(set.reps,   TextRange(set.reps.length)))  }
+    var durationValue by remember { mutableStateOf(TextFieldValue(set.duration, TextRange(set.duration.length))) }
 
     LaunchedEffect(set.weight) {
         if (weightValue.text != set.weight) weightValue = TextFieldValue(set.weight, TextRange(set.weight.length))
@@ -460,6 +466,15 @@ private fun SetRow(
     LaunchedEffect(set.reps) {
         if (repsValue.text != set.reps) repsValue = TextFieldValue(set.reps, TextRange(set.reps.length))
     }
+    LaunchedEffect(set.duration) {
+        if (durationValue.text != set.duration) durationValue = TextFieldValue(set.duration, TextRange(set.duration.length))
+    }
+
+    val showReps = trackingMode == ExerciseTrackingMode.REPS_WEIGHT
+    val showWeight = trackingMode == ExerciseTrackingMode.REPS_WEIGHT ||
+        trackingMode == ExerciseTrackingMode.DURATION_WEIGHT
+    val showDuration = trackingMode == ExerciseTrackingMode.DURATION ||
+        trackingMode == ExerciseTrackingMode.DURATION_WEIGHT
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -473,32 +488,53 @@ private fun SetRow(
             color = if (set.isCompleted) MaterialTheme.colorScheme.primary
             else MaterialTheme.colorScheme.onSurface,
         )
-        OutlinedTextField(
-            value = weightValue,
-            onValueChange = { tv -> weightValue = tv; onWeightChange(tv.text) },
-            modifier = Modifier
-                .weight(1.5f)
-                .onFocusChanged { fs ->
-                    if (fs.isFocused)
-                        weightValue = weightValue.copy(selection = TextRange(0, weightValue.text.length))
-                },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            singleLine = true,
-            placeholder = { Text("0") },
-        )
-        OutlinedTextField(
-            value = repsValue,
-            onValueChange = { tv -> repsValue = tv; onRepsChange(tv.text) },
-            modifier = Modifier
-                .weight(1.5f)
-                .onFocusChanged { fs ->
-                    if (fs.isFocused)
-                        repsValue = repsValue.copy(selection = TextRange(0, repsValue.text.length))
-                },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            singleLine = true,
-            placeholder = { Text("0") },
-        )
+        if (showWeight) {
+            OutlinedTextField(
+                value = weightValue,
+                onValueChange = { tv -> weightValue = tv; onWeightChange(tv.text) },
+                modifier = Modifier
+                    .weight(1.5f)
+                    .onFocusChanged { fs ->
+                        if (fs.isFocused)
+                            weightValue = weightValue.copy(selection = TextRange(0, weightValue.text.length))
+                    },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                singleLine = true,
+                placeholder = { Text("kg") },
+            )
+        }
+        if (showReps) {
+            OutlinedTextField(
+                value = repsValue,
+                onValueChange = { tv -> repsValue = tv; onRepsChange(tv.text) },
+                modifier = Modifier
+                    .weight(1.5f)
+                    .onFocusChanged { fs ->
+                        if (fs.isFocused)
+                            repsValue = repsValue.copy(selection = TextRange(0, repsValue.text.length))
+                    },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true,
+                placeholder = { Text("reps") },
+            )
+        }
+        if (showDuration) {
+            // For DURATION-only mode the field takes the full row; for DURATION_WEIGHT it shares
+            // the row with the weight field at the same weight ratio.
+            OutlinedTextField(
+                value = durationValue,
+                onValueChange = { tv -> durationValue = tv; onDurationChange(tv.text) },
+                modifier = Modifier
+                    .weight(if (showWeight) 1.5f else 3f)
+                    .onFocusChanged { fs ->
+                        if (fs.isFocused)
+                            durationValue = durationValue.copy(selection = TextRange(0, durationValue.text.length))
+                    },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true,
+                placeholder = { Text("mm:ss") },
+            )
+        }
         IconButton(onClick = onToggleComplete) {
             Icon(
                 if (set.isCompleted) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked,

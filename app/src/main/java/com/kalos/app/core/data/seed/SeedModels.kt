@@ -25,6 +25,7 @@ data class SeedExercise(
     val equipment: String = "Aucun",
     val level: String = "Débutant",
     val type: String = "Musculation",
+    val trackingMode: String = "REPS_WEIGHT",  // REPS_WEIGHT | DURATION | DURATION_WEIGHT
     val description: String = "",
     val instructions: String = "",
 )

@@ -41,6 +41,9 @@ data class SetDraft(
     val reps: String,
     val weight: String,
     val isCompleted: Boolean,
+    // Stored as "mm:ss" or "ss" — empty for REPS_WEIGHT exercises. Default preserves
+    // compat with drafts written before the field existed.
+    val duration: String = "",
 )
 
 @Singleton

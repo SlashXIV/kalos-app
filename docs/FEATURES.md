@@ -1,6 +1,6 @@
 # Features
 
-> Version: 3.9.1
+> Version: 3.10.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -114,6 +114,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Auto-save draft (debounced, 400 ms) | Done | |
 | Resume interrupted session | Done | Dialog with elapsed time, staleness warning if > 24 h |
 | In-progress workout banner on Sport screen | Done | Non-intrusive card above tabs when a draft exists (v3.9.1) |
+| In-session load reference (PR + last session) | Done | Per-exercise memory aid, weight modes only, hidden when no history (v3.10.0) |
 | Finish session and save to history | Done | |
 
 ### Post-workout summary
@@ -179,7 +180,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |
 | Data import / restore | Done | Confirmation dialog (destructive) |
-| Version display | Done | Kalos 3.9.1 |
+| Version display | Done | Kalos 3.10.0 |
 
 ---
 

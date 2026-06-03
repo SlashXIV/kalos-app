@@ -21,6 +21,9 @@ interface WorkoutRepository {
     suspend fun getMaxWeight(exerciseId: Long): Float?
     suspend fun getMaxWeightsForExercises(exerciseIds: List<Long>): Map<Long, Float?>
 
+    /** Historical load reference (PR + last session top) for an exercise, null if no history. */
+    suspend fun getExerciseReference(exerciseId: Long): ExerciseReference?
+
     /**
      * Persists a complete workout atomically: log + exercises + sets + duration/volume.
      * On any failure, the entire transaction rolls back — no partial logs in history.

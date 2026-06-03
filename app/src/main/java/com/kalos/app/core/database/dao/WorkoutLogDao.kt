@@ -79,6 +79,27 @@ interface WorkoutLogDao {
     """)
     suspend fun getMaxWeights(exerciseIds: List<Long>): List<MaxWeightRow>
 
+    // Top completed weight of the most recent (by startedAt) finished session that
+    // contains this exercise. Used as an in-session memory aid ("dernière séance").
+    // Null if the exercise has no completed weighted set in history.
+    @Query("""
+        SELECT MAX(wls.weightKg)
+        FROM workout_log_set wls
+        JOIN workout_log_exercise wle ON wls.logExerciseId = wle.id
+        WHERE wle.exerciseId = :exerciseId
+          AND wls.isCompleted = 1
+          AND wls.weightKg > 0
+          AND wle.logId = (
+            SELECT wl.id FROM workout_log wl
+            JOIN workout_log_exercise wle2 ON wle2.logId = wl.id
+            JOIN workout_log_set wls2 ON wls2.logExerciseId = wle2.id
+            WHERE wle2.exerciseId = :exerciseId AND wls2.isCompleted = 1 AND wls2.weightKg > 0
+            ORDER BY wl.startedAt DESC
+            LIMIT 1
+          )
+    """)
+    suspend fun getLastSessionTopWeight(exerciseId: Long): Float?
+
     // Exercise progression
     data class ExerciseProgressionRow(val date: String, val maxWeight: Float)
 

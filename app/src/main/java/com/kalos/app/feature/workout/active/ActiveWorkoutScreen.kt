@@ -207,6 +207,28 @@ fun ActiveWorkoutScreen(
                         Text(ep.templateExercise.exercise.primaryMuscle,
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+                        // Historical load reference (PR + last session) — weight modes only.
+                        val mode = ep.templateExercise.exercise.trackingMode
+                        val showWeightRef = mode == ExerciseTrackingMode.REPS_WEIGHT ||
+                            mode == ExerciseTrackingMode.DURATION_WEIGHT
+                        val ref = state.exerciseReferences[ep.templateExercise.exercise.id]
+                        if (showWeightRef && ref != null) {
+                            val label = buildString {
+                                append("PR ${formatRefWeight(ref.prKg)} kg")
+                                // Skip "Dernière séance" when it just equals the PR (redundant).
+                                ref.lastSessionTopKg?.let { last ->
+                                    if (last != ref.prKg) append(" · Dernière séance ${formatRefWeight(last)} kg")
+                                }
+                            }
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                label,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+
                         Spacer(Modifier.height(4.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text("N°", modifier = Modifier.width(24.dp),
@@ -564,3 +586,7 @@ private fun formatElapsed(secs: Int): String {
     val s = secs % 60
     return if (h > 0) "%d:%02d:%02d".format(h, m, s) else "%d:%02d".format(m, s)
 }
+
+/** 100.0 → "100", 82.5 → "82.5". */
+private fun formatRefWeight(kg: Float): String =
+    if (kg == kg.toLong().toFloat()) kg.toLong().toString() else "%.1f".format(kg)

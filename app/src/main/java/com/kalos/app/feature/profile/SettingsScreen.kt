@@ -227,7 +227,7 @@ fun SettingsScreen(
             SettingsItem(
                 icon = Icons.Filled.Info,
                 title = "Version",
-                subtitle = "Kalos 3.9.1",
+                subtitle = "Kalos 3.10.0",
                 enabled = false,
             )
         }

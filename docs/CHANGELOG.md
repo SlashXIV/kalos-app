@@ -2,6 +2,24 @@
 
 ---
 
+## v3.10.0 — 3 June 2026
+
+### Added — repère de charge en séance
+- Pendant une séance active, chaque exercice affiche un repère historique sous le groupe musculaire : **PR (record absolu) + top set de la dernière séance**. Aide-mémoire pour ne pas avoir à fouiller l'historique en plein effort.
+- La mention "Dernière séance" est masquée quand elle égale le PR (évite la redondance).
+- Affiché uniquement pour les exercices à charge (`REPS_WEIGHT`, `DURATION_WEIGHT`). Les exercices durée pure (cardio, planches) n'ont pas de repère.
+- Masqué pour un exercice sans historique (première fois).
+- Le repère se met à jour automatiquement si un exercice est ajouté ou remplacé en cours de séance.
+
+### Technique
+- `WorkoutLogDao.getLastSessionTopWeight(exerciseId)` : top set complété de la séance terminée la plus récente contenant l'exercice (requête dédiée — ne réutilise pas `getExerciseProgression` dont le `LIMIT 20 ASC` ne garantit pas la séance la plus récente au-delà de 20 séances).
+- PR réutilise `getMaxWeight` (sans limite, donc correct).
+- `WorkoutRepository.getExerciseReference` + modèle `ExerciseReference(prKg, lastSessionTopKg)`.
+- `ActiveWorkoutViewModel` : `exerciseReferences: Map<Long, ExerciseReference>` chargé paresseusement via un collecteur réactif sur l'ensemble des ids d'exercices.
+- Les chiffres proviennent des séances terminées uniquement — la séance en cours (draft) n'est pas encore persistée, donc aucune contamination.
+
+---
+
 ## v3.9.1 — 3 June 2026
 
 Petite vague UX — deux ajustements pour fluidifier l'usage quotidien.

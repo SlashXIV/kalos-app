@@ -192,6 +192,15 @@ class WorkoutRepositoryImpl @Inject constructor(
             getLog(logId)
         }
 
+    override suspend fun getExerciseReference(exerciseId: Long): ExerciseReference? {
+        val pr = logDao.getMaxWeight(exerciseId) ?: return null
+        if (pr <= 0f) return null
+        return ExerciseReference(
+            prKg = pr,
+            lastSessionTopKg = logDao.getLastSessionTopWeight(exerciseId),
+        )
+    }
+
     override suspend fun getExerciseProgression(exerciseId: Long): List<Pair<String, Float>> =
         logDao.getExerciseProgression(exerciseId).map { it.date to it.maxWeight }
 

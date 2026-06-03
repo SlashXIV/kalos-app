@@ -51,6 +51,8 @@ data class ActiveWorkoutUiState(
     val confirmReplaceExIndex: Int = -1,
     val confirmReplaceExercise: Exercise? = null,
     val errorMessage: String? = null,
+    // Historical load reference per exercise id (PR + last session), loaded lazily.
+    val exerciseReferences: Map<Long, ExerciseReference> = emptyMap(),
 )
 
 @HiltViewModel
@@ -79,6 +81,23 @@ class ActiveWorkoutViewModel @Inject constructor(
                 .filter { !it.isLoading && !it.isSaving && it.savedLogId == null && !it.resumeAvailable }
                 .debounce(400)
                 .collect { s -> persistDraft(s) }
+        }
+        // Load the historical reference (PR + last session) for every exercise present,
+        // re-running when the exercise set changes (handles add / replace mid-session).
+        viewModelScope.launch {
+            _state
+                .map { s -> s.exercises.map { it.templateExercise.exercise.id }.toSet() }
+                .distinctUntilChanged()
+                .collect { ids ->
+                    val missing = ids - _state.value.exerciseReferences.keys
+                    if (missing.isEmpty()) return@collect
+                    val loaded = missing.mapNotNull { id ->
+                        workoutRepository.getExerciseReference(id)?.let { id to it }
+                    }.toMap()
+                    if (loaded.isNotEmpty()) {
+                        _state.update { it.copy(exerciseReferences = it.exerciseReferences + loaded) }
+                    }
+                }
         }
     }
 

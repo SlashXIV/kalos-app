@@ -2,6 +2,31 @@
 
 ---
 
+## v3.11.0 — 4 June 2026
+
+Vague 2 de la revue UX — les sujets structurants : états d'obsolescence, dépassement d'objectif, clarification produit.
+
+### Added — gestion de l'obsolescence de la séance en cours (C2 complet)
+- Au-delà de 24 h (`ActiveWorkoutStore.EXPIRY_MS`), la bannière passe en ton neutre (`surfaceVariant`) avec le titre "Séance interrompue" au lieu du vert engageant "Séance en cours"
+- Nouvelle action "Abandonner" sur la bannière obsolète, avec dialog de confirmation (les séries saisies sont perdues) — `WorkoutViewModel.discardDraft()` → le `draftFlow` réactif retire la bannière instantanément
+- Plus de drafts fantômes qui traînent indéfiniment avec une invitation à reprendre
+
+### Added — dépassement d'objectif visible (I1)
+- Nouveau token `ColorOverTarget` (orange ambré) : signal de pilotage, jamais rouge punitif
+- Barres macros : la valeur consommée passe en orange quand elle dépasse l'objectif (ex. "162" orange dans "162 / 160 g")
+- Anneau calories : au-delà de l'objectif, l'anneau passe en orange uni et le centre affiche "+99 kcal" en orange au lieu de "99 restants" en vert
+
+### Changed — programmes sans séances liées (I5 complet)
+- Bouton "Activer" désactivé quand un programme n'a aucune séance liée
+- Caption explicative sur la carte : pointe vers le flux existant (éditeur de séance → "Rattacher à un programme")
+
+### Added — clarification poids de référence vs dernière pesée (I4)
+- Caption sous le TDEE : "Le poids ci-dessus est la référence du calcul — il peut différer de votre dernière pesée"
+- Quand l'écart entre poids de référence et dernière pesée atteint 1 kg : bouton "Utiliser ma dernière pesée (X kg)" qui met à jour le poids de référence en un tap
+- Le resync respecte la règle existante d'EditProfile : les objectifs nutritionnels ne sont recalculés que s'ils ne sont pas personnalisés (`isCustom == false`) — les macros réglées à la main ne sont jamais écrasées
+
+---
+
 ## v3.10.1 — 4 June 2026
 
 Vague de quick wins issue de la revue UX/UI complète (9 écrans). Aucun changement fonctionnel — uniquement qualité perçue, lisibilité et cohérence.

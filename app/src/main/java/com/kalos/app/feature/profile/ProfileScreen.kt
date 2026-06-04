@@ -110,6 +110,22 @@ fun ProfileScreen(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                            Text(
+                                "Le poids ci-dessus est la référence du calcul — il peut différer de votre dernière pesée.",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            )
+                        }
+                        // Offer a one-tap resync when the logged weight has drifted ≥ 1 kg
+                        // from the reference weight used for the TDEE.
+                        val lastWeight = state.lastWeightKg
+                        if (lastWeight != null && kotlin.math.abs(lastWeight - profile.weightKg) >= 1f) {
+                            TextButton(
+                                onClick = viewModel::updateReferenceWeightFromLog,
+                                contentPadding = PaddingValues(0.dp),
+                            ) {
+                                Text("Utiliser ma dernière pesée (${formatProfileWeight(lastWeight)})")
+                            }
                         }
                     } else {
                         Text("Aucun profil configuré. Touchez « Modifier » pour commencer.",

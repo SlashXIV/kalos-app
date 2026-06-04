@@ -1,6 +1,6 @@
 # Features
 
-> Version: 3.10.1
+> Version: 3.11.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -27,7 +27,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Feature | Status | Notes |
 |---|---|---|
 | Date navigation (previous / next / today) | Done | Future dates disabled |
-| Daily summary (calorie ring + macro bars) | Done | |
+| Daily summary (calorie ring + macro bars) | Done | Over-target state: amber value + amber ring beyond goal (v3.11.0) |
 | 4 meal sections (Breakfast / Lunch / Dinner / Snacks) | Done | |
 | Add food to a meal | Done | |
 | Delete food from a meal | Done | |
@@ -113,7 +113,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Skip rest | Done | |
 | Auto-save draft (debounced, 400 ms) | Done | |
 | Resume interrupted session | Done | Dialog with elapsed time, staleness warning if > 24 h |
-| In-progress workout banner on Sport screen | Done | Non-intrusive card above tabs when a draft exists (v3.9.1) |
+| In-progress workout banner on Sport screen | Done | Non-intrusive card above tabs when a draft exists (v3.9.1); stale state (> 24 h) with neutral tone + Abandonner action (v3.11.0) |
 | In-session load reference (PR + last session) | Done | Per-exercise memory aid, weight modes only, hidden when no history (v3.10.0) |
 | Finish session and save to history | Done | |
 
@@ -168,6 +168,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Edit goals (manual or auto-calculated) | Done | Detailed breakdown before saving |
 | Body weight log and trend chart | Done | Entry dialog, 30-day line chart, recent history list |
 | Body weight card | Done | Last weight, date, delta vs previous; tappable → Suivi du poids; hidden if no entry |
+| Reference weight clarification + one-tap resync | Done | Caption under TDEE; "Utiliser ma dernière pesée" when drift ≥ 1 kg; custom goals never overwritten (v3.11.0) |
 
 ---
 
@@ -180,7 +181,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |
 | Data import / restore | Done | Confirmation dialog (destructive) |
-| Version display | Done | Kalos 3.10.1 |
+| Version display | Done | Kalos 3.11.0 |
 
 ---
 

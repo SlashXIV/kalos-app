@@ -14,6 +14,10 @@ val ColorCarbs                = Color(0xFFFBBF24)   // Amber 400
 val ColorFat                  = Color(0xFFF87171)   // Rose 400
 val ColorCalories             = PrimaryGreen
 
+// Over-target signal (macros / calories beyond goal): amber warning, never red —
+// a cue for steering, not a punishment.
+val ColorOverTarget           = AccentOrange
+
 // ── Dark theme (app always forces dark) ───────────────────────────────────────
 val md_theme_dark_primary              = PrimaryGreen
 val md_theme_dark_onPrimary            = Color(0xFF022C22)

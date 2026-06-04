@@ -32,6 +32,24 @@ fun WorkoutScreen(
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Séances", "Programmes", "Historique")
     var templateToDelete by remember { mutableStateOf<WorkoutTemplate?>(null) }
+    var showAbandonConfirm by remember { mutableStateOf(false) }
+
+    if (showAbandonConfirm) {
+        AlertDialog(
+            onDismissRequest = { showAbandonConfirm = false },
+            title = { Text("Abandonner la séance ?") },
+            text = { Text("Les séries saisies dans cette séance interrompue seront définitivement perdues.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showAbandonConfirm = false
+                    viewModel.discardDraft()
+                }) { Text("Abandonner", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAbandonConfirm = false }) { Text("Annuler") }
+            },
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -66,6 +84,9 @@ fun WorkoutScreen(
                     onResume = {
                         navController.navigate(Screen.ActiveWorkout.route(banner.templateId))
                     },
+                    onAbandon = if (banner.isStale) {
+                        { showAbandonConfirm = true }
+                    } else null,
                 )
             }
             TabRow(selectedTabIndex = selectedTab) {
@@ -117,19 +138,27 @@ fun WorkoutScreen(
 private fun ActiveWorkoutBanner(
     banner: DraftBannerState,
     onResume: () -> Unit,
+    onAbandon: (() -> Unit)? = null,
 ) {
     val elapsedLabel = formatElapsedSince(banner.startedAt)
     val title = banner.templateName.ifBlank { "Séance libre" }
     val plural = if (banner.exerciseCount > 1) "exercices" else "exercice"
+
+    // Stale draft (> 24h): neutral tone instead of the engaging green — the session is
+    // almost certainly abandoned, the banner should inform, not invite.
+    val containerColor = if (banner.isStale) MaterialTheme.colorScheme.surfaceVariant
+                         else MaterialTheme.colorScheme.primaryContainer
+    val contentColor = if (banner.isStale) MaterialTheme.colorScheme.onSurfaceVariant
+                       else MaterialTheme.colorScheme.onPrimaryContainer
+    val headline = if (banner.isStale) "Séance interrompue · $title"
+                   else "Séance en cours · $title"
 
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .clickable(onClick = onResume),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
+        colors = CardDefaults.elevatedCardColors(containerColor = containerColor),
     ) {
         Row(
             modifier = Modifier
@@ -140,27 +169,35 @@ private fun ActiveWorkoutBanner(
             Icon(
                 Icons.Filled.Timer,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                tint = contentColor,
                 modifier = Modifier.size(20.dp),
             )
             Spacer(Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "Séance en cours · $title",
+                    headline,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = contentColor,
                 )
                 Text(
                     "${banner.exerciseCount} $plural · $elapsedLabel",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                    color = contentColor.copy(alpha = 0.8f),
                 )
+            }
+            if (onAbandon != null) {
+                TextButton(
+                    onClick = onAbandon,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error,
+                    ),
+                ) {
+                    Text("Abandonner")
+                }
             }
             TextButton(
                 onClick = onResume,
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ),
+                colors = ButtonDefaults.textButtonColors(contentColor = contentColor),
             ) {
                 Text("Reprendre")
             }

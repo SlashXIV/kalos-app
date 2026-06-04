@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.kalos.app.core.ui.theme.ColorOverTarget
 import kotlin.math.roundToInt
 
 @Composable
@@ -32,6 +33,7 @@ fun CalorieProgressRing(
         animationSpec = tween(durationMillis = 900, easing = EaseOutCubic),
         label = "calorieRing"
     )
+    val isOver = goal > 0 && consumed.roundToInt() > goal
     val trackColor = MaterialTheme.colorScheme.surfaceVariant
     val primaryColor = MaterialTheme.colorScheme.primary
     val secondaryColor = MaterialTheme.colorScheme.secondary
@@ -56,19 +58,31 @@ fun CalorieProgressRing(
                 size = arcSize,
                 style = Stroke(strokePx, cap = StrokeCap.Round),
             )
-            // Progress arc with gradient brush
+            // Progress arc — green gradient on target, solid amber once the goal is exceeded.
             if (animatedProgress > 0f) {
-                drawArc(
-                    brush = Brush.sweepGradient(
-                        colors = listOf(primaryColor, secondaryColor, primaryColor),
-                    ),
-                    startAngle = -90f,
-                    sweepAngle = 360f * animatedProgress,
-                    useCenter = false,
-                    topLeft = topLeft,
-                    size = arcSize,
-                    style = Stroke(strokePx, cap = StrokeCap.Round),
-                )
+                if (isOver) {
+                    drawArc(
+                        color = ColorOverTarget,
+                        startAngle = -90f,
+                        sweepAngle = 360f * animatedProgress,
+                        useCenter = false,
+                        topLeft = topLeft,
+                        size = arcSize,
+                        style = Stroke(strokePx, cap = StrokeCap.Round),
+                    )
+                } else {
+                    drawArc(
+                        brush = Brush.sweepGradient(
+                            colors = listOf(primaryColor, secondaryColor, primaryColor),
+                        ),
+                        startAngle = -90f,
+                        sweepAngle = 360f * animatedProgress,
+                        useCenter = false,
+                        topLeft = topLeft,
+                        size = arcSize,
+                        style = Stroke(strokePx, cap = StrokeCap.Round),
+                    )
+                }
             }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -82,12 +96,19 @@ fun CalorieProgressRing(
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            val remaining = (goal - consumed.roundToInt()).coerceAtLeast(0)
-            Text(
-                text = "$remaining restants",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary,
-            )
+            if (isOver) {
+                Text(
+                    text = "+${consumed.roundToInt() - goal} kcal",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = ColorOverTarget,
+                )
+            } else {
+                Text(
+                    text = "${goal - consumed.roundToInt()} restants",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
         }
     }
 }

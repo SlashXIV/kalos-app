@@ -19,6 +19,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.kalos.app.core.ui.theme.ColorCarbs
 import com.kalos.app.core.ui.theme.ColorFat
+import com.kalos.app.core.ui.theme.ColorOverTarget
 import com.kalos.app.core.ui.theme.ColorProtein
 import kotlin.math.roundToInt
 
@@ -50,9 +51,16 @@ fun MacroRow(
             )
             // "162 / 160 g" inline — single fixation instead of value here + goal on its own
             // line below the bar. Consumed keeps the macro color; goal stays muted.
+            // Over target: the consumed value switches to the amber warning tone.
+            val isOver = goal > 0 && consumed.roundToInt() > goal
             Text(
                 buildAnnotatedString {
-                    withStyle(SpanStyle(color = color, fontWeight = FontWeight.SemiBold)) {
+                    withStyle(
+                        SpanStyle(
+                            color = if (isOver) ColorOverTarget else color,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    ) {
                         append("${consumed.roundToInt()}")
                     }
                     withStyle(

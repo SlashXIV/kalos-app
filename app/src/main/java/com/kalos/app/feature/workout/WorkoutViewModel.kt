@@ -16,6 +16,9 @@ data class DraftBannerState(
     val templateName: String,
     val exerciseCount: Int,
     val startedAt: Long,
+    // Draft older than ActiveWorkoutStore.EXPIRY_MS (24h) — almost certainly abandoned.
+    // The banner switches to a neutral "Séance interrompue" tone and offers discarding.
+    val isStale: Boolean,
 )
 
 data class WorkoutUiState(
@@ -42,6 +45,7 @@ class WorkoutViewModel @Inject constructor(
                     templateName = it.templateName,
                     exerciseCount = it.exercises.size,
                     startedAt = it.startedAt,
+                    isStale = System.currentTimeMillis() - it.startedAt > ActiveWorkoutStore.EXPIRY_MS,
                 )
             },
             isLoading = false,
@@ -55,4 +59,7 @@ class WorkoutViewModel @Inject constructor(
     fun deleteTemplate(template: WorkoutTemplate) {
         viewModelScope.launch { workoutRepository.deleteTemplate(template) }
     }
+
+    /** Discards the in-progress draft. The reactive draftFlow removes the banner automatically. */
+    fun discardDraft() = activeWorkoutStore.clear()
 }

@@ -150,6 +150,15 @@ private fun ProgramCard(
                     )
                 })
             }
+            val hasLinkedWorkouts = program.workouts.isNotEmpty()
+            if (!hasLinkedWorkouts) {
+                Text(
+                    "Aucune séance liée — activer ce programme n'aurait aucun effet. " +
+                        "Liez des séances depuis l'éditeur de séance (« Rattacher à un programme »).",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
@@ -158,7 +167,9 @@ private fun ProgramCard(
                 TextButton(onClick = onDetail) { Text("Détails") }
                 if (!program.isActive) {
                     Spacer(Modifier.width(8.dp))
-                    Button(onClick = onActivate) { Text("Activer") }
+                    // Disabled when empty: the CTA must not promise an activation that
+                    // would produce an empty program.
+                    Button(onClick = onActivate, enabled = hasLinkedWorkouts) { Text("Activer") }
                 }
             }
         }

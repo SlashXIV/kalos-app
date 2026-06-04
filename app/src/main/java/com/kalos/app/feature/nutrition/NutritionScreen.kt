@@ -79,16 +79,30 @@ fun NutritionScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = {
-                        clipboardManager.setText(AnnotatedString(buildDailySummary(state)))
-                        scope.launch { snackbarHostState.showSnackbar("Résumé nutritionnel copié") }
-                    }) {
-                        Icon(Icons.Filled.ContentCopy, contentDescription = "Copier le résumé")
-                    }
                     if (initialDate == null) {
                         IconButton(onClick = { navController.navigate(Screen.NutritionHistory.route) }) {
                             Icon(Icons.Filled.BarChart, contentDescription = "Historique")
                         }
+                    }
+                    // Copy lives in an overflow menu with an explicit label — a bare copy
+                    // glyph next to the chart icon didn't communicate what gets copied.
+                    var menuExpanded by remember { mutableStateOf(false) }
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(Icons.Filled.MoreVert, contentDescription = "Plus d'options")
+                    }
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false },
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Copier le résumé du jour") },
+                            leadingIcon = { Icon(Icons.Filled.ContentCopy, contentDescription = null) },
+                            onClick = {
+                                menuExpanded = false
+                                clipboardManager.setText(AnnotatedString(buildDailySummary(state)))
+                                scope.launch { snackbarHostState.showSnackbar("Résumé nutritionnel copié") }
+                            },
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -403,14 +417,13 @@ private fun HydrationCard(
                         Text("+${ml}ml", style = MaterialTheme.typography.labelMedium)
                     }
                 }
-                FilledTonalButton(
+                // Same outlined treatment as the quick-add buttons: "Autre" is the least
+                // frequent action, it must not be the most prominent one.
+                OutlinedButton(
                     onClick = { showCustomDialog = true },
                     modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
-                    colors = ButtonDefaults.filledTonalButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    ),
+                    border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.dp),
                 ) {
                     Text("Autre", style = MaterialTheme.typography.labelMedium)
                 }

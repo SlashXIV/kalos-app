@@ -2,6 +2,36 @@
 
 ---
 
+## v3.12.0 — 4 June 2026
+
+Clôture de la revue UX (lot cosmétique restant) + trois corrections de logique produit.
+
+### Added — réordonnancement des exercices dans l'éditeur de séance
+- Flèches haut/bas compactes sur chaque carte exercice (`WorkoutBuilderViewModel.moveExercise`) — fini le supprimer/re-ajouter pour réordonner
+- L'ordre est persisté à l'enregistrement via `orderIndex` (mécanisme existant, aucun changement de schéma)
+
+### Fixed — durée de séance honnête (idle gap exclu)
+- `WorkoutDraft.lastSavedAt` : timestamp du dernier auto-save (cadence ~400 ms pendant l'activité)
+- À la reprise d'un draft, l'écart d'inactivité (`now - lastSavedAt`) est exclu de la durée s'il dépasse 5 min — une séance interrompue 19 h n'est plus enregistrée comme une séance de 19 h. Les pauses courtes (repos entre séries, process death bref) restent comptées
+- L'obsolescence (bannière + dialog de reprise) est désormais mesurée depuis la dernière activité et non depuis le début de séance — un draft repris puis re-abandonné vieillit correctement
+- Drafts antérieurs (`lastSavedAt = 0`) : comportement inchangé (compat)
+
+### Changed — programmes seedés vides retirés
+- `seed_programs.json` : PPL et Upper/Lower retirés (coquilles sans séances liées, jamais activables) — seul Full Body 3 jours reste pour les nouveaux installs
+- Suppression locale : tout programme **inactif** (seedé ou custom) peut désormais être supprimé depuis sa carte (icône poubelle grise + confirmation) — permet de nettoyer les coquilles héritées sur les installs existants
+
+### Changed — lot cosmétique final de la revue UX
+- Hydratation : "Autre" passe en outlined comme les boutons +250/+500/+750 (l'action la moins fréquente n'est plus la plus saillante)
+- Stats de séance (résumé + détail historique) : `FlowRow` — sur petit écran, une stat passe à la ligne entière au lieu de couper "615 / kg"
+- Carte "Poids corporel" du Profil : chevron trailing (cohérence avec les autres cartes navigantes)
+- Avatar Profil : initiale du prénom au lieu de l'icône générique (fallback icône si nom vide)
+- Paramètres : suppression du titre de section "Notifications" qui dupliquait le titre de l'item
+- Pencil d'édition de série : 11 dp/45 % → 14 dp/60 % (découvrabilité)
+- Historique Sport : l'icône copy isolée devient un bouton libellé "Copier l'historique"
+- Header Nutrition : l'action copier passe dans un menu ⋮ avec libellé explicite "Copier le résumé du jour" ; l'icône historique (navigation fréquente) reste visible
+
+---
+
 ## v3.11.0 — 4 June 2026
 
 Vague 2 de la revue UX — les sujets structurants : états d'obsolescence, dépassement d'objectif, clarification produit.

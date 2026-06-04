@@ -121,12 +121,7 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             // ── Notifications ────────────────────────────────────────────────
-            Text(
-                "Notifications",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
+            // No section header here: it duplicated the item's own title verbatim.
             SettingsItem(
                 icon = Icons.Filled.Notifications,
                 title = "Notifications",
@@ -227,7 +222,7 @@ fun SettingsScreen(
             SettingsItem(
                 icon = Icons.Filled.Info,
                 title = "Version",
-                subtitle = "Kalos 3.11.0",
+                subtitle = "Kalos 3.12.0",
                 enabled = false,
             )
         }

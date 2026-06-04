@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -62,11 +63,23 @@ fun ProfileScreen(
                     color = MaterialTheme.colorScheme.primaryContainer,
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Filled.Person, null,
-                            modifier = Modifier.size(40.dp),
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
+                        val initial = profile?.name?.trim()?.firstOrNull()?.uppercaseChar()
+                        if (initial != null) {
+                            // First-name initial reads warmer than a generic glyph.
+                            Text(
+                                initial.toString(),
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                ),
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            )
+                        } else {
+                            Icon(
+                                Icons.Filled.Person, null,
+                                modifier = Modifier.size(40.dp),
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            )
+                        }
                     }
                 }
                 Column {
@@ -215,16 +228,21 @@ private fun BodyWeightCard(weightKg: Float, date: String, delta: Float?, onClick
                     Text(weightLabel, style = MaterialTheme.typography.titleMedium)
                 }
             }
-            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(dateLabel, style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
-                if (delta != null) {
-                    val sign = if (delta >= 0f) "+" else ""
-                    val deltaLabel = if (delta == delta.toLong().toFloat()) "${sign}${delta.toLong()} kg"
-                                     else "${sign}${"%.1f".format(delta)} kg"
-                    Text(deltaLabel, style = MaterialTheme.typography.bodySmall,
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(dateLabel, style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (delta != null) {
+                        val sign = if (delta >= 0f) "+" else ""
+                        val deltaLabel = if (delta == delta.toLong().toFloat()) "${sign}${delta.toLong()} kg"
+                                         else "${sign}${"%.1f".format(delta)} kg"
+                        Text(deltaLabel, style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
+                // Chevron: every tappable navigation card carries one (consistency with
+                // "Modifier le profil" / "Modifier les objectifs").
+                Icon(Icons.Filled.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

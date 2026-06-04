@@ -208,6 +208,29 @@ fun WorkoutBuilderScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
+                            // Stacked up/down arrows: compact reorder without drag & drop.
+                            Column {
+                                IconButton(
+                                    onClick = { viewModel.moveExercise(index, -1) },
+                                    enabled = index > 0,
+                                    modifier = Modifier.size(28.dp),
+                                ) {
+                                    Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "Monter",
+                                        modifier = Modifier.size(20.dp),
+                                        tint = if (index > 0) MaterialTheme.colorScheme.onSurfaceVariant
+                                               else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
+                                }
+                                IconButton(
+                                    onClick = { viewModel.moveExercise(index, 1) },
+                                    enabled = index < state.exercises.size - 1,
+                                    modifier = Modifier.size(28.dp),
+                                ) {
+                                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Descendre",
+                                        modifier = Modifier.size(20.dp),
+                                        tint = if (index < state.exercises.size - 1) MaterialTheme.colorScheme.onSurfaceVariant
+                                               else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
+                                }
+                            }
                             IconButton(onClick = {
                                 editingExerciseIndex = index
                                 editSets = te.defaultSets.toString()

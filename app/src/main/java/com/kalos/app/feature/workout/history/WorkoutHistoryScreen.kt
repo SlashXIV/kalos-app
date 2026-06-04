@@ -130,14 +130,17 @@ private fun WorkoutHistoryContent(
         ) {
             if (onCopyClick != null) {
                 item {
+                    // Labeled action instead of a lone copy glyph — "copy what?" now has
+                    // a visible answer.
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        IconButton(onClick = onCopyClick) {
+                        TextButton(onClick = onCopyClick) {
                             Icon(
                                 Icons.Filled.ContentCopy,
-                                contentDescription = "Copier l'historique",
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
                             )
+                            Spacer(Modifier.width(6.dp))
+                            Text("Copier l'historique", style = MaterialTheme.typography.labelMedium)
                         }
                     }
                 }

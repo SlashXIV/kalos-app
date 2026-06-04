@@ -15,9 +15,11 @@ data class DraftBannerState(
     val templateId: Long,
     val templateName: String,
     val exerciseCount: Int,
-    val startedAt: Long,
-    // Draft older than ActiveWorkoutStore.EXPIRY_MS (24h) — almost certainly abandoned.
-    // The banner switches to a neutral "Séance interrompue" tone and offers discarding.
+    // Last activity timestamp (last auto-save; falls back to session start for legacy
+    // drafts). Drives both the "il y a X" label and the staleness flag.
+    val lastActiveAt: Long,
+    // Draft inactive longer than ActiveWorkoutStore.EXPIRY_MS (24h) — almost certainly
+    // abandoned. The banner switches to a neutral "Séance interrompue" tone and offers discarding.
     val isStale: Boolean,
 )
 
@@ -40,12 +42,15 @@ class WorkoutViewModel @Inject constructor(
         WorkoutUiState(
             templates = templates,
             draftBanner = draft?.let {
+                // Both the elapsed label and the staleness flag are measured from the last
+                // activity (auto-save), falling back to session start for legacy drafts.
+                val lastActive = if (it.lastSavedAt > 0) it.lastSavedAt else it.startedAt
                 DraftBannerState(
                     templateId = it.templateId,
                     templateName = it.templateName,
                     exerciseCount = it.exercises.size,
-                    startedAt = it.startedAt,
-                    isStale = System.currentTimeMillis() - it.startedAt > ActiveWorkoutStore.EXPIRY_MS,
+                    lastActiveAt = lastActive,
+                    isStale = System.currentTimeMillis() - lastActive > ActiveWorkoutStore.EXPIRY_MS,
                 )
             },
             isLoading = false,

@@ -1,6 +1,6 @@
 # Features
 
-> Version: 3.11.0
+> Version: 3.12.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -96,6 +96,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Create workout template | Done | |
 | Edit existing template | Done | |
 | Add / remove exercises | Done | Duplicate prevention: already-added exercises are hidden in the catalog and disabled in the active-workout picker (v3.9.1) |
+| Reorder exercises | Done | Up/down arrows per card, order persisted via orderIndex (v3.12.0) |
 | Edit sets × reps per exercise | Done | |
 | Link template to a program and day | Done | |
 
@@ -112,7 +113,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Automatic rest timer (triggered on set completion) | Done | Duration configurable per exercise |
 | Skip rest | Done | |
 | Auto-save draft (debounced, 400 ms) | Done | |
-| Resume interrupted session | Done | Dialog with elapsed time, staleness warning if > 24 h |
+| Resume interrupted session | Done | Dialog with elapsed time, staleness warning if > 24 h; idle gaps > 5 min excluded from recorded duration (v3.12.0) |
 | In-progress workout banner on Sport screen | Done | Non-intrusive card above tabs when a draft exists (v3.9.1); stale state (> 24 h) with neutral tone + Abandonner action (v3.11.0) |
 | In-session load reference (PR + last session) | Done | Per-exercise memory aid, weight modes only, hidden when no history (v3.10.0) |
 | Finish session and save to history | Done | |
@@ -136,7 +137,7 @@ Statuses: **Done** · **Partial** · **Planned**
 
 | Feature | Status | Notes |
 |---|---|---|
-| Display 3 seeded programs (PPL, Upper/Lower, Full Body) | Done | |
+| Seeded program (Full Body 3 jours) | Done | PPL and Upper/Lower removed in v3.12.0 (empty shells); inactive programs deletable from their card |
 | Activate / deactivate a program | Done | |
 | Program detail (days and assigned templates) | Done | |
 | Create / edit custom programs | Done | Full editor: name, description, duration, day assignments via template picker |
@@ -181,7 +182,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |
 | Data import / restore | Done | Confirmation dialog (destructive) |
-| Version display | Done | Kalos 3.11.0 |
+| Version display | Done | Kalos 3.12.0 |
 
 ---
 

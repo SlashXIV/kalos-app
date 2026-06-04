@@ -17,6 +17,10 @@ data class WorkoutDraft(
     val templateId: Long,
     val templateName: String,
     val startedAt: Long,
+    // Wall-clock of the last auto-save (~400ms cadence while the session is active).
+    // Used to exclude idle gaps (app killed, session abandoned for hours) from the
+    // recorded duration on resume, and as the staleness reference. 0 = legacy draft.
+    val lastSavedAt: Long = 0L,
     val currentExIndex: Int = 0,
     val restStartedAt: Long? = null,
     val restDurationSecs: Int = 0,

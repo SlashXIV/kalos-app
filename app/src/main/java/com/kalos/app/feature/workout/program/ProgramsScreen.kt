@@ -65,6 +65,25 @@ private fun ProgramsContent(
     modifier: Modifier = Modifier,
 ) {
     val programs by viewModel.programs.collectAsStateWithLifecycle()
+    var programToDelete by remember { mutableStateOf<TrainingProgram?>(null) }
+
+    programToDelete?.let { program ->
+        AlertDialog(
+            onDismissRequest = { programToDelete = null },
+            title = { Text("Supprimer le programme") },
+            text = { Text("Voulez-vous vraiment supprimer « ${program.name} » ? Cette action est irréversible.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.delete(program.id)
+                    programToDelete = null
+                }) { Text("Supprimer", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { programToDelete = null }) { Text("Annuler") }
+            },
+        )
+    }
+
     if (programs.isEmpty()) {
         Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             EmptyState(
@@ -89,6 +108,11 @@ private fun ProgramsContent(
                     onEdit = if (program.isCustom) {
                         { navController.navigate(Screen.ProgramEditor.edit(program.id)) }
                     } else null,
+                    // Any inactive program (seeded or custom) can be removed — lets users
+                    // clean up legacy seeded shells (PPL, Upper/Lower) shipped before v3.12.
+                    onDelete = if (!program.isActive) {
+                        { programToDelete = program }
+                    } else null,
                 )
             }
         }
@@ -102,6 +126,7 @@ private fun ProgramCard(
     onActivate: () -> Unit,
     onDetail: () -> Unit,
     onEdit: (() -> Unit)? = null,
+    onDelete: (() -> Unit)? = null,
 ) {
     ElevatedCard(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -131,6 +156,16 @@ private fun ProgramCard(
                                 Icons.Filled.Edit,
                                 "Modifier",
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        }
+                    }
+                    if (onDelete != null) {
+                        IconButton(onClick = onDelete) {
+                            Icon(
+                                Icons.Filled.Delete,
+                                "Supprimer",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                 modifier = Modifier.size(18.dp),
                             )
                         }

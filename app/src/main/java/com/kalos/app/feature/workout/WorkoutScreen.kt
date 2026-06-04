@@ -140,7 +140,7 @@ private fun ActiveWorkoutBanner(
     onResume: () -> Unit,
     onAbandon: (() -> Unit)? = null,
 ) {
-    val elapsedLabel = formatElapsedSince(banner.startedAt)
+    val elapsedLabel = formatElapsedSince(banner.lastActiveAt)
     val title = banner.templateName.ifBlank { "Séance libre" }
     val plural = if (banner.exerciseCount > 1) "exercices" else "exercice"
 

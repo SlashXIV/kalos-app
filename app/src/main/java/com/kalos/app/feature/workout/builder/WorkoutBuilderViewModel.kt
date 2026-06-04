@@ -108,6 +108,18 @@ class WorkoutBuilderViewModel @Inject constructor(
         }
     }
 
+    /** Swaps the exercise at [index] with its neighbor ([delta] = -1 up, +1 down).
+     *  Order is persisted on save via orderIndex = list position. */
+    fun moveExercise(index: Int, delta: Int) {
+        _state.update { state ->
+            val target = index + delta
+            if (index !in state.exercises.indices || target !in state.exercises.indices) return@update state
+            val list = state.exercises.toMutableList()
+            list[index] = list[target].also { list[target] = list[index] }
+            state.copy(exercises = list)
+        }
+    }
+
     fun updateExerciseParams(index: Int, sets: Int, reps: Int) {
         _state.update { state ->
             state.copy(exercises = state.exercises.mapIndexed { i, te ->

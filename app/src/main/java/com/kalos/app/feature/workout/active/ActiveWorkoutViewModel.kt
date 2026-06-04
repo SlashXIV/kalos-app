@@ -63,6 +63,10 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     companion object {
         const val ADD_EXERCISE_SENTINEL = Int.MAX_VALUE
+
+        // Idle gaps longer than this are excluded from the recorded session duration
+        // on resume; shorter gaps count as in-session rest.
+        const val IDLE_GAP_THRESHOLD_MS = 5 * 60 * 1000L
     }
 
     private val _state = MutableStateFlow(ActiveWorkoutUiState())
@@ -108,7 +112,10 @@ class ActiveWorkoutViewModel @Inject constructor(
             val draft = store.load()
             when {
                 draft != null && draft.templateId == id -> {
-                    val isStale = System.currentTimeMillis() - draft.startedAt > ActiveWorkoutStore.EXPIRY_MS
+                    // Staleness is measured from the last activity (auto-save), not the
+                    // session start — a draft resumed then re-paused ages from its last touch.
+                    val reference = if (draft.lastSavedAt > 0) draft.lastSavedAt else draft.startedAt
+                    val isStale = System.currentTimeMillis() - reference > ActiveWorkoutStore.EXPIRY_MS
                     _state.update {
                         it.copy(
                             templateName = draft.templateName,
@@ -130,7 +137,17 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     fun resumeDraft() {
         val draft = store.load() ?: return
-        workoutStartTime = draft.startedAt
+        // Exclude the idle gap (time between the last auto-save and now) from the
+        // session duration: a séance paused 19h must not be recorded as a 19h séance.
+        // Short gaps (< 5 min — process death mid-workout, quick app switch) still count
+        // as legitimate rest time. Legacy drafts (lastSavedAt == 0) keep the old behavior.
+        val now = System.currentTimeMillis()
+        val idleGap = if (draft.lastSavedAt > 0) now - draft.lastSavedAt else 0L
+        workoutStartTime = if (idleGap > IDLE_GAP_THRESHOLD_MS) {
+            draft.startedAt + idleGap
+        } else {
+            draft.startedAt
+        }
         val exercises = draft.exercises.map { ed ->
             ExerciseProgress(
                 templateExercise = TemplateExercise(
@@ -530,6 +547,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                 templateId = loadedTemplateId,
                 templateName = s.templateName,
                 startedAt = workoutStartTime,
+                lastSavedAt = System.currentTimeMillis(),
                 currentExIndex = s.currentExIndex,
                 restStartedAt = if (s.isResting) restStartedAt else null,
                 restDurationSecs = if (s.isResting) restDurationSecs else 0,

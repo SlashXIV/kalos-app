@@ -1,33 +1,5 @@
 [
   {
-    "id": 1,
-    "name": "PPL — Push Pull Legs",
-    "description": "Programme classique 6 jours : Pectoraux/Épaules/Triceps, Dos/Biceps, Jambes en alternance.",
-    "durationWeeks": 8,
-    "daysPerWeek": 6,
-    "workouts": [
-      { "dayOfWeek": 1, "weekNumber": 1, "templateName": "Push — Pectoraux & Épaules" },
-      { "dayOfWeek": 2, "weekNumber": 1, "templateName": "Pull — Dos & Biceps" },
-      { "dayOfWeek": 3, "weekNumber": 1, "templateName": "Legs — Jambes & Fessiers" },
-      { "dayOfWeek": 4, "weekNumber": 1, "templateName": "Push — Variation" },
-      { "dayOfWeek": 5, "weekNumber": 1, "templateName": "Pull — Variation" },
-      { "dayOfWeek": 6, "weekNumber": 1, "templateName": "Legs — Variation" }
-    ]
-  },
-  {
-    "id": 2,
-    "name": "Upper/Lower — 4 jours",
-    "description": "Programme 4 jours : haut du corps lundi/jeudi, bas du corps mardi/vendredi.",
-    "durationWeeks": 8,
-    "daysPerWeek": 4,
-    "workouts": [
-      { "dayOfWeek": 1, "weekNumber": 1, "templateName": "Upper A — Force" },
-      { "dayOfWeek": 2, "weekNumber": 1, "templateName": "Lower A — Force" },
-      { "dayOfWeek": 4, "weekNumber": 1, "templateName": "Upper B — Hypertrophie" },
-      { "dayOfWeek": 5, "weekNumber": 1, "templateName": "Lower B — Hypertrophie" }
-    ]
-  },
-  {
     "id": 3,
     "name": "Full Body — 3 jours",
     "description": "Programme débutant 3 jours/semaine. Corps entier à chaque séance pour maximiser la fréquence.",

@@ -101,7 +101,7 @@ class WorkoutSummaryViewModel @Inject constructor(
     fun onErrorShown() = _uiState.update { it.copy(errorMessage = null) }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun WorkoutSummaryScreen(
     navController: NavController,
@@ -161,7 +161,10 @@ fun WorkoutSummaryScreen(
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(l.templateName.ifBlank { "Séance libre" },
                             style = MaterialTheme.typography.titleLarge)
-                        Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(20.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
                             SummaryStat(Icons.Filled.Timer, formatDuration(l.durationSecs))
                             SummaryStat(Icons.Filled.FitnessCenter, "${l.exercises.size} exercices")
                             if (l.totalVolumeKg > 0) {
@@ -207,8 +210,8 @@ fun WorkoutSummaryScreen(
                                             Icon(
                                                 Icons.Filled.Edit,
                                                 contentDescription = "Modifier",
-                                                modifier = Modifier.size(11.dp),
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+                                                modifier = Modifier.size(14.dp),
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                             )
                                         }
                                     }

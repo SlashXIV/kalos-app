@@ -242,6 +242,7 @@ private fun LogDetailContent(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SessionHeaderCard(log: WorkoutLog) {
     ElevatedCard(modifier = Modifier.fillMaxWidth()) {
@@ -256,7 +257,12 @@ private fun SessionHeaderCard(log: WorkoutLog) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-            Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+            // FlowRow: on narrow screens a 4th stat wraps as a whole unit instead of
+            // breaking mid-text ("615" / "kg" stacked).
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 if (log.durationSecs > 0) {
                     DetailStat(Icons.Filled.Timer, formatDuration(log.durationSecs))
                 }
@@ -385,8 +391,8 @@ private fun ExerciseDetailCard(
                             Icon(
                                 Icons.Filled.Edit,
                                 contentDescription = "Modifier",
-                                modifier = Modifier.size(11.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                             )
                         }
                     }

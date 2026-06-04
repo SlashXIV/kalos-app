@@ -1,6 +1,8 @@
 # Roadmap
 
-> Last updated: v3.9.0 — 3 June 2026
+> Last updated: v3.12.0 — 4 June 2026
+>
+> The June 2026 UX review cycle (18 findings, 3 waves: v3.10.1 / v3.11.0 / v3.12.0) is fully closed. No pending UX backlog.
 
 Priorities are based on user impact relative to implementation effort. The list is intentionally short — only changes worth doing next.
 
@@ -52,6 +54,12 @@ The following are noted but not prioritized:
 - ~~Custom program creation~~ — Done in v2.8.0
 - ~~Advanced food filters~~ — Done in v2.9.0
 - Multi-user profiles
+
+Explicit decisions from the June 2026 UX review (revisit only on real usage signal):
+
+- Drag & drop exercise reorder in the builder — up/down arrows shipped instead (v3.12.0); a drag lib (sh.calvin.reorderable) is the upgrade path if arrows feel limiting
+- Full seed content for PPL / Upper-Lower programs — removed from seed instead (v3.12.0); would require ~7 seed templates and would clutter the user's Séances tab
+- Undo snackbar or confirmation for journal food deletion — deletion is currently immediate with a muted icon; add a safety net only if accidental deletions actually happen
 
 ---
 

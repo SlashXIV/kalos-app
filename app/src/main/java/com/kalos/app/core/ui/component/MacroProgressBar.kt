@@ -12,7 +12,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.kalos.app.core.ui.theme.ColorCarbs
 import com.kalos.app.core.ui.theme.ColorFat
@@ -45,10 +48,20 @@ fun MacroRow(
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            // "162 / 160 g" inline — single fixation instead of value here + goal on its own
+            // line below the bar. Consumed keeps the macro color; goal stays muted.
             Text(
-                "${consumed.roundToInt()}g",
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = color,
+                buildAnnotatedString {
+                    withStyle(SpanStyle(color = color, fontWeight = FontWeight.SemiBold)) {
+                        append("${consumed.roundToInt()}")
+                    }
+                    withStyle(
+                        SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+                    ) {
+                        append(" / $goal g")
+                    }
+                },
+                style = MaterialTheme.typography.labelMedium,
             )
         }
         // Custom track + fill for better visual control
@@ -67,11 +80,6 @@ fun MacroRow(
                     .background(color),
             )
         }
-        Text(
-            "/ ${goal}g",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-        )
     }
 }
 

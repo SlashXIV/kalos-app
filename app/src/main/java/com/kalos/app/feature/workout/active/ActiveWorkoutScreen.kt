@@ -25,6 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.ExerciseStatus
 import com.kalos.app.core.domain.model.ExerciseTrackingMode
+import com.kalos.app.core.ui.util.formatElapsedSince
 import com.kalos.app.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -335,12 +336,7 @@ fun ActiveWorkoutScreen(
     }
 
     if (state.resumeAvailable) {
-        val elapsedMin = ((System.currentTimeMillis() - state.resumeStartedAt) / 60_000).toInt()
-        val timeLabel = when {
-            elapsedMin < 1 -> "à l'instant"
-            elapsedMin < 60 -> "il y a $elapsedMin min"
-            else -> "il y a ${elapsedMin / 60}h${"%02d".format(elapsedMin % 60)}"
-        }
+        val timeLabel = formatElapsedSince(state.resumeStartedAt)
         AlertDialog(
             onDismissRequest = {},
             title = { Text("Séance en cours") },
@@ -525,7 +521,7 @@ private fun SetRow(
                     },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
-                placeholder = { Text("kg") },
+                placeholder = { Text("0") },
             )
         }
         if (showReps) {
@@ -540,7 +536,7 @@ private fun SetRow(
                     },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
-                placeholder = { Text("reps") },
+                placeholder = { Text("0") },
             )
         }
         if (showDuration) {

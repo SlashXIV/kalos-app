@@ -75,7 +75,9 @@ private fun ProgramsContent(
         }
     } else {
         LazyColumn(
-            contentPadding = PaddingValues(16.dp),
+            // bottom = 88dp keeps the last card's "Activer" button clear of the FAB
+            // (56dp FAB + 16dp margin + breathing room).
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 88.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = modifier.fillMaxSize(),
         ) {
@@ -138,7 +140,15 @@ private fun ProgramCard(
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 AssistChip(onClick = {}, label = { Text("${program.durationWeeks} sem.") })
                 AssistChip(onClick = {}, label = { Text("${program.daysPerWeek} j/sem") })
-                AssistChip(onClick = {}, label = { Text("${program.workouts.size} séances") })
+                AssistChip(onClick = {}, label = {
+                    Text(
+                        when (val n = program.workouts.size) {
+                            0 -> "Aucune séance liée"
+                            1 -> "1 séance liée"
+                            else -> "$n séances liées"
+                        }
+                    )
+                })
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),

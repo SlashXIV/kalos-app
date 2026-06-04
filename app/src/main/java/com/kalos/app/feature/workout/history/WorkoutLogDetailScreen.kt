@@ -153,7 +153,7 @@ fun WorkoutLogDetailScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(state.log?.let { "Séance du ${formatLogDateShort(it.date)}" } ?: "Détail de séance")
+                    Text(state.log?.let { formatLogDateTitle(it.date) } ?: "Détail de séance")
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
@@ -451,6 +451,20 @@ private fun formatSet(set: WorkoutSet, mode: ExerciseTrackingMode): String = whe
     ExerciseTrackingMode.DURATION_WEIGHT -> {
         val dur = formatSecsAsDuration(set.durationSecs).ifEmpty { "—" }
         if (set.weightKg > 0f) "$dur @ ${"%.1f".format(set.weightKg)} kg" else dur
+    }
+}
+
+/** Screen title with correct French elision: "Séance d'hier", not "Séance du hier". */
+private fun formatLogDateTitle(dateStr: String): String {
+    val d = LocalDate.parse(dateStr)
+    val today = LocalDate.now()
+    return when (d) {
+        today -> "Séance d'aujourd'hui"
+        today.minusDays(1) -> "Séance d'hier"
+        else -> {
+            val pattern = if (d.year == today.year) "d MMM" else "d MMM yyyy"
+            "Séance du ${d.format(DateTimeFormatter.ofPattern(pattern, Locale.FRENCH))}"
+        }
     }
 }
 

@@ -216,7 +216,9 @@ fun WorkoutBuilderScreen(
                                 Icon(Icons.Filled.Edit, contentDescription = "Modifier", tint = MaterialTheme.colorScheme.primary)
                             }
                             IconButton(onClick = { viewModel.removeExercise(index) }) {
-                                Icon(Icons.Filled.Delete, contentDescription = "Supprimer", tint = MaterialTheme.colorScheme.error)
+                                // Muted per-row delete; red is reserved for confirmation steps.
+                                Icon(Icons.Filled.Delete, contentDescription = "Supprimer",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
                             }
                         }
                     }

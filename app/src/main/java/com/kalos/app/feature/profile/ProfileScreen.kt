@@ -15,6 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.Sex
+import com.kalos.app.core.ui.util.formatGroupedInt
 import com.kalos.app.navigation.Screen
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -96,14 +97,16 @@ fun ProfileScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
-                            ProfileStat("Poids", "${profile.weightKg} kg")
+                            // weightLabel-style formatting: locale-aware decimal separator,
+                            // integers rendered without trailing ".0" (87.0 → "87", 82.5 → "82,5" on FR devices)
+                            ProfileStat("Poids", formatProfileWeight(profile.weightKg))
                             ProfileStat("Taille", "${profile.heightCm.toInt()} cm")
-                            ProfileStat("Objectif", "${profile.targetWeightKg} kg")
+                            ProfileStat("Objectif", formatProfileWeight(profile.targetWeightKg))
                         }
                         if (state.tdee > 0) {
                             HorizontalDivider()
                             Text(
-                                "TDEE estimé : ${state.tdee.toInt()} kcal/j — ${profile.activityLevel.label}",
+                                "TDEE estimé : ${formatGroupedInt(state.tdee.toInt())} kcal/j — ${profile.activityLevel.label}",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -210,6 +213,11 @@ private fun BodyWeightCard(weightKg: Float, date: String, delta: Float?, onClick
         }
     }
 }
+
+/** Same convention as BodyWeightCard's weightLabel: no trailing ".0", locale decimal separator. */
+private fun formatProfileWeight(weightKg: Float): String =
+    if (weightKg == weightKg.toLong().toFloat()) "${weightKg.toLong()} kg"
+    else "${"%.1f".format(weightKg)} kg"
 
 @Composable
 private fun ProfileStat(label: String, value: String) {

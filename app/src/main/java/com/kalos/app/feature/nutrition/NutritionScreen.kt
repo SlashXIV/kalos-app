@@ -674,7 +674,9 @@ private fun MealItemRow(item: ConsolidatedItem, onDelete: () -> Unit) {
             Icon(
                 Icons.Filled.Close,
                 contentDescription = "Supprimer",
-                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+                // Muted, not red: with one delete affordance per row, red would dominate the
+                // whole journal. Red stays reserved for confirmation dialogs.
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                 modifier = Modifier.size(16.dp),
             )
         }

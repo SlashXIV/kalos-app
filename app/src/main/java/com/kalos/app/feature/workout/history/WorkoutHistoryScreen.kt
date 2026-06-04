@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import com.kalos.app.core.ui.util.formatGroupedInt
 import kotlinx.coroutines.launch
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -225,7 +226,7 @@ private fun VolumeChartCard(weeks: List<WeeklyVolume>) {
                 }
             }
             Text(
-                "Total sur ${weeks.size} semaines : ${"%.0f".format(weeks.sumOf { it.volumeKg.toDouble() })} kg",
+                "Total sur ${weeks.size} semaines : ${formatGroupedInt(weeks.sumOf { it.volumeKg.toDouble() })} kg",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

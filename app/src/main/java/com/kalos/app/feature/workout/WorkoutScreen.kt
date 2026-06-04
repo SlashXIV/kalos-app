@@ -18,6 +18,7 @@ import com.kalos.app.core.ui.component.EmptyState
 import com.kalos.app.core.ui.component.WorkoutTemplateCard
 import com.kalos.app.feature.workout.history.WorkoutHistoryTabContent
 import com.kalos.app.feature.workout.program.ProgramsTabContent
+import com.kalos.app.core.ui.util.formatElapsedSince
 import com.kalos.app.navigation.Screen
 import androidx.compose.foundation.clickable
 
@@ -73,6 +74,8 @@ fun WorkoutScreen(
                         selected = selectedTab == i,
                         onClick = { selectedTab = i },
                         text = { Text(title) },
+                        selectedContentColor = MaterialTheme.colorScheme.primary,
+                        unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -115,12 +118,7 @@ private fun ActiveWorkoutBanner(
     banner: DraftBannerState,
     onResume: () -> Unit,
 ) {
-    val elapsedMin = ((System.currentTimeMillis() - banner.startedAt) / 60_000).toInt()
-    val elapsedLabel = when {
-        elapsedMin < 1 -> "à l'instant"
-        elapsedMin < 60 -> "il y a $elapsedMin min"
-        else -> "il y a ${elapsedMin / 60}h${"%02d".format(elapsedMin % 60)}"
-    }
+    val elapsedLabel = formatElapsedSince(banner.startedAt)
     val title = banner.templateName.ifBlank { "Séance libre" }
     val plural = if (banner.exerciseCount > 1) "exercices" else "exercice"
 

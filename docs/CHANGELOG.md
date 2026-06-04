@@ -2,6 +2,26 @@
 
 ---
 
+## v3.10.1 — 4 June 2026
+
+Vague de quick wins issue de la revue UX/UI complète (9 écrans). Aucun changement fonctionnel — uniquement qualité perçue, lisibilité et cohérence.
+
+### Fixed
+- Écran Programmes : le FAB ne recouvre plus le bouton "Activer" du dernier programme (`contentPadding bottom` 88dp)
+- Titre du détail historique : "Séance d'hier" / "Séance d'aujourd'hui" au lieu de "Séance du hier" (élision française correcte)
+- Durée écoulée : "il y a 19 h" au lieu de "il y a 19h35" (lisible comme une heure d'horloge) — helper partagé `formatElapsedSince`, appliqué à la bannière séance en cours et au dialog de reprise ; au-delà de 24 h : "il y a X j"
+- Profil : séparateur décimal cohérent — "Poids" et "Objectif" suivent désormais la locale (87,0 → "87", 82.5 → "82,5") comme le reste de l'app
+
+### Changed
+- Nombres groupés via formatter localisé (`NumberFormat`, locale FR) : "23 673 kg" (volume hebdo), "2 921 kcal/j" (TDEE)
+- Chip programmes : "Aucune séance liée" / "1 séance liée" / "N séances liées" au lieu du "N séances" ambigu
+- Onglets Sport : onglets inactifs en gris (`onSurfaceVariant`), seul l'onglet actif est en vert — état de sélection enfin lisible
+- Icônes destructives (croix du journal nutrition, poubelles de l'éditeur de séance) : grises au lieu de rouges — le rouge est réservé aux confirmations
+- Barres macros : objectif inline "162 / 160 g" à droite de la barre, au lieu de "/160g" sur une ligne séparée en dessous (s'applique aussi à l'écran de résultat d'onboarding)
+- Champs de saisie séance active : placeholder "0" au lieu de "kg" (redondant avec l'en-tête de colonne)
+
+---
+
 ## v3.10.0 — 3 June 2026
 
 ### Added — repère de charge en séance

@@ -31,3 +31,20 @@ fun formatSecsAsDuration(secs: Int): String {
     val s = secs % 60
     return "%d:%02d".format(m, s)
 }
+
+/**
+ * Human-friendly "time since" label for in-progress workout drafts.
+ * "à l'instant" / "il y a 12 min" / "il y a 19 h" / "il y a 2 j".
+ *
+ * Beyond one hour we intentionally drop the minutes: "il y a 19h35" reads like a
+ * clock time (started AT 19:35) rather than a duration — the coarser unit is clearer.
+ */
+fun formatElapsedSince(startedAtMillis: Long, nowMillis: Long = System.currentTimeMillis()): String {
+    val minutes = ((nowMillis - startedAtMillis) / 60_000).coerceAtLeast(0)
+    return when {
+        minutes < 1 -> "à l'instant"
+        minutes < 60 -> "il y a $minutes min"
+        minutes < 24 * 60 -> "il y a ${minutes / 60} h"
+        else -> "il y a ${minutes / (24 * 60)} j"
+    }
+}

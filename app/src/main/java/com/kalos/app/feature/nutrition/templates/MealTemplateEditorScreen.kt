@@ -230,7 +230,9 @@ private fun ItemRow(
     var text by remember(item.food.id) { mutableStateOf(item.amountG.roundToInt().toString()) }
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {

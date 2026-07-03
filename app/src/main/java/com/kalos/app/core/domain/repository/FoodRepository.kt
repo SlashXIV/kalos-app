@@ -15,6 +15,8 @@ interface FoodRepository {
     suspend fun delete(food: Food)
     suspend fun archiveOrDelete(id: Long)
     suspend fun findDuplicate(name: String): Food?
+    /** Local barcode-cache lookup (checked before any network resolution). Null if unknown. */
+    suspend fun findByBarcode(barcode: String): Food?
     suspend fun setFavorite(id: Long, isFavorite: Boolean)
     suspend fun markUsed(id: Long)
     suspend fun count(): Int

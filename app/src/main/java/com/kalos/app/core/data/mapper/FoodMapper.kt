@@ -21,6 +21,7 @@ fun FoodEntity.toDomain() = Food(
     lastUsedAt = lastUsedAt,
     tags = if (tags.isBlank()) emptyList() else tags.split(","),
     isArchived = isArchived,
+    barcode = barcode,
 )
 
 fun Food.toEntity() = FoodEntity(
@@ -41,4 +42,5 @@ fun Food.toEntity() = FoodEntity(
     lastUsedAt = lastUsedAt,
     tags = tags.joinToString(","),
     isArchived = isArchived,
+    barcode = barcode,
 )

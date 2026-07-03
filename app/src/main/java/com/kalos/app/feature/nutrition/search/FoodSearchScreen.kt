@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.RestaurantMenu
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -24,6 +25,7 @@ import com.kalos.app.core.domain.model.Food
 import com.kalos.app.core.ui.component.EmptyState
 import com.kalos.app.core.ui.component.FoodListItem
 import com.kalos.app.core.ui.component.KalosSearchBar
+import com.kalos.app.feature.nutrition.scan.SCANNED_BARCODE_KEY
 import com.kalos.app.navigation.Screen
 import kotlin.math.roundToInt
 
@@ -53,6 +55,26 @@ fun FoodSearchScreen(
         }
     }
 
+    // Barcode returned by the scanner via savedStateHandle → local lookup / manual create.
+    val currentEntry = navController.currentBackStackEntry
+    LaunchedEffect(currentEntry) {
+        currentEntry?.savedStateHandle
+            ?.getStateFlow<String?>(SCANNED_BARCODE_KEY, null)
+            ?.collect { barcode ->
+                if (barcode != null) {
+                    viewModel.onBarcodeScanned(barcode)
+                    currentEntry.savedStateHandle[SCANNED_BARCODE_KEY] = null
+                }
+            }
+    }
+    // Unknown barcode → open manual creation pre-filled with it.
+    LaunchedEffect(state.createBarcode) {
+        state.createBarcode?.let { bc ->
+            viewModel.onCreateBarcodeHandled()
+            navController.navigate(Screen.CustomFood.createWithBarcode(bc))
+        }
+    }
+
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Scaffold(
@@ -65,6 +87,9 @@ fun FoodSearchScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { navController.navigate(Screen.BarcodeScanner.route) }) {
+                        Icon(Icons.Filled.QrCodeScanner, contentDescription = "Scanner un code-barres")
+                    }
                     IconButton(onClick = { navController.navigate(Screen.MyFoods.route) }) {
                         Icon(Icons.Filled.RestaurantMenu, contentDescription = "Mes aliments")
                     }

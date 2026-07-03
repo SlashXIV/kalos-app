@@ -27,6 +27,7 @@ data class CustomFoodState(
     val isVegan: Boolean = false,
     val isFavorite: Boolean = false,
     val lastUsedAt: Long = 0L,
+    val barcode: String? = null,
     val isEditing: Boolean = false,
     val isSaving: Boolean = false,
     val savedSuccessfully: Boolean = false,
@@ -61,11 +62,18 @@ class CustomFoodViewModel @Inject constructor(
                         isVegan = "vegan" in food.tags,
                         isFavorite = food.isFavorite,
                         lastUsedAt = food.lastUsedAt,
+                        barcode = food.barcode,
                         isEditing = true,
                     )
                 }
             }
         }
+    }
+
+    /** Pre-fills the barcode when creating a food from a scan of an unknown product. */
+    fun setBarcode(barcode: String) {
+        if (barcode.isBlank()) return
+        _state.update { if (it.barcode == null) it.copy(barcode = barcode) else it }
     }
 
     fun onNameChange(v: String) = _state.update { it.copy(name = v) }
@@ -156,6 +164,7 @@ class CustomFoodViewModel @Inject constructor(
                     isFavorite = s.isFavorite,
                     lastUsedAt = s.lastUsedAt,
                     tags = tags,
+                    barcode = s.barcode,
                 )
             )
         }

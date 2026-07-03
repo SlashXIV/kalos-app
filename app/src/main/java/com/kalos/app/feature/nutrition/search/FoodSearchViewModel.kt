@@ -32,6 +32,9 @@ data class FoodSearchUiState(
     val isLoading: Boolean = false,
     val addedSuccessfully: Boolean = false,
     val errorMessage: String? = null,
+    // Set when a scanned barcode has no local match → screen navigates to manual creation
+    // pre-filled with this barcode. Null otherwise.
+    val createBarcode: String? = null,
     val categoryFilter: String = "",
     val onlyCustom: Boolean = false,
     val categories: List<String> = emptyList(),
@@ -150,6 +153,24 @@ class FoodSearchViewModel @Inject constructor(
     fun onServingModeChange(mode: ServingMode) { _state.update { it.copy(servingMode = mode) } }
 
     fun dismissSheet() { _state.update { it.copy(selectedFood = null, amountG = "100") } }
+
+    /**
+     * Handles a barcode decoded by the scanner. Local cache lookup only (Phase 2, no network):
+     * a known product opens the portion sheet directly; an unknown one routes to manual
+     * creation pre-filled with the barcode, so it becomes cached for next time.
+     */
+    fun onBarcodeScanned(barcode: String) {
+        viewModelScope.launch {
+            val food = runCatching { foodRepository.findByBarcode(barcode) }.getOrNull()
+            if (food != null) {
+                selectFood(food)
+            } else {
+                _state.update { it.copy(createBarcode = barcode) }
+            }
+        }
+    }
+
+    fun onCreateBarcodeHandled() = _state.update { it.copy(createBarcode = null) }
 
     fun addToMeal(mealType: String, date: String) {
         val food = _state.value.selectedFood ?: return

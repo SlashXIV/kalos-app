@@ -22,12 +22,16 @@ import androidx.navigation.NavController
 fun CustomFoodScreen(
     navController: NavController,
     foodId: Long,
+    barcode: String = "",
     viewModel: CustomFoodViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(foodId) { if (foodId > 0) viewModel.loadFood(foodId) }
+    // Creation from a scan of an unknown product: pre-fill the barcode so it gets
+    // persisted on save and the product is cached for next time.
+    LaunchedEffect(barcode) { viewModel.setBarcode(barcode) }
     LaunchedEffect(state.savedSuccessfully) { if (state.savedSuccessfully) navController.popBackStack() }
     LaunchedEffect(state.deletedSuccessfully) { if (state.deletedSuccessfully) navController.popBackStack() }
     LaunchedEffect(state.errorMessage) {

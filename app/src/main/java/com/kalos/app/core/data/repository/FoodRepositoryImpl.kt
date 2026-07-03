@@ -43,6 +43,9 @@ class FoodRepositoryImpl @Inject constructor(
     }
     override suspend fun findDuplicate(name: String): Food? =
         dao.findByNormalizedName(name.trim().normalizeForSearch())?.toDomain()
+
+    override suspend fun findByBarcode(barcode: String): Food? =
+        dao.findByBarcode(barcode.trim())?.toDomain()
     override suspend fun setFavorite(id: Long, isFavorite: Boolean) = dao.setFavorite(id, isFavorite)
     override suspend fun markUsed(id: Long) = dao.updateLastUsed(id, System.currentTimeMillis())
     override suspend fun count(): Int = dao.count()

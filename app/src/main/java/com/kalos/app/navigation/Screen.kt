@@ -24,10 +24,15 @@ sealed class Screen(val route: String) {
         fun routeWithQuery(mealType: String, date: String, query: String) =
             "nutrition/food_search?mealType=$mealType&date=$date&query=${android.net.Uri.encode(query)}"
     }
-    object CustomFood : Screen("nutrition/custom_food?foodId={foodId}") {
-        fun create() = "nutrition/custom_food?foodId=-1"
-        fun edit(foodId: Long) = "nutrition/custom_food?foodId=$foodId"
+    object CustomFood : Screen("nutrition/custom_food?foodId={foodId}&barcode={barcode}") {
+        fun create() = "nutrition/custom_food?foodId=-1&barcode="
+        fun edit(foodId: Long) = "nutrition/custom_food?foodId=$foodId&barcode="
+        fun createWithBarcode(barcode: String) =
+            "nutrition/custom_food?foodId=-1&barcode=${android.net.Uri.encode(barcode)}"
     }
+    // Scanner returns the decoded barcode to the food-search screen via savedStateHandle,
+    // then pops — it needs no arguments of its own.
+    object BarcodeScanner : Screen("nutrition/scan")
     object MyFoods : Screen("nutrition/my_foods")
     object NutritionHistory : Screen("nutrition/history")
     object NutritionDay : Screen("nutrition/day/{date}") {

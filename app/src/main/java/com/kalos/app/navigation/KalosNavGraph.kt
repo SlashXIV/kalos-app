@@ -18,6 +18,7 @@ import com.kalos.app.feature.nutrition.NutritionScreen
 import com.kalos.app.feature.nutrition.custom.CustomFoodScreen
 import com.kalos.app.feature.nutrition.history.NutritionHistoryScreen
 import com.kalos.app.feature.nutrition.myfoods.MyFoodsScreen
+import com.kalos.app.feature.nutrition.scan.BarcodeScannerScreen
 import com.kalos.app.feature.nutrition.search.FoodSearchScreen
 import com.kalos.app.feature.onboarding.*
 import com.kalos.app.feature.profile.EditGoalsScreen
@@ -97,14 +98,19 @@ fun KalosNavGraph() {
                 )
             }
             composable(
-                route = "nutrition/custom_food?foodId={foodId}",
-                arguments = listOf(navArgument("foodId") { type = NavType.LongType; defaultValue = -1L })
+                route = "nutrition/custom_food?foodId={foodId}&barcode={barcode}",
+                arguments = listOf(
+                    navArgument("foodId") { type = NavType.LongType; defaultValue = -1L },
+                    navArgument("barcode") { type = NavType.StringType; defaultValue = "" },
+                )
             ) { backStackEntry ->
                 CustomFoodScreen(
                     navController = navController,
                     foodId = backStackEntry.arguments?.getLong("foodId") ?: -1L,
+                    barcode = backStackEntry.arguments?.getString("barcode").orEmpty(),
                 )
             }
+            composable(Screen.BarcodeScanner.route) { BarcodeScannerScreen(navController) }
             composable(Screen.MyFoods.route) { MyFoodsScreen(navController) }
             composable(Screen.NutritionHistory.route) { NutritionHistoryScreen(navController) }
             composable(

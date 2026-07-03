@@ -87,6 +87,14 @@ dependencies {
     // Coroutines
     implementation(libs.coroutines.android)
 
+    // CameraX + ML Kit — barcode scanner (Phase 2). ML Kit barcode-scanning bundles the
+    // model (no Google Play Services dependency), keeping the app installable everywhere.
+    implementation(libs.camera.core)
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
+    implementation(libs.mlkit.barcode)
+
     // Vico Charts
     implementation(libs.vico.compose)
     implementation(libs.vico.compose.m3)

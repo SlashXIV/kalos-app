@@ -24,6 +24,32 @@ Aucun de ces points n'est bloquant pour l'usage actuel, mais ils méritent une v
 
 ---
 
+## Revue technique — 3 July 2026 (v3.17.0)
+
+Revue transverse (notifications, export/import, performance) menée par exploration ciblée. Vue produit correspondante dans `docs/ROADMAP.md` (section « Revue générale — 3 July 2026 »).
+
+### Notifications
+
+- **[High] Tap sans effet** — `NotificationHelper` construit les notifications (`postWorkoutReminder`, `postSmartReminder`) sans `setContentIntent`. Taper la notification n'ouvre pas l'app. Fix : `PendingIntent.getActivity(...)` vers `MainActivity` (flags `FLAG_IMMUTABLE`), idéalement avec extra de destination pour deep-link.
+- **[High] Heure de déclenchement non fiable** — `IntelligentReminderScheduler.schedule()` utilise bien l'heure choisie via `setInitialDelay(minutesUntilNextTarget())`, mais un `PeriodicWorkRequest` n'est pas précis à l'horloge et dérive après le 1er run (Doze/batching). `IntelligentReminderWorker` ne se replanifie pas et ne vérifie pas l'heure. Fix : `OneTimeWorkRequest` auto-replanifié en fin de `doWork()` pour l'heure cible du lendemain. Corrige aussi le faux positif « aucun repas loggé » déclenché en matinée.
+- **[Low] Échec de permission silencieux** — `POST_NOTIFICATIONS` refusé → retour silencieux, aucun log. Ajouter un log.
+- **[Low] Pas de replanification post-reboot explicite** — WorkManager replanifie seul, mais un `schedule()` au lancement de l'app serait un filet de sécurité.
+
+### Performance
+
+- **[High] N+1 sur le chargement des séances** — `WorkoutRepositoryImpl.buildLog` appelle `exerciseDao.getById` par exercice, dans `getLogs()`/`getLogsForDate()`. ~50-80 requêtes pour 10 séances. Fix : `exerciseDao.getByIds(ids)` en batch + `associateBy`. Même pattern sur `getTemplates()`.
+- **[Medium] Table d'aliments entière chargée dans le combine nutrition** — `NutritionViewModel` combine `foodRepository.getAll()` uniquement pour les suggestions (calculées seulement pour aujourd'hui). Résolu automatiquement si les suggestions sont retirées ; sinon isoler dans un flow conditionnel `isToday`.
+- **[Medium] Historiques sans pagination** — `WorkoutHistory` charge toutes les séances ; fenêtres nutrition/sport figées à 60 j (`LIMIT 60` dans les DAO). Rendre la fenêtre configurable + chargement paresseux.
+- **[Low-Medium] Index manquant sur `meal_entry.date`** — requêtes par date fréquentes sans index. Ajouter `indices = [Index("date")]` sur `MealEntryEntity` (migration).
+- **[Low] Parsing `LocalDate.parse` en boucle** — `CalendarViewModel` / `InsightsViewModel` reparsent les dates dans des comptages hebdo. Parser une fois en amont.
+
+### Export / Import — VÉRIFIÉ SAIN
+
+- Couverture complète (repas favoris v3.16 + `food.barcode` v3.14 inclus), ordre de purge FK correct (`clearMealTemplates` avant `clearCustomFoods`), remap `foodIdMap` sur `meal_template_item`, import atomique avec validation des orphelins avant purge, rétro-compatibilité des vieux backups (defaults + `coerceInputValues`). Aucun risque de perte de données.
+- Notes mineures : les aliments archivés sont volontairement exclus du backup (à documenter) ; penser à bumper `exportVersion` (actuellement figé à 1, rejet strict) à la prochaine évolution du schéma JSON.
+
+---
+
 ## Points positifs (à conserver tels quels)
 
 | Sujet | Qualité |

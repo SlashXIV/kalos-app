@@ -8,6 +8,35 @@ Priorities are based on user impact relative to implementation effort. The list 
 
 ---
 
+## Revue générale — 3 July 2026
+
+Revue transverse demandée par l'utilisateur (app jugée globalement complète, focus sur l'amélioration de l'existant). Détail technique des défauts dans `docs/TECHNICAL_AUDIT.md` (section du 3 July 2026).
+
+### Corrections (défauts confirmés)
+
+- **Notifications — tap sans effet** (High) : les notifications n'ont pas de `setContentIntent`, taper dessus n'ouvre pas l'app. Ajouter un `PendingIntent` vers `MainActivity` (idéalement avec deep-link vers l'écran concerné : nutrition / séance / eau).
+- **Notifications — heure non respectée** (High) : le `PeriodicWorkRequest` n'est pas précis à l'horloge et dérive après le 1er run. Passer à un `OneTimeWorkRequest` auto-replanifié chaque jour à l'heure cible. Effet de bord positif : la vérif « aucun repas loggé aujourd'hui » ne sera plus déclenchée le matin (faux positif) mais le soir.
+- **Notifications — robustesse** (Low) : log quand `POST_NOTIFICATIONS` est refusé ; replanifier au lancement de l'app en filet de sécurité.
+
+### Décision produit
+
+- **Retrait des suggestions nutrition** (Low effort) : feature jugée inutile à l'usage. Retrait chirurgical (NutritionScreen + NutritionViewModel, suppression de `SuggestFoodsUseCase` et `FoodTagger`). Bonus perf : supprime le chargement de toute la table d'aliments dans le combine nutrition. Statut : Planned (à confirmer).
+
+### Sport — variantes d'exercices
+
+- **Variantes d'un même exercice** (ex. extension triceps corde / barre) non distinguées (Medium). Le modèle `Exercise` est plat (pas de parent/variante), les PR/progressions sont indexés par `exerciseId`.
+  - Phase 1 (faible effort) : convention de nommage « Exercice (attache) » dans `seed_exercises.json` (déjà partiellement le cas) — chaque variante = exercice distinct, progression suivie séparément (souhaitable, car biomécaniquement différentes).
+  - Phase 2 (si besoin) : champ `variant: String?` sur `Exercise` (migration non-breaking) + regroupement dans le catalogue. Éviter un modèle parent/enfant tant qu'il n'y a pas de besoin de rollup de PR entre variantes.
+
+### Nouvelles pistes
+
+- **Internationalisation / langues** (Medium-High) : les libellés sont actuellement en dur en français dans le code. Externaliser vers `res/values/strings.xml` (FR par défaut) puis ajouter l'anglais (`values-en`). Gros travail d'extraction mais sans risque. Prérequis à toute ouverture au-delà d'un usage FR.
+- **Thèmes multiples** (Medium) : l'app est en thème sombre unique. Ajouter un thème clair (et éventuellement variantes d'accent) + bascule dans les Paramètres (suivre le système / clair / sombre). La structure `core/ui/theme/` centralise déjà les couleurs.
+- **Performance** (voir TECHNICAL_AUDIT) : N+1 sur le chargement des séances/templates (High), pagination des historiques (Medium), index sur `meal_entry.date` (Low).
+- **Deep-link notifications** : router chaque notification vers l'écran pertinent (dépend du fix tap-to-open ci-dessus).
+
+---
+
 ## Next priorities
 
 ### ~~1. Body weight log~~ — Done in v2.1.2

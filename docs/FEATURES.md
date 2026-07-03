@@ -178,6 +178,16 @@ Statuses: **Done** · **Partial** · **Planned**
 | Body weight card | Done | Last weight, date, delta vs previous; tappable → Suivi du poids; hidden if no entry |
 | Reference weight clarification + one-tap resync | Done | Caption under TDEE; "Utiliser ma dernière pesée" when drift ≥ 1 kg; custom goals never overwritten (v3.11.0) |
 
+### Weekly review (Bilan)
+
+| Feature | Status | Notes |
+|---|---|---|
+| Bilan screen (entry from Profile) | Done | 7-day / 30-day period toggle; no schema change, aggregates existing data (v3.17.0) |
+| Nutrition adherence | Done | Avg kcal/protein vs goal (over-target in amber), days in kcal target (90–105%), days protein reached (≥ goal), kcal/day bar chart |
+| Weight trend | Done | Delta + kg/week rate, verdict vs profile goal direction (on-track / stalled / opposite / stable); empty state if < 2 weigh-ins |
+| Training consistency | Done | Sessions this week vs active-program target, total over period, 4-week sessions/week bars |
+| "À retenir" summary line | Done | Rule-based one-liner (no AI) |
+
 ---
 
 ## Settings

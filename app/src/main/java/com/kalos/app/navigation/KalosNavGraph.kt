@@ -28,6 +28,7 @@ import com.kalos.app.feature.profile.EditProfileScreen
 import com.kalos.app.feature.profile.NotificationsScreen
 import com.kalos.app.feature.profile.ProfileScreen
 import com.kalos.app.feature.profile.SettingsScreen
+import com.kalos.app.feature.insights.InsightsScreen
 import com.kalos.app.feature.profile.WeightLogScreen
 import com.kalos.app.feature.workout.WorkoutScreen
 import com.kalos.app.feature.workout.active.ActiveWorkoutScreen
@@ -220,6 +221,7 @@ fun KalosNavGraph() {
             composable(Screen.Settings.route) { SettingsScreen(navController) }
             composable(Screen.Notifications.route) { NotificationsScreen(navController) }
             composable(Screen.WeightLog.route) { WeightLogScreen(navController) }
+            composable(Screen.Insights.route) { InsightsScreen(navController) }
         }
     }
 }

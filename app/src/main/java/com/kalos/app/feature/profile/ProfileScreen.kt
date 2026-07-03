@@ -184,6 +184,9 @@ fun ProfileScreen(
             }
 
             // Navigation items
+            ProfileNavItem(Icons.Filled.Insights, "Bilan hebdomadaire") {
+                navController.navigate(Screen.Insights.route)
+            }
             ProfileNavItem(Icons.Filled.Edit, "Modifier le profil") {
                 navController.navigate(Screen.EditProfile.route)
             }

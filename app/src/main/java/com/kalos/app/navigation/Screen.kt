@@ -42,6 +42,7 @@ sealed class Screen(val route: String) {
         fun edit(templateId: Long) = "nutrition/meal_template_edit?templateId=$templateId"
     }
     object NutritionHistory : Screen("nutrition/history")
+    object Insights : Screen("insights")
     object NutritionDay : Screen("nutrition/day/{date}") {
         fun route(date: String) = "nutrition/day/$date"
     }

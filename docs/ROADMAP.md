@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: v3.16.0 — 3 July 2026
+> Last updated: v3.17.0 — 3 July 2026
 >
 > The June 2026 UX review cycle (18 findings, 3 waves: v3.10.1 / v3.11.0 / v3.12.0) is fully closed. No pending UX backlog.
 
@@ -93,3 +93,11 @@ En phase de sèche, le budget calorique est contraint mais la faim ne l'est pas.
 Beaucoup de repas sont récurrents (ex. salade de thon : quasi toujours les mêmes aliments et grammages). L'objectif : enregistrer un repas type et le réinjecter en un tap, sans re-saisir chaque aliment.
 
 **Statut : volet clos en v3.16.0 (Phase A data + Phase B UI + Phase B2 éditeur).** Livré : tables `meal_template` / `meal_template_item` (migration 15 → 16), enregistrer un repas rempli comme favori (fusion des doublons), appliquer un favori en un tap (aliments ajoutés, jamais de remplacement), écran de gestion (liste + suppression), éditeur complet (renommer, ajuster les grammages, ajouter/retirer des aliments, créer de zéro — via `FoodSearch` réutilisé en mode « pick »), inclusion dans la sauvegarde/restauration JSON. Protection FK RESTRICT sur les aliments référencés par un favori. Éditer/supprimer un favori ne touche jamais les repas déjà journalisés.
+
+---
+
+### Bilan hebdomadaire
+
+Beaucoup de données sont loguées (repas, poids, séances) mais le retour « est-ce que je tiens mon cap ? » était éparpillé (moyenne 7 j dans le calendrier, courbe de poids dans le profil, volume dans l'historique). L'idée : un seul écran de synthèse qui transforme la donnée en feedback.
+
+**Statut : livré en v3.17.0.** Écran `feature/insights` accessible depuis le Profil, périodes 7 j / 30 j. Trois cartes (nutrition / poids / entraînement) + phrase de synthèse « À retenir ». Réutilise `MealRepository.getDailySummaries`, `UserRepository.observeGoal`/`observeProfile`, `WorkoutRepository.getTrainedDates`/`getBodyWeightHistory`, `ProgramRepository.getActive`. **Aucun changement de schéma.** Cible calorique = 90–105 % de l'objectif ; protéines = ≥ objectif ; verdict poids selon `FitnessGoal.kcalDelta`. Écartés (anti-bloat) : ajustement auto de l'objectif (périodisation), export du bilan, détail par aliment, plages arbitraires.

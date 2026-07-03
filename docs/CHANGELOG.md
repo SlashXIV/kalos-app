@@ -2,6 +2,20 @@
 
 ---
 
+## v3.17.0 — 3 July 2026
+
+### Added — bilan hebdomadaire
+
+Écran de synthèse qui transforme les données déjà loguées en feedback, sur 7 ou 30 jours. Accessible depuis le Profil (« Bilan hebdomadaire »). Aucun changement de base de données (agrégation des données existantes).
+
+- **Nutrition** : moyenne calories/j et protéines/j vs objectif (calories au-dessus de la cible en ambre), nombre de jours dans la cible calorique (90–105 % de l'objectif) et de jours protéines atteintes (≥ objectif), mini-graphe des calories/jour avec ligne d'objectif.
+- **Poids** : variation sur la période + rythme en kg/semaine, avec un verdict par rapport à la direction de l'objectif du profil (en ligne / stagnation / direction opposée / stable). État vide propre si moins de deux pesées sur la période.
+- **Entraînement** : séances de la semaine vs cible du programme actif, total sur la période, barres des séances/semaine sur 4 semaines.
+- **À retenir** : phrase de synthèse générée par règles simples (pas d'IA), ex. « Période solide. Sur 7 jours : calories dans la cible 6/7 j, 180 g de protéines/j, 3 séances, -0,4 kg. »
+- Sélecteur de période 7 jours / 30 jours.
+
+---
+
 ## v3.16.0 — 3 July 2026
 
 ### Added — repas favoris (meal templates)

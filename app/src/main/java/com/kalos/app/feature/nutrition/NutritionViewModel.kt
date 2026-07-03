@@ -2,16 +2,11 @@ package com.kalos.app.feature.nutrition
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kalos.app.core.data.DietaryPreferencesStore
 import com.kalos.app.core.domain.model.*
-import com.kalos.app.core.domain.model.DietaryFilter
-import com.kalos.app.core.domain.repository.FoodRepository
 import com.kalos.app.core.domain.repository.MealRepository
 import com.kalos.app.core.domain.repository.MealTemplateRepository
 import com.kalos.app.core.domain.repository.UserRepository
 import com.kalos.app.core.domain.repository.WaterRepository
-import com.kalos.app.core.domain.usecase.FoodSuggestion
-import com.kalos.app.core.domain.usecase.SuggestFoodsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -27,7 +22,6 @@ data class NutritionUiState(
     val totalProtein: Float = 0f,
     val totalCarbs: Float = 0f,
     val totalFat: Float = 0f,
-    val suggestions: List<FoodSuggestion> = emptyList(),
     val isLoading: Boolean = true,
     val isToday: Boolean = true,
     val waterMl: Int = 0,
@@ -44,9 +38,6 @@ data class NutritionUiState(
 class NutritionViewModel @Inject constructor(
     private val mealRepository: MealRepository,
     private val userRepository: UserRepository,
-    private val foodRepository: FoodRepository,
-    private val suggestFoods: SuggestFoodsUseCase,
-    private val dietaryPrefsStore: DietaryPreferencesStore,
     private val waterRepository: WaterRepository,
     private val mealTemplateRepository: MealTemplateRepository,
 ) : ViewModel() {
@@ -63,18 +54,13 @@ class NutritionViewModel @Inject constructor(
         _date.flatMapLatest { mealRepository.getMealsForDate(it) },
         userRepository.observeGoal(),
         _date,
-        foodRepository.getAll(),
-        dietaryPrefsStore.filtersFlow,
-    ) { meals: List<MealEntry>, goal: NutritionGoal?, currentDate: String, allFoods: List<Food>, filters: Set<DietaryFilter> ->
+    ) { meals: List<MealEntry>, goal: NutritionGoal?, currentDate: String ->
         val safeGoal = goal ?: NutritionGoal()
         val totalKcal = meals.sumOf { it.totalKcal.toDouble() }.toFloat()
         val totalProtein = meals.sumOf { it.totalProtein.toDouble() }.toFloat()
         val totalCarbs = meals.sumOf { it.totalCarbs.toDouble() }.toFloat()
         val totalFat = meals.sumOf { it.totalFat.toDouble() }.toFloat()
         val isToday = currentDate == LocalDate.now().toString()
-        val suggestions = if (isToday && totalKcal > 0f) {
-            suggestFoods(allFoods, safeGoal, totalKcal, totalProtein, totalCarbs, totalFat, filters)
-        } else emptyList()
         NutritionUiState(
             date = currentDate,
             meals = meals,
@@ -83,7 +69,6 @@ class NutritionViewModel @Inject constructor(
             totalProtein = totalProtein,
             totalCarbs = totalCarbs,
             totalFat = totalFat,
-            suggestions = suggestions,
             isLoading = false,
             isToday = isToday,
         )

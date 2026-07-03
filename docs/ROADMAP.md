@@ -14,13 +14,13 @@ Revue transverse demandée par l'utilisateur (app jugée globalement complète, 
 
 ### Corrections (défauts confirmés)
 
-- **Notifications — tap sans effet** (High) : les notifications n'ont pas de `setContentIntent`, taper dessus n'ouvre pas l'app. Ajouter un `PendingIntent` vers `MainActivity` (idéalement avec deep-link vers l'écran concerné : nutrition / séance / eau).
-- **Notifications — heure non respectée** (High) : le `PeriodicWorkRequest` n'est pas précis à l'horloge et dérive après le 1er run. Passer à un `OneTimeWorkRequest` auto-replanifié chaque jour à l'heure cible. Effet de bord positif : la vérif « aucun repas loggé aujourd'hui » ne sera plus déclenchée le matin (faux positif) mais le soir.
-- **Notifications — robustesse** (Low) : log quand `POST_NOTIFICATIONS` est refusé ; replanifier au lancement de l'app en filet de sécurité.
+- **Notifications — tap sans effet** — Done v3.18.0. `PendingIntent` vers `MainActivity` + deep-link vers l'écran concerné (nutrition / séance / eau), `launchMode=singleTop`.
+- **Notifications — heure non respectée** — Done v3.18.0. `OneTimeWorkRequest` auto-replanifié chaque jour à l'heure cible (remplace le `PeriodicWorkRequest` qui dérivait). Corrige aussi le faux positif « aucun repas loggé » du matin.
+- **Notifications — robustesse** — Partial v3.18.0. Replanification au lancement de l'app faite ; log sur permission refusée non fait (Low, optionnel).
 
 ### Décision produit
 
-- **Retrait des suggestions nutrition** (Low effort) : feature jugée inutile à l'usage. Retrait chirurgical (NutritionScreen + NutritionViewModel, suppression de `SuggestFoodsUseCase` et `FoodTagger`). Bonus perf : supprime le chargement de toute la table d'aliments dans le combine nutrition. Statut : Planned (à confirmer).
+- **Retrait des suggestions nutrition** — Done v3.18.0. Carte retirée, `SuggestFoodsUseCase` et `FoodTagger` supprimés. Bonus perf : plus de chargement de toute la table d'aliments dans le combine nutrition.
 
 ### Sport — variantes d'exercices
 

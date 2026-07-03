@@ -40,7 +40,6 @@ Statuses: **Done** · **Partial** · **Planned**
 | Water intake tracking | Done | Quick-add 250 / 500 / 750 ml + custom |
 | Configurable water goal | Done | In-screen dialog |
 | Negative correction for water intake | Done | |
-| Smart food suggestions | Done | Based on remaining macros and dietary filters |
 
 ### Food search
 
@@ -207,11 +206,12 @@ Statuses: **Done** · **Partial** · **Planned**
 
 | Feature | Status | Notes |
 |---|---|---|
-| Smart reminders master switch | Done | WorkManager daily job |
+| Smart reminders master switch | Done | Self-chaining OneTimeWorkRequest anchored to the chosen hour (v3.18.0) |
 | Nutrition reminder (no meal logged today) | Done | |
 | Activity reminder (configurable inactivity threshold: 2 / 3 / 5 days) | Done | |
 | Hydration reminder (< 50% of water goal) | Done | |
-| Smart reminder send time (slider, 6 h–22 h) | Done | |
+| Smart reminder send time (slider, 6 h–22 h) | Done | Now reliably honored (was drifting via PeriodicWorkRequest) (v3.18.0) |
+| Tap notification to open the app | Done | Deep-links to the relevant screen (nutrition / workout / water) (v3.18.0) |
 | Per-program reminder toggle | Done | |
 | Program reminder send time | Done | |
 | Day-of / day-before reminder per program | Done | In ProgramDetailScreen |

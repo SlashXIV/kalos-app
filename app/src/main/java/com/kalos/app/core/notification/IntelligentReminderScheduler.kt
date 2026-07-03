@@ -37,32 +37,43 @@ class IntelligentReminderScheduler @Inject constructor(
         if (isEnabled()) schedule()
     }
 
+    /**
+     * Schedules the next reminder as a one-time job at the configured hour. The worker
+     * re-enqueues the following day at the end of its run, forming a self-perpetuating
+     * chain anchored to the wall-clock hour — unlike a PeriodicWorkRequest, which drifts
+     * after the first run (Doze/batching) and ignored the chosen time in practice.
+     */
     fun schedule() {
         NotificationHelper.createSmartChannel(context)
-        val request = PeriodicWorkRequestBuilder<IntelligentReminderWorker>(1, TimeUnit.DAYS)
-            .setInitialDelay(minutesUntilNextTarget(), TimeUnit.MINUTES)
-            .setConstraints(Constraints.Builder().setRequiresBatteryNotLow(false).build())
-            .build()
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-            WORK_NAME,
-            ExistingPeriodicWorkPolicy.UPDATE,
-            request,
-        )
+        enqueueNext(context, getHour())
     }
 
     fun cancel() {
         WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
     }
 
-    private fun minutesUntilNextTarget(): Long {
-        val now = LocalDateTime.now()
-        val target = now.toLocalDate().atTime(getHour(), 0).let {
-            if (now.isBefore(it)) it else it.plusDays(1)
-        }
-        return ChronoUnit.MINUTES.between(now, target).coerceAtLeast(1)
-    }
-
     companion object {
         private const val WORK_NAME = "kalos_smart_reminder"
+
+        /** Enqueues a single run at the next occurrence of [hour]. Called by the scheduler and by the worker to chain the next day. */
+        fun enqueueNext(context: Context, hour: Int) {
+            val request = OneTimeWorkRequestBuilder<IntelligentReminderWorker>()
+                .setInitialDelay(minutesUntilNextTarget(hour), TimeUnit.MINUTES)
+                .setConstraints(Constraints.Builder().setRequiresBatteryNotLow(false).build())
+                .build()
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                WORK_NAME,
+                ExistingWorkPolicy.REPLACE,
+                request,
+            )
+        }
+
+        private fun minutesUntilNextTarget(hour: Int): Long {
+            val now = LocalDateTime.now()
+            val target = now.toLocalDate().atTime(hour, 0).let {
+                if (now.isBefore(it)) it else it.plusDays(1)
+            }
+            return ChronoUnit.MINUTES.between(now, target).coerceAtLeast(1)
+        }
     }
 }

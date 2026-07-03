@@ -2,6 +2,23 @@
 
 ---
 
+## v3.18.0 — 3 July 2026
+
+### Fixed — notifications
+
+Premier lot de la revue générale du 3 July 2026 (voir `docs/TECHNICAL_AUDIT.md`).
+
+- **Le tap ouvre enfin l'app** : les notifications embarquaient aucun `PendingIntent`. Elles ouvrent désormais l'app, avec deep-link vers l'écran pertinent (rappel nutrition -> Nutrition, rappel séance -> Séances, hydratation -> Nutrition).
+- **Heure de rappel respectée** : le rappel intelligent passait par un `PeriodicWorkRequest` qui dérivait (Doze/batching) et tombait souvent en matinée quelle que soit l'heure choisie. Remplacé par un `OneTimeWorkRequest` auto-replanifié chaque jour à l'heure configurée. Effet de bord positif : la vérification « aucun repas enregistré aujourd'hui » se déclenche le soir (pertinent) et non le matin (faux positif systématique).
+- **Robustesse** : replanification au lancement de l'app en filet de sécurité si la chaîne a été interrompue.
+
+### Removed — suggestions nutrition
+
+- Retrait de la carte « Suggestions » du journal nutritionnel (peu utilisée). Suppression de `SuggestFoodsUseCase` et `FoodTagger`.
+- Bonus performance : le journal nutritionnel ne charge plus toute la table d'aliments à chaque changement de date (elle n'était combinée que pour alimenter les suggestions).
+
+---
+
 ## v3.17.0 — 3 July 2026
 
 ### Added — bilan hebdomadaire

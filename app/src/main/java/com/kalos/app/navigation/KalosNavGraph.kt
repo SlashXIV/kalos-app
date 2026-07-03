@@ -12,6 +12,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
+import com.kalos.app.core.notification.NotificationHelper
 import com.kalos.app.core.ui.component.KalosBottomNavBar
 import com.kalos.app.feature.calendar.CalendarScreen
 import com.kalos.app.feature.nutrition.NutritionScreen
@@ -43,10 +44,30 @@ import com.kalos.app.feature.workout.program.ProgramEditorScreen
 import com.kalos.app.feature.workout.program.ProgramsScreen
 
 @Composable
-fun KalosNavGraph() {
+fun KalosNavGraph(
+    deepLinkDestination: String? = null,
+    onDeepLinkHandled: () -> Unit = {},
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    // Notification tap deep-link → jump to the relevant tab, once.
+    LaunchedEffect(deepLinkDestination) {
+        val route = when (deepLinkDestination) {
+            NotificationHelper.DEST_WORKOUT -> Screen.Workout.route
+            NotificationHelper.DEST_NUTRITION, NotificationHelper.DEST_WATER -> Screen.Nutrition.route
+            else -> null
+        }
+        if (route != null) {
+            navController.navigate(route) {
+                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+            onDeepLinkHandled()
+        }
+    }
 
     val mainRoutes = bottomNavItems.map { it.screen.route }
     val showBottomBar = currentDestination?.hierarchy?.any { dest ->

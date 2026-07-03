@@ -31,6 +31,10 @@ class IntelligentReminderWorker(
         val prefs = applicationContext.getSharedPreferences("kalos_smart_reminders", Context.MODE_PRIVATE)
         if (!prefs.getBoolean("enabled", false)) return Result.success()
 
+        // Chain the next day's run up-front, anchored to the configured hour, so a
+        // failure below never breaks the schedule.
+        IntelligentReminderScheduler.enqueueNext(applicationContext, prefs.getInt("hour", 20))
+
         val ep = EntryPointAccessors.fromApplication(applicationContext, WorkerEntryPoint::class.java)
         val today = LocalDate.now().toString()
 
@@ -43,6 +47,7 @@ class IntelligentReminderWorker(
                     "N'oubliez pas de journaliser 🥗",
                     "Aucun repas enregistré aujourd'hui — suivez votre nutrition pour progresser.",
                     NOTIF_NUTRITION,
+                    NotificationHelper.DEST_NUTRITION,
                 )
             }
         }
@@ -61,6 +66,7 @@ class IntelligentReminderWorker(
                     "Il est temps de s'entraîner 💪",
                     msg,
                     NOTIF_WORKOUT,
+                    NotificationHelper.DEST_WORKOUT,
                 )
             }
         }
@@ -74,6 +80,7 @@ class IntelligentReminderWorker(
                     "Pensez à vous hydrater 💧",
                     "$waterMl ml bus — objectif ${goalMl} ml.",
                     NOTIF_HYDRATION,
+                    NotificationHelper.DEST_WATER,
                 )
             }
         }

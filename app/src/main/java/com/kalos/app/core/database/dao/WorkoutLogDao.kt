@@ -100,6 +100,31 @@ interface WorkoutLogDao {
     """)
     suspend fun getLastSessionTopWeight(exerciseId: Long): Float?
 
+    data class LastSessionSetRow(val setNumber: Int, val reps: Int, val weightKg: Float)
+
+    // All completed sets of the most recent finished session containing this exercise,
+    // ordered by set number. Same "most recent session" subquery as getLastSessionTopWeight
+    // so the detail line stays consistent with the "Dernière séance" top-weight figure.
+    // In-session memory aid: what reps × weight were done last time.
+    @Query("""
+        SELECT wls.setNumber AS setNumber, wls.reps AS reps, wls.weightKg AS weightKg
+        FROM workout_log_set wls
+        JOIN workout_log_exercise wle ON wls.logExerciseId = wle.id
+        WHERE wle.exerciseId = :exerciseId
+          AND wls.isCompleted = 1
+          AND wls.weightKg > 0
+          AND wle.logId = (
+            SELECT wl.id FROM workout_log wl
+            JOIN workout_log_exercise wle2 ON wle2.logId = wl.id
+            JOIN workout_log_set wls2 ON wls2.logExerciseId = wle2.id
+            WHERE wle2.exerciseId = :exerciseId AND wls2.isCompleted = 1 AND wls2.weightKg > 0
+            ORDER BY wl.startedAt DESC
+            LIMIT 1
+          )
+        ORDER BY wls.setNumber ASC
+    """)
+    suspend fun getLastSessionSets(exerciseId: Long): List<LastSessionSetRow>
+
     // Exercise progression
     data class ExerciseProgressionRow(val date: String, val maxWeight: Float)
 

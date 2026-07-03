@@ -2,9 +2,11 @@ package com.kalos.app.feature.workout.active
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -228,6 +230,22 @@ fun ActiveWorkoutScreen(
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.primary,
                             )
+                            // Recent set-by-set detail of the last session — minimal memory aid,
+                            // one muted line, scrolls horizontally if long.
+                            if (ref.lastSessionSets.isNotEmpty()) {
+                                val detail = ref.lastSessionSets.joinToString(" · ") { s ->
+                                    "${s.reps}×${formatRefWeight(s.weightKg)}"
+                                }
+                                Text(
+                                    "Dernière fois : $detail",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    softWrap = false,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .horizontalScroll(rememberScrollState()),
+                                )
+                            }
                         }
 
                         Spacer(Modifier.height(4.dp))

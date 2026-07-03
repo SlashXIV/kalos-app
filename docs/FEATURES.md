@@ -1,6 +1,6 @@
 # Features
 
-> Version: 3.12.1
+> Version: 3.13.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -116,6 +116,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Resume interrupted session | Done | Dialog with elapsed time, staleness warning if > 24 h; idle gaps > 5 min excluded from recorded duration (v3.12.0) |
 | In-progress workout banner on Sport screen | Done | Non-intrusive card above tabs when a draft exists (v3.9.1); stale state (> 24 h) with neutral tone + Abandonner action (v3.11.0) |
 | In-session load reference (PR + last session) | Done | Per-exercise memory aid, weight modes only, hidden when no history (v3.10.0) |
+| In-session last-session set detail | Done | Compact "Dernière fois : 10×6,8 · …" line under the reference (v3.13.0) |
 | Finish session and save to history | Done | |
 
 ### Post-workout summary
@@ -182,7 +183,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |
 | Data import / restore | Done | Confirmation dialog (destructive) |
-| Version display | Done | Kalos 3.12.1 |
+| Version display | Done | Kalos 3.13.0 |
 
 ---
 

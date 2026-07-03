@@ -2,11 +2,20 @@
 
 ---
 
-## v3.12.1 — 4 June 2026
+## v3.13.0 — 4 June 2026
 
-### Fixed
-- Remplacement d'exercice en séance : un exercice déjà remplacé (ou ajouté hors programme) ne proposait plus les boutons "Remplacer" / "Passer" — après un misclick sur le mauvais exercice de remplacement, il devenait impossible de le re-remplacer. Pire, après un kill de l'app, l'`originalTemplateExercise` (non persisté dans le draft) était perdu, faisant disparaître aussi "Annuler le remplacement" : l'exercice était totalement gelé.
+### Fixed — remplacement d'exercice débloqué
+- Un exercice déjà remplacé (ou ajouté hors programme) ne proposait plus les boutons "Remplacer" / "Passer" — après un misclick sur le mauvais exercice de remplacement, il devenait impossible de le re-remplacer. Pire, après un kill de l'app, l'`originalTemplateExercise` (non persisté dans le draft) était perdu, faisant disparaître aussi "Annuler le remplacement" : l'exercice était totalement gelé.
 - Les actions "Remplacer" et "Passer" sont désormais **toujours disponibles** quel que soit le statut de l'exercice (PLANNED / REPLACED / ADDED). La ligne de contexte ("Remplace : X" + "Annuler", ou "Hors programme") reste affichée au-dessus. Correctif purement UI — la logique de remplacement du ViewModel enchaînait déjà correctement les remplacements successifs.
+
+### Added — historique récent en séance
+- Sous le repère de charge (PR · Dernière séance), une ligne compacte affiche le détail des séries de la dernière séance pour l'exercice en cours : "Dernière fois : 10×6,8 · 10×11,3 · 9×15,8 · 7×15,8"
+- Une seule ligne, texte atténué, défilement horizontal si longue — aide-mémoire minimaliste pour savoir où l'on en était sans quitter la séance
+- Exercices à charge uniquement (comme le repère PR), masqué si pas d'historique
+- Technique : `WorkoutLogDao.getLastSessionSets` (mêmes critères de "séance la plus récente" que le top-weight, donc cohérent), `ExerciseReference.lastSessionSets`. Aucune migration.
+
+### Audit
+- `docs/SCANNER_AUDIT.md` : audit préparatoire du scan de code-barres (tension offline-first vs feature réseau, options caméra/décodage/résolution, plan en 3 phases). Aucun code — décisions produit en attente.
 
 ---
 

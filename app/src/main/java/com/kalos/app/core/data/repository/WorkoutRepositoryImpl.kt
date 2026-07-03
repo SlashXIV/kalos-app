@@ -198,6 +198,8 @@ class WorkoutRepositoryImpl @Inject constructor(
         return ExerciseReference(
             prKg = pr,
             lastSessionTopKg = logDao.getLastSessionTopWeight(exerciseId),
+            lastSessionSets = logDao.getLastSessionSets(exerciseId)
+                .map { SetSummary(reps = it.reps, weightKg = it.weightKg) },
         )
     }
 

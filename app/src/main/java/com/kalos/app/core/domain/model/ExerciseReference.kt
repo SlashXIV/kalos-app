@@ -12,4 +12,10 @@ package com.kalos.app.core.domain.model
 data class ExerciseReference(
     val prKg: Float,
     val lastSessionTopKg: Float?,
+    // Completed sets of the most recent session (reps × weight), ordered — the in-session
+    // "what did I do last time" detail line. Empty if no weighted history.
+    val lastSessionSets: List<SetSummary> = emptyList(),
 )
+
+/** A single completed set, for the in-session recent-history line. */
+data class SetSummary(val reps: Int, val weightKg: Float)

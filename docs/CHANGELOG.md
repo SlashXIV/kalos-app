@@ -12,9 +12,8 @@ Enregistrer un repas récurrent (ex. salade de thon) et le réappliquer en un ta
 - **Enregistrer comme favori** : depuis un repas déjà rempli, menu (⋮) → « Enregistrer comme favori », puis nommer. Les aliments en double sont fusionnés (grammages additionnés).
 - **Appliquer un favori** : menu (⋮) d'un repas → « Ajouter un repas favori » → choix dans la liste. Les aliments sont **ajoutés** au repas (jamais de remplacement) sur la date affichée.
 - **Gérer les favoris** : écran dédié (menu ⋮ de l'écran Nutrition → « Gérer les repas favoris ») listant chaque favori (kcal + aliments + grammages) avec suppression. Supprimer un favori n'affecte pas les repas déjà journalisés.
+- **Détail et édition d'un favori** : taper un favori ouvre l'éditeur — renommer, ajuster le grammage de chaque aliment, retirer un aliment, en ajouter un via le sélecteur d'aliments (recherche/scan réutilisés en mode « choisir »). Bouton + pour créer un favori de zéro. Éditer un favori ne modifie jamais les repas déjà journalisés.
 - **Sauvegarde / restauration** : les favoris sont inclus dans l'export/import JSON (remappage des IDs d'aliments personnalisés, ordre de purge FK-safe).
-
-Écarté pour une passe ultérieure : éditeur de favori (création de zéro via sélecteur d'aliments, renommage, ajout/retrait d'aliments et ajustement des grammages).
 
 ---
 

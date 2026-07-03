@@ -33,16 +33,31 @@ import com.kalos.app.feature.nutrition.scan.SCANNED_BARCODE_KEY
 import com.kalos.app.navigation.Screen
 import kotlin.math.roundToInt
 
+/** savedStateHandle key: id of the food picked in pick mode, read by the caller. */
+const val PICKED_FOOD_ID_KEY = "picked_food_id"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FoodSearchScreen(
     navController: NavController,
     mealType: String,
     date: String,
+    pickForResult: Boolean = false,
     viewModel: FoodSearchViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Pick mode (e.g. meal-template editor): tapping a food returns its id to the caller
+    // via savedStateHandle and pops — no logging, no portion sheet.
+    val onFoodClick: (Food) -> Unit = if (pickForResult) {
+        { food ->
+            navController.previousBackStackEntry?.savedStateHandle?.set(PICKED_FOOD_ID_KEY, food.id)
+            navController.popBackStack()
+        }
+    } else {
+        { food -> viewModel.selectFood(food) }
+    }
 
     LaunchedEffect(state.addedSuccessfully) {
         if (state.addedSuccessfully) {
@@ -101,7 +116,7 @@ fun FoodSearchScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Ajouter un aliment") },
+                title = { Text(if (pickForResult) "Choisir un aliment" else "Ajouter un aliment") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
@@ -167,14 +182,14 @@ fun FoodSearchScreen(
                     if (state.recent.isNotEmpty()) {
                         item { SectionHeader("Récents") }
                         items(state.recent) { food ->
-                            FoodListItem(food = food, onClick = { viewModel.selectFood(food) })
+                            FoodListItem(food = food, onClick = { onFoodClick(food) })
                             HorizontalDivider()
                         }
                     }
                     if (state.favorites.isNotEmpty()) {
                         item { SectionHeader("Favoris") }
                         items(state.favorites) { food ->
-                            FoodListItem(food = food, onClick = { viewModel.selectFood(food) })
+                            FoodListItem(food = food, onClick = { onFoodClick(food) })
                             HorizontalDivider()
                         }
                     }
@@ -203,7 +218,7 @@ fun FoodSearchScreen(
                             state.results
                         }
                         items(displayed) { food ->
-                            FoodListItem(food = food, onClick = { viewModel.selectFood(food) })
+                            FoodListItem(food = food, onClick = { onFoodClick(food) })
                             HorizontalDivider()
                         }
                     }

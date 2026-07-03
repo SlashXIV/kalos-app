@@ -19,10 +19,12 @@ sealed class Screen(val route: String) {
     object Profile : Screen("profile")
 
     // Nutrition sub-screens
-    object FoodSearch : Screen("nutrition/food_search?mealType={mealType}&date={date}&query={query}") {
-        fun route(mealType: String, date: String) = "nutrition/food_search?mealType=$mealType&date=$date&query="
+    object FoodSearch : Screen("nutrition/food_search?mealType={mealType}&date={date}&query={query}&pick={pick}") {
+        fun route(mealType: String, date: String) = "nutrition/food_search?mealType=$mealType&date=$date&query=&pick=false"
         fun routeWithQuery(mealType: String, date: String, query: String) =
-            "nutrition/food_search?mealType=$mealType&date=$date&query=${android.net.Uri.encode(query)}"
+            "nutrition/food_search?mealType=$mealType&date=$date&query=${android.net.Uri.encode(query)}&pick=false"
+        /** Pick mode: tapping a food returns its id via savedStateHandle instead of logging it. */
+        fun pick() = "nutrition/food_search?mealType=BREAKFAST&date=&query=&pick=true"
     }
     object CustomFood : Screen("nutrition/custom_food?foodId={foodId}&barcode={barcode}") {
         fun create() = "nutrition/custom_food?foodId=-1&barcode="
@@ -35,6 +37,10 @@ sealed class Screen(val route: String) {
     object BarcodeScanner : Screen("nutrition/scan")
     object MyFoods : Screen("nutrition/my_foods")
     object MealTemplates : Screen("nutrition/meal_templates")
+    object MealTemplateEdit : Screen("nutrition/meal_template_edit?templateId={templateId}") {
+        fun create() = "nutrition/meal_template_edit?templateId=-1"
+        fun edit(templateId: Long) = "nutrition/meal_template_edit?templateId=$templateId"
+    }
     object NutritionHistory : Screen("nutrition/history")
     object NutritionDay : Screen("nutrition/day/{date}") {
         fun route(date: String) = "nutrition/day/$date"

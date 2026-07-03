@@ -18,6 +18,7 @@ import com.kalos.app.feature.nutrition.NutritionScreen
 import com.kalos.app.feature.nutrition.custom.CustomFoodScreen
 import com.kalos.app.feature.nutrition.history.NutritionHistoryScreen
 import com.kalos.app.feature.nutrition.myfoods.MyFoodsScreen
+import com.kalos.app.feature.nutrition.templates.MealTemplateEditorScreen
 import com.kalos.app.feature.nutrition.templates.MealTemplatesScreen
 import com.kalos.app.feature.nutrition.scan.BarcodeScannerScreen
 import com.kalos.app.feature.nutrition.search.FoodSearchScreen
@@ -85,17 +86,19 @@ fun KalosNavGraph() {
 
             // Nutrition sub-screens
             composable(
-                route = "nutrition/food_search?mealType={mealType}&date={date}&query={query}",
+                route = "nutrition/food_search?mealType={mealType}&date={date}&query={query}&pick={pick}",
                 arguments = listOf(
                     navArgument("mealType") { type = NavType.StringType },
-                    navArgument("date") { type = NavType.StringType },
+                    navArgument("date") { type = NavType.StringType; defaultValue = "" },
                     navArgument("query") { type = NavType.StringType; defaultValue = "" },
+                    navArgument("pick") { type = NavType.BoolType; defaultValue = false },
                 )
             ) { backStackEntry ->
                 FoodSearchScreen(
                     navController = navController,
                     mealType = backStackEntry.arguments?.getString("mealType") ?: "BREAKFAST",
                     date = backStackEntry.arguments?.getString("date") ?: "",
+                    pickForResult = backStackEntry.arguments?.getBoolean("pick") ?: false,
                 )
             }
             composable(
@@ -114,6 +117,12 @@ fun KalosNavGraph() {
             composable(Screen.BarcodeScanner.route) { BarcodeScannerScreen(navController) }
             composable(Screen.MyFoods.route) { MyFoodsScreen(navController) }
             composable(Screen.MealTemplates.route) { MealTemplatesScreen(navController) }
+            composable(
+                route = "nutrition/meal_template_edit?templateId={templateId}",
+                arguments = listOf(
+                    navArgument("templateId") { type = NavType.LongType; defaultValue = -1L },
+                )
+            ) { MealTemplateEditorScreen(navController) }
             composable(Screen.NutritionHistory.route) { NutritionHistoryScreen(navController) }
             composable(
                 route = "nutrition/day/{date}",

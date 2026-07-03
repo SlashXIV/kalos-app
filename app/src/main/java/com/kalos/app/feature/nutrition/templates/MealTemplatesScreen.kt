@@ -1,10 +1,12 @@
 package com.kalos.app.feature.nutrition.templates
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,6 +21,7 @@ import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.MealTemplate
 import com.kalos.app.core.domain.repository.MealTemplateRepository
 import com.kalos.app.core.ui.component.EmptyState
+import com.kalos.app.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -74,6 +77,11 @@ fun MealTemplatesScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
                     }
                 },
+                actions = {
+                    IconButton(onClick = { navController.navigate(Screen.MealTemplateEdit.create()) }) {
+                        Icon(Icons.Filled.Add, contentDescription = "Créer un repas favori")
+                    }
+                },
             )
         }
     ) { padding ->
@@ -81,7 +89,7 @@ fun MealTemplatesScreen(
             Box(Modifier.fillMaxSize().padding(padding)) {
                 EmptyState(
                     title = "Aucun repas favori",
-                    subtitle = "Depuis un repas déjà rempli, ouvrez le menu (⋮) et choisissez « Enregistrer comme favori ».",
+                    subtitle = "Créez-en un avec le bouton +, ou depuis un repas déjà rempli via le menu (⋮) → « Enregistrer comme favori ».",
                 )
             }
         } else {
@@ -93,6 +101,9 @@ fun MealTemplatesScreen(
             ) {
                 items(templates, key = { it.id }) { template ->
                     ListItem(
+                        modifier = Modifier.clickable {
+                            navController.navigate(Screen.MealTemplateEdit.edit(template.id))
+                        },
                         headlineContent = {
                             Text(template.name, fontWeight = FontWeight.SemiBold)
                         },

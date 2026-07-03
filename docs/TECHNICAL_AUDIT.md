@@ -37,7 +37,7 @@ Revue transverse (notifications, export/import, performance) menée par explorat
 
 ### Performance
 
-- **[High] N+1 sur le chargement des séances** — `WorkoutRepositoryImpl.buildLog` appelle `exerciseDao.getById` par exercice, dans `getLogs()`/`getLogsForDate()`. ~50-80 requêtes pour 10 séances. Fix : `exerciseDao.getByIds(ids)` en batch + `associateBy`. Même pattern sur `getTemplates()`.
+- **[High] N+1 sur le chargement des séances** — CORRIGÉ (lot perf) : `exerciseDao.getByIds(ids)` en batch + map, via l'aide `WorkoutRepositoryImpl.exercisesByIdFor`, appliquée à `buildLog`, `getTemplates` et `getTemplate`. Une requête au lieu de N par séance/template.
 - **[Medium] Table d'aliments entière chargée dans le combine nutrition** — `NutritionViewModel` combine `foodRepository.getAll()` uniquement pour les suggestions (calculées seulement pour aujourd'hui). Résolu automatiquement si les suggestions sont retirées ; sinon isoler dans un flow conditionnel `isToday`.
 - **[Medium] Historiques sans pagination** — `WorkoutHistory` charge toutes les séances ; fenêtres nutrition/sport figées à 60 j (`LIMIT 60` dans les DAO). Rendre la fenêtre configurable + chargement paresseux.
 - **[Low-Medium] Index manquant sur `meal_entry.date`** — requêtes par date fréquentes sans index. Ajouter `indices = [Index("date")]` sur `MealEntryEntity` (migration).

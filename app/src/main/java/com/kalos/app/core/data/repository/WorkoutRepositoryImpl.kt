@@ -24,10 +24,11 @@ class WorkoutRepositoryImpl @Inject constructor(
     override fun getTemplates(): Flow<List<WorkoutTemplate>> = templateDao.getAll().map { templates ->
         templates.map { t ->
             val exEntities = templateDao.getExercisesForTemplateOnce(t.id)
+            val exerciseMap = exercisesByIdFor(exEntities.map { it.exerciseId })
             val exercises = exEntities.mapNotNull { te ->
-                val ex = exerciseDao.getById(te.exerciseId) ?: return@mapNotNull null
+                val ex = exerciseMap[te.exerciseId] ?: return@mapNotNull null
                 TemplateExercise(
-                    id = te.id, templateId = t.id, exercise = ex.toDomain(),
+                    id = te.id, templateId = t.id, exercise = ex,
                     orderIndex = te.orderIndex, defaultSets = te.defaultSets,
                     defaultReps = te.defaultReps, defaultWeightKg = te.defaultWeightKg,
                     restSeconds = te.restSeconds, notes = te.notes,
@@ -41,15 +42,23 @@ class WorkoutRepositoryImpl @Inject constructor(
     override suspend fun getTemplate(id: Long): WorkoutTemplate? {
         val t = templateDao.getById(id) ?: return null
         val exEntities = templateDao.getExercisesForTemplateOnce(id)
+        val exerciseMap = exercisesByIdFor(exEntities.map { it.exerciseId })
         val exercises = exEntities.mapNotNull { te ->
-            val ex = exerciseDao.getById(te.exerciseId) ?: return@mapNotNull null
-            TemplateExercise(id = te.id, templateId = id, exercise = ex.toDomain(),
+            val ex = exerciseMap[te.exerciseId] ?: return@mapNotNull null
+            TemplateExercise(id = te.id, templateId = id, exercise = ex,
                 orderIndex = te.orderIndex, defaultSets = te.defaultSets,
                 defaultReps = te.defaultReps, defaultWeightKg = te.defaultWeightKg,
                 restSeconds = te.restSeconds, notes = te.notes)
         }
         return WorkoutTemplate(id = t.id, name = t.name, description = t.description,
             estimatedDurationMin = t.estimatedDurationMin, exercises = exercises)
+    }
+
+    /** Batch-resolves exercises by id into domain models — one query instead of N (avoids N+1). */
+    private suspend fun exercisesByIdFor(ids: List<Long>): Map<Long, Exercise> {
+        val distinct = ids.distinct()
+        if (distinct.isEmpty()) return emptyMap()
+        return exerciseDao.getByIds(distinct).associate { it.id to it.toDomain() }
     }
 
     override suspend fun saveTemplate(template: WorkoutTemplate): Long {
@@ -86,15 +95,16 @@ class WorkoutRepositoryImpl @Inject constructor(
 
     private suspend fun buildLog(entity: WorkoutLogEntity): WorkoutLog {
         val logExercises = logDao.getExercisesForLogOnce(entity.id)
+        val exerciseMap = exercisesByIdFor(logExercises.map { it.exerciseId })
         val exercises = logExercises.map { le ->
-            val ex = exerciseDao.getById(le.exerciseId)
+            val ex = exerciseMap[le.exerciseId]
             val sets = logDao.getSetsForExerciseOnce(le.id).map { s ->
                 WorkoutSet(id = s.id, logExerciseId = s.logExerciseId, setNumber = s.setNumber,
                     reps = s.reps, weightKg = s.weightKg, durationSecs = s.durationSecs,
                     isCompleted = s.isCompleted, rpe = s.rpe)
             }
             LogExercise(id = le.id, logId = entity.id,
-                exercise = ex?.toDomain() ?: Exercise(id = le.exerciseId, name = le.exerciseName, primaryMuscle = ""),
+                exercise = ex ?: Exercise(id = le.exerciseId, name = le.exerciseName, primaryMuscle = ""),
                 orderIndex = le.orderIndex, sets = sets,
                 status = runCatching { ExerciseStatus.valueOf(le.status) }.getOrDefault(ExerciseStatus.PLANNED),
                 replacedExerciseName = le.replacedExerciseName)

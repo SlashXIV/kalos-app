@@ -35,6 +35,10 @@ interface ExerciseDao {
     @Query("SELECT * FROM exercise WHERE id = :id")
     suspend fun getById(id: Long): ExerciseEntity?
 
+    /** Batch lookup — avoids N+1 when resolving the exercises of a template or a log. */
+    @Query("SELECT * FROM exercise WHERE id IN (:ids)")
+    suspend fun getByIds(ids: List<Long>): List<ExerciseEntity>
+
     @Query("SELECT * FROM exercise ORDER BY name ASC")
     fun getAll(): Flow<List<ExerciseEntity>>
 

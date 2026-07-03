@@ -32,7 +32,7 @@ Revue transverse demandée par l'utilisateur (app jugée globalement complète, 
 
 - **Internationalisation / langues** (Medium-High) : les libellés sont actuellement en dur en français dans le code. Externaliser vers `res/values/strings.xml` (FR par défaut) puis ajouter l'anglais (`values-en`). Gros travail d'extraction mais sans risque. Prérequis à toute ouverture au-delà d'un usage FR.
 - **Thèmes multiples** (Medium) : l'app est en thème sombre unique. Ajouter un thème clair (et éventuellement variantes d'accent) + bascule dans les Paramètres (suivre le système / clair / sombre). La structure `core/ui/theme/` centralise déjà les couleurs.
-- **Performance** (voir TECHNICAL_AUDIT) : N+1 sur le chargement des séances/templates (High), pagination des historiques (Medium), index sur `meal_entry.date` (Low).
+- **Performance** (voir TECHNICAL_AUDIT) : N+1 chargement séances/templates — Done (batch `getByIds`). Reste : pagination des historiques (Medium), index sur `meal_entry.date` (Low, nécessite une migration — à grouper avec la prochaine évolution de schéma, ex. champ `variant`).
 - **Deep-link notifications** : router chaque notification vers l'écran pertinent (dépend du fix tap-to-open ci-dessus).
 
 ---

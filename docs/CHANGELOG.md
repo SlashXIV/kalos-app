@@ -2,6 +2,20 @@
 
 ---
 
+## v3.15.0 — 5 June 2026
+
+### Added — signal de densité calorique (aide au volume eating)
+
+Premier volet de la piste "densité / volume eating" (`docs/ROADMAP.md`). Aide à repérer les aliments rassasiants pour peu de calories, sans changement de base de données (calcul depuis `kcalPer100g`).
+
+- **Recherche / favoris / récents** : préfixe coloré sur chaque aliment — "Léger" (vert, < 150 kcal/100 g) ou "Dense" (ambre, > 350). Les aliments modérés (150–350) restent neutres pour ne pas surcharger.
+- **Feuille de portion** (au moment d'ajouter) : indicateur explicite "Densité : Léger · 52 kcal/100 g" avec pastille colorée.
+- Jamais de rouge : le signal est positif (trouver du volume), pas culpabilisant — cohérent avec la logique vert→ambre du dépassement d'objectif.
+
+Volets suivants possibles (différés) : tri "volume eating" dans la recherche, indice de satiété (protéines + fibres), suggestions intelligentes à faible densité quand le solde calorique est serré.
+
+---
+
 ## v3.14.0 — 5 June 2026
 
 ### Added — scanner de code-barres alimentaire

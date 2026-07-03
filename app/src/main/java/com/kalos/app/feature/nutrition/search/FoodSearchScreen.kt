@@ -1,5 +1,6 @@
 package com.kalos.app.feature.nutrition.search
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -14,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -25,6 +27,8 @@ import com.kalos.app.core.domain.model.Food
 import com.kalos.app.core.ui.component.EmptyState
 import com.kalos.app.core.ui.component.FoodListItem
 import com.kalos.app.core.ui.component.KalosSearchBar
+import com.kalos.app.core.ui.util.color
+import com.kalos.app.core.ui.util.foodDensityLevel
 import com.kalos.app.feature.nutrition.scan.SCANNED_BARCODE_KEY
 import com.kalos.app.navigation.Screen
 import kotlin.math.roundToInt
@@ -272,6 +276,20 @@ private fun FoodDetailSheet(
         Text(food.name, style = MaterialTheme.typography.headlineSmall)
         if (food.brand.isNotEmpty()) {
             Text(food.brand, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+
+        // Calorie-density indicator — decision moment ("should I add this?").
+        val densityLevel = foodDensityLevel(food.kcalPer100g)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Box(Modifier.size(10.dp).clip(CircleShape).background(densityLevel.color()))
+            Text(
+                "Densité : ${densityLevel.label} · ${food.kcalPer100g.roundToInt()} kcal/100 g",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
 
         if (hasUnitServing) {

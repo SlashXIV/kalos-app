@@ -6,10 +6,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.kalos.app.core.domain.model.Food
+import com.kalos.app.core.ui.util.FoodDensityLevel
+import com.kalos.app.core.ui.util.color
+import com.kalos.app.core.ui.util.foodDensityLevel
 import kotlin.math.roundToInt
 
 @Composable
@@ -45,8 +51,17 @@ fun FoodListItem(
             }
         },
         supportingContent = {
+            // Calorie-density prefix, coloured — shown only for the actionable extremes
+            // (Léger / Dense); "Modéré" stays quiet to avoid noise on most foods.
+            val level = foodDensityLevel(food.kcalPer100g)
+            val densityColor = level.color()
             Text(
-                buildString {
+                buildAnnotatedString {
+                    if (level != FoodDensityLevel.MODERATE) {
+                        withStyle(SpanStyle(color = densityColor, fontWeight = FontWeight.SemiBold)) {
+                            append("${level.label} · ")
+                        }
+                    }
                     if (food.brand.isNotEmpty()) append("${food.brand} • ")
                     append("${food.kcalPer100g.roundToInt()} kcal")
                     append(" • P: ${food.proteinPer100g.roundToInt()}g")

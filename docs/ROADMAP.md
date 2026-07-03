@@ -83,3 +83,5 @@ En phase de sèche, le budget calorique est contraint mais la faim ne l'est pas.
 **Effort estimé :** signal de densité seul = 1 jour ; indice de satiété + comparaison = 2–3 jours ; suggestions intelligentes = 1 jour supplémentaire.
 
 **Prérequis :** aucun changement de schéma DB nécessaire pour le signal de densité et le tri — les données sont déjà là.
+
+**Statut :** signal de densité **livré en v3.15.0** (label coloré Léger/Dense dans les listes + indicateur dans la feuille de portion). Volets restants (différés) : tri "volume eating", indice de satiété, comparaison visuelle, suggestions intelligentes, densité moyenne journalière.

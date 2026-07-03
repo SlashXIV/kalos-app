@@ -1,6 +1,6 @@
 # Features
 
-> Version: 3.14.0
+> Version: 3.15.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -52,6 +52,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Custom food filter | Done | "Perso" toggle chip |
 | Create custom food from search screen | Done | |
 | Barcode scanner | Done | CameraX + ML Kit (bundled); local cache → OpenFoodFacts → manual, graceful offline fallback (v3.14.0) |
+| Calorie-density signal | Done | Coloured Léger/Dense label in food lists + density line in the portion sheet, green→amber never red (v3.15.0) |
 
 ### Custom foods
 
@@ -184,7 +185,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |
 | Data import / restore | Done | Confirmation dialog (destructive) |
-| Version display | Done | Kalos 3.14.0 |
+| Version display | Done | Kalos 3.15.0 |
 
 ---
 

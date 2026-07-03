@@ -66,6 +66,7 @@ data class FoodBackup(
     val isFavorite: Boolean,
     val tags: String,              // comma-separated token string
     val lastUsedAt: Long = 0L,     // added v3.7 — preserves "Recents" ordering after restore
+    val barcode: String? = null,   // added v3.14 — scanned foods; default preserves old backups
 )
 
 @Serializable

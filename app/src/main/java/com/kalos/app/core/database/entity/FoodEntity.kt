@@ -23,4 +23,8 @@ data class FoodEntity(
     val lastUsedAt: Long = 0,
     val tags: String = "",  // comma-separated tag tokens, e.g. "pork,vegetarian"
     val isArchived: Boolean = false,
+    // EAN/UPC barcode when the food was resolved via scan (Phase 1 groundwork).
+    // Null for seed and manually-created foods. No index: the food table is small,
+    // a linear lookup on scan is negligible.
+    val barcode: String? = null,
 )

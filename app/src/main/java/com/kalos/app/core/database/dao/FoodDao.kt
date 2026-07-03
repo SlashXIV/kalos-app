@@ -46,6 +46,11 @@ interface FoodDao {
     @Query("SELECT * FROM food WHERE nameNormalized = :nameNormalized AND isArchived = 0 LIMIT 1")
     suspend fun findByNormalizedName(nameNormalized: String): FoodEntity?
 
+    // Local barcode cache lookup — checked before any network resolution (Phase 3),
+    // so a re-scan of a previously resolved product is instant and offline.
+    @Query("SELECT * FROM food WHERE barcode = :barcode AND isArchived = 0 LIMIT 1")
+    suspend fun findByBarcode(barcode: String): FoodEntity?
+
     @Query("UPDATE food SET isArchived = :isArchived WHERE id = :id")
     suspend fun setArchived(id: Long, isArchived: Boolean)
 

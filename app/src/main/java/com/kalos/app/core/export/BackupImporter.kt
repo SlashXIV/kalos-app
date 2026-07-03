@@ -186,7 +186,7 @@ class BackupImporter @Inject constructor(
                     fiberPer100g = f.fiberPer100g, sugarPer100g = f.sugarPer100g,
                     defaultServingG = f.defaultServingG,
                     servingUnit = f.servingUnit, isFavorite = f.isFavorite,
-                    lastUsedAt = f.lastUsedAt,
+                    lastUsedAt = f.lastUsedAt, barcode = f.barcode,
                     isCustom = true, tags = f.tags,
                 )
             )

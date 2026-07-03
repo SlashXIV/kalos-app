@@ -81,7 +81,7 @@ class BackupExporter @Inject constructor(
                     fiberPer100g = it.fiberPer100g, sugarPer100g = it.sugarPer100g,
                     defaultServingG = it.defaultServingG,
                     servingUnit = it.servingUnit, isFavorite = it.isFavorite, tags = it.tags,
-                    lastUsedAt = it.lastUsedAt,
+                    lastUsedAt = it.lastUsedAt, barcode = it.barcode,
                 )
             },
             mealEntries = allEntries.map { entry ->

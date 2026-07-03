@@ -27,7 +27,7 @@ import com.kalos.app.core.database.entity.*
         ProgramWorkoutEntity::class,
         WaterIntakeEntity::class,
     ],
-    version = 14,
+    version = 15,
     exportSchema = true,
 )
 abstract class KalosDatabase : RoomDatabase() {
@@ -65,6 +65,13 @@ abstract class KalosDatabase : RoomDatabase() {
                 // The seeder backfills the actual mode (DURATION / DURATION_WEIGHT) for cardio
                 // and isometric seeds at next launch via seed_exercises_version bump.
                 database.execSQL("ALTER TABLE exercise ADD COLUMN trackingMode TEXT NOT NULL DEFAULT 'REPS_WEIGHT'")
+            }
+        }
+        val MIGRATION_14_15 = object : Migration(14, 15) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Barcode scanner groundwork (Phase 1). Nullable TEXT → existing rows get NULL,
+                // no default clause (matches Room's schema for a `String? = null` field).
+                database.execSQL("ALTER TABLE food ADD COLUMN barcode TEXT")
             }
         }
         val MIGRATION_11_12 = object : Migration(11, 12) {

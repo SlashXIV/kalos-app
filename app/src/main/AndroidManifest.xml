@@ -7,6 +7,10 @@
          camera-less devices — the scan entry point simply won't be usable there. -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera.any" android:required="false" />
+    <!-- Scanner Phase 3: OpenFoodFacts lookup only. The app remains offline-first —
+         the network is used opportunistically to resolve a scanned barcode, never on
+         the critical path of a manual food entry. -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".KalosApp"

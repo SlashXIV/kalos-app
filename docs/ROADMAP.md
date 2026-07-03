@@ -48,7 +48,7 @@ Weekly aggregation of `totalVolumeKg`, last 8 weeks, bar chart in `WorkoutHistor
 
 The following are noted but not prioritized:
 
-- Barcode scanner for food entry — audit préparatoire complet dans `docs/SCANNER_AUDIT.md` (juin 2026). Tension centrale : l'app est offline-first, le scan impose caméra + réseau. Reco : intégration dégradable en 3 phases (data → décodage local → résolution OpenFoodFacts en ligne). Décisions produit en attente.
+- ~~Barcode scanner for food entry~~ — Done in v3.14.0. Implémenté en 3 phases par l'audit `docs/SCANNER_AUDIT.md` : data → décodage local (CameraX + ML Kit bundlé) → résolution OpenFoodFacts opportuniste avec cache local. Offline-first préservé (dégradation gracieuse).
 - Android home screen widget (Jetpack Glance)
 - CSV / Google Sheets export
 - ~~Custom program creation~~ — Done in v2.8.0

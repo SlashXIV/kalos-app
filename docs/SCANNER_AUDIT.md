@@ -2,7 +2,7 @@
 
 > Date : 4 June 2026 · app v3.12.0
 > Objectif : évaluer l'intégration d'un scan de code-barres pour ajouter un aliment, proprement, sans casser l'architecture existante.
-> Statut : audit préparatoire — aucune ligne de code écrite.
+> **Statut : IMPLÉMENTÉ en v3.14.0** — 3 phases livrées (data / décodage local ML Kit bundlé / résolution OpenFoodFacts opportuniste). Décisions retenues : réseau accepté, ML Kit bundlé, écran de validation pré-rempli sur hit OFF. Le reste du document est conservé comme trace de conception.
 
 ---
 

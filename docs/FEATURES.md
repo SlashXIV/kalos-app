@@ -1,6 +1,6 @@
 # Features
 
-> Version: 3.13.0
+> Version: 3.14.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -51,6 +51,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Category filter chips | Done | Single-select, loaded from DB, combinable with text |
 | Custom food filter | Done | "Perso" toggle chip |
 | Create custom food from search screen | Done | |
+| Barcode scanner | Done | CameraX + ML Kit (bundled); local cache → OpenFoodFacts → manual, graceful offline fallback (v3.14.0) |
 
 ### Custom foods
 
@@ -183,7 +184,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |
 | Data import / restore | Done | Confirmation dialog (destructive) |
-| Version display | Done | Kalos 3.13.0 |
+| Version display | Done | Kalos 3.14.0 |
 
 ---
 

@@ -2,6 +2,29 @@
 
 ---
 
+## v3.14.0 — 5 June 2026
+
+### Added — scanner de code-barres alimentaire
+
+Ajout d'un aliment par scan du code-barres. Implémenté en 3 phases (voir `docs/SCANNER_AUDIT.md`), livrées ensemble.
+
+- **Écran de scan** : caméra (CameraX) + décodage ML Kit embarqué (modèle bundlé, pas de dépendance Google Play Services). Formats retail : EAN-13/8, UPC-A/E. Permission caméra demandée à l'usage, avec écran de repli si refusée.
+- **Point d'entrée** : icône scan dans la barre de la recherche d'aliments.
+- **Résolution en cascade, dégradable** :
+  1. **Cache local** — code-barres déjà connu → ouvre directement la feuille de portion (instantané, offline).
+  2. **OpenFoodFacts** — inconnu localement → interrogation en ligne ; si trouvé, ouvre "Nouvel aliment" **pré-rempli** (nom + macros) pour validation avant enregistrement (les données OFF sont communautaires).
+  3. **Repli** — produit introuvable ou hors-ligne → création manuelle avec le code-barres pré-rempli.
+- Tout produit enregistré est **mis en cache** avec son code-barres → un re-scan est instantané et offline.
+- **Offline-first préservé** : le réseau n'est utilisé qu'en résolution opportuniste, jamais sur le chemin critique. Échec réseau → repli manuel silencieux.
+
+### Migration / permissions / dépendances
+- DB v14 → v15 : `ALTER TABLE food ADD COLUMN barcode TEXT` (nullable, migration triviale)
+- Permissions ajoutées : `CAMERA` (feature optionnelle — l'app s'installe sur device sans caméra), `INTERNET` (première permission réseau de l'app, pour OpenFoodFacts uniquement)
+- Dépendances : CameraX 1.3.4 + ML Kit barcode 17.3.0 (~+3-4 Mo d'APK, modèle bundlé). Résolution OpenFoodFacts via `HttpURLConnection` + kotlinx.serialization, sans lib réseau supplémentaire.
+- `FoodBackup.barcode` ajouté (default null → compat backups existants)
+
+---
+
 ## v3.13.0 — 4 June 2026
 
 ### Fixed — remplacement d'exercice débloqué

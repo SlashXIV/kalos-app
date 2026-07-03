@@ -67,12 +67,29 @@ fun FoodSearchScreen(
                 }
             }
     }
-    // Unknown barcode → open manual creation pre-filled with it.
+    // Unknown barcode → open manual creation pre-filled with it (macros too if OFF resolved it).
     LaunchedEffect(state.createBarcode) {
         state.createBarcode?.let { bc ->
             viewModel.onCreateBarcodeHandled()
             navController.navigate(Screen.CustomFood.createWithBarcode(bc))
         }
+    }
+
+    if (state.isResolvingBarcode) {
+        AlertDialog(
+            onDismissRequest = {},
+            confirmButton = {},
+            title = { Text("Recherche du produit") },
+            text = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    Text("Interrogation d'OpenFoodFacts…")
+                }
+            },
+        )
     }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)

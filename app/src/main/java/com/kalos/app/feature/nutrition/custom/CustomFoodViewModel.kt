@@ -2,6 +2,7 @@ package com.kalos.app.feature.nutrition.custom
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kalos.app.core.data.remote.ScannedFoodHolder
 import com.kalos.app.core.domain.model.Food
 import com.kalos.app.core.domain.repository.FoodRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,6 +40,7 @@ data class CustomFoodState(
 @HiltViewModel
 class CustomFoodViewModel @Inject constructor(
     private val foodRepository: FoodRepository,
+    private val scannedFoodHolder: ScannedFoodHolder,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CustomFoodState())
@@ -70,10 +72,31 @@ class CustomFoodViewModel @Inject constructor(
         }
     }
 
-    /** Pre-fills the barcode when creating a food from a scan of an unknown product. */
+    /**
+     * Pre-fills the form when creating a food from a scan. If OpenFoodFacts resolved the
+     * product (handed off via [ScannedFoodHolder]), macros are pre-filled for review;
+     * otherwise only the barcode is set (unknown product → full manual entry).
+     */
     fun setBarcode(barcode: String) {
         if (barcode.isBlank()) return
-        _state.update { if (it.barcode == null) it.copy(barcode = barcode) else it }
+        val resolved = scannedFoodHolder.pending?.takeIf { it.barcode == barcode }
+        scannedFoodHolder.pending = null  // one-shot: consume immediately
+        _state.update { s ->
+            when {
+                s.barcode != null -> s  // already initialized
+                resolved != null -> s.copy(
+                    barcode = barcode,
+                    name = resolved.name,
+                    brand = resolved.brand,
+                    kcal = resolved.kcalPer100g.toFieldString(),
+                    protein = resolved.proteinPer100g.toFieldString(),
+                    carbs = resolved.carbsPer100g.toFieldString(),
+                    fat = resolved.fatPer100g.toFieldString(),
+                    fiber = resolved.fiberPer100g.toFieldString(),
+                )
+                else -> s.copy(barcode = barcode)
+            }
+        }
     }
 
     fun onNameChange(v: String) = _state.update { it.copy(name = v) }
@@ -177,6 +200,10 @@ class CustomFoodViewModel @Inject constructor(
 
 // Accepts both "7.5" and "7,5" (French decimal separator)
 private fun String.parseFloat(): Float? = replace(',', '.').toFloatOrNull()
+
+// Float → editable field string: whole numbers drop the ".0" ("250.0" → "250").
+private fun Float.toFieldString(): String =
+    if (this == toLong().toFloat()) toLong().toString() else toString()
 
 internal fun Throwable.toUserMessage(fallback: String): String =
     message?.takeIf { it.isNotBlank() } ?: fallback

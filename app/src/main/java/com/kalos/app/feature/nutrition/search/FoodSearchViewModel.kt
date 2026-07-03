@@ -7,6 +7,8 @@ import com.kalos.app.core.domain.model.Food
 import com.kalos.app.core.domain.model.MealItem
 import com.kalos.app.core.domain.model.MealType
 import com.kalos.app.core.domain.model.NutritionGoal
+import com.kalos.app.core.data.remote.OpenFoodFactsDataSource
+import com.kalos.app.core.data.remote.ScannedFoodHolder
 import com.kalos.app.core.domain.repository.FoodRepository
 import com.kalos.app.core.domain.repository.MealRepository
 import com.kalos.app.core.domain.repository.UserRepository
@@ -33,8 +35,11 @@ data class FoodSearchUiState(
     val addedSuccessfully: Boolean = false,
     val errorMessage: String? = null,
     // Set when a scanned barcode has no local match → screen navigates to manual creation
-    // pre-filled with this barcode. Null otherwise.
+    // pre-filled with this barcode (and, if the OpenFoodFacts lookup succeeded, the macros
+    // handed off via ScannedFoodHolder). Null otherwise.
     val createBarcode: String? = null,
+    // True while querying OpenFoodFacts for a scanned barcode → screen shows a spinner.
+    val isResolvingBarcode: Boolean = false,
     val categoryFilter: String = "",
     val onlyCustom: Boolean = false,
     val categories: List<String> = emptyList(),
@@ -56,6 +61,8 @@ class FoodSearchViewModel @Inject constructor(
     private val foodRepository: FoodRepository,
     private val mealRepository: MealRepository,
     private val userRepository: UserRepository,
+    private val openFoodFacts: OpenFoodFactsDataSource,
+    private val scannedFoodHolder: ScannedFoodHolder,
 ) : ViewModel() {
 
     private val searchDate = savedStateHandle.get<String>("date") ?: LocalDate.now().toString()
@@ -155,18 +162,25 @@ class FoodSearchViewModel @Inject constructor(
     fun dismissSheet() { _state.update { it.copy(selectedFood = null, amountG = "100") } }
 
     /**
-     * Handles a barcode decoded by the scanner. Local cache lookup only (Phase 2, no network):
-     * a known product opens the portion sheet directly; an unknown one routes to manual
-     * creation pre-filled with the barcode, so it becomes cached for next time.
+     * Handles a barcode decoded by the scanner:
+     *  1. Local cache hit → opens the portion sheet directly (instant, offline).
+     *  2. Miss → queries OpenFoodFacts. On a hit the resolved product is stashed in
+     *     [ScannedFoodHolder] and we route to manual creation, pre-filled for review.
+     *  3. Not found / offline → manual creation with just the barcode (Phase 2 behavior).
+     * The network step is opportunistic and fully degradable.
      */
     fun onBarcodeScanned(barcode: String) {
         viewModelScope.launch {
-            val food = runCatching { foodRepository.findByBarcode(barcode) }.getOrNull()
-            if (food != null) {
-                selectFood(food)
-            } else {
-                _state.update { it.copy(createBarcode = barcode) }
+            val local = runCatching { foodRepository.findByBarcode(barcode) }.getOrNull()
+            if (local != null) {
+                selectFood(local)
+                return@launch
             }
+            _state.update { it.copy(isResolvingBarcode = true) }
+            val remote = openFoodFacts.lookup(barcode)
+            // Carries the pre-fill to CustomFoodViewModel (null → empty create with barcode only).
+            scannedFoodHolder.pending = remote
+            _state.update { it.copy(isResolvingBarcode = false, createBarcode = barcode) }
         }
     }
 

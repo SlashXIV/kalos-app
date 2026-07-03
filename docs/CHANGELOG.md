@@ -11,7 +11,7 @@
 - **Nutrition** : moyenne calories/j et protéines/j vs objectif (calories au-dessus de la cible en ambre), nombre de jours dans la cible calorique (90–105 % de l'objectif) et de jours protéines atteintes (≥ objectif), mini-graphe des calories/jour avec ligne d'objectif.
 - **Poids** : variation sur la période + rythme en kg/semaine, avec un verdict par rapport à la direction de l'objectif du profil (en ligne / stagnation / direction opposée / stable). État vide propre si moins de deux pesées sur la période.
 - **Entraînement** : séances de la semaine vs cible du programme actif, total sur la période, barres des séances/semaine sur 4 semaines.
-- **À retenir** : phrase de synthèse générée par règles simples (pas d'IA), ex. « Période solide. Sur 7 jours : calories dans la cible 6/7 j, 180 g de protéines/j, 3 séances, -0,4 kg. »
+- **À retenir** : phrase de synthèse qualitative choisie parmi plusieurs variantes selon la situation (nutrition/entraînement/poids) — stable pour un bilan donné, variée d'une période à l'autre — accompagnée des chiffres clés mis en avant en pastilles (jours dans la cible, protéines/j, séances, variation de poids). Règles simples, pas d'IA.
 - Sélecteur de période 7 jours / 30 jours.
 
 ---

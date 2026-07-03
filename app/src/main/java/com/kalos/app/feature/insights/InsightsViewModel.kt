@@ -55,13 +55,17 @@ data class TrainingInsight(
     val sessionsPerWeek: List<Int> = emptyList(),
 )
 
+/** A key figure surfaced as a standalone pill in the "À retenir" card. */
+data class SummaryHighlight(val value: String, val label: String)
+
 data class InsightsUiState(
     val period: InsightsPeriod = InsightsPeriod.WEEK,
     val isLoading: Boolean = true,
     val nutrition: NutritionInsight = NutritionInsight(),
     val weight: WeightInsight = WeightInsight(),
     val training: TrainingInsight = TrainingInsight(),
-    val summary: String = "",
+    val summaryHeadline: String = "",
+    val summaryHighlights: List<SummaryHighlight> = emptyList(),
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -196,7 +200,8 @@ class InsightsViewModel @Inject constructor(
             nutrition = nutrition,
             weight = weight,
             training = training,
-            summary = buildSummary(data.period, nutrition, weight, training),
+            summaryHeadline = buildHeadline(nutrition, weight, training),
+            summaryHighlights = buildHighlights(nutrition, weight, training),
         )
     }
 
@@ -217,33 +222,72 @@ class InsightsViewModel @Inject constructor(
         }
     }
 
-    private fun buildSummary(
-        period: InsightsPeriod,
+    private fun buildHeadline(
         n: NutritionInsight,
         w: WeightInsight,
         t: TrainingInsight,
     ): String {
         if (n.daysWithData == 0 && t.sessionsInPeriod == 0) {
-            return "Rien à analyser pour l'instant. Logue tes repas et tes séances pour voir ton bilan."
+            return "Rien à analyser pour l'instant — logue tes repas et tes séances pour voir ton bilan."
         }
         val onTargetRatio = if (n.daysWithData > 0) n.daysOnKcalTarget.toFloat() / n.daysWithData else 0f
-        val meetsTraining = t.weeklyTarget == null || t.sessionsThisWeek >= t.weeklyTarget
-        val lead = when {
-            onTargetRatio >= 0.8f && meetsTraining -> "Période solide."
-            onTargetRatio >= 0.5f -> "Bon rythme, quelques écarts."
-            else -> "Période en dents de scie."
-        }
+        val nutritionGood = n.daysWithData > 0 && onTargetRatio >= 0.7f
+        val nutritionMid = n.daysWithData > 0 && onTargetRatio in 0.4f..0.7f
+        val trainingGood = if (t.weeklyTarget != null) t.sessionsThisWeek >= t.weeklyTarget
+                           else t.sessionsInPeriod >= 2
 
-        val parts = mutableListOf<String>()
-        if (n.daysWithData > 0) {
-            parts += "calories dans la cible ${n.daysOnKcalTarget}/${n.daysWithData} j"
-            parts += "${n.avgProtein} g de protéines/j"
+        // A pool of phrasings per situation; a data-derived seed keeps the choice
+        // stable for a given period but varied as the numbers evolve week to week.
+        val pool: List<String> = when {
+            nutritionGood && trainingGood -> listOf(
+                "Période solide, tu tiens le cap.",
+                "Beau travail sur cette période.",
+                "Régularité au rendez-vous, continue comme ça.",
+                "Tout est aligné : assiette et séances suivent.",
+            )
+            nutritionGood && !trainingGood -> listOf(
+                "Alimentation carrée, mais peu de séances.",
+                "Côté assiette c'est bon ; l'entraînement est à relancer.",
+                "Nutrition maîtrisée, il manque du volume à l'entraînement.",
+            )
+            !nutritionGood && trainingGood -> listOf(
+                "Bonne assiduité en séance, mais l'alimentation dérape.",
+                "Entraînement régulier ; à resserrer côté calories.",
+                "Tu t'entraînes bien — l'assiette reste à cadrer.",
+            )
+            nutritionMid -> listOf(
+                "Bon rythme, avec quelques écarts.",
+                "Sur la bonne voie, encore quelques irrégularités.",
+                "Correct dans l'ensemble, des ajustements possibles.",
+            )
+            else -> listOf(
+                "Période en dents de scie.",
+                "Des hauts et des bas sur cette période.",
+                "Semaine difficile à tenir — on repart au propre.",
+            )
         }
-        parts += "${t.sessionsInPeriod} séance${if (t.sessionsInPeriod > 1) "s" else ""}"
+        val seed = n.daysOnKcalTarget * 31 + t.sessionsInPeriod * 7 + n.daysWithData + n.avgProtein
+        return pool[(seed % pool.size + pool.size) % pool.size]
+    }
+
+    private fun buildHighlights(
+        n: NutritionInsight,
+        w: WeightInsight,
+        t: TrainingInsight,
+    ): List<SummaryHighlight> {
+        val list = mutableListOf<SummaryHighlight>()
+        if (n.daysWithData > 0) {
+            list += SummaryHighlight("${n.daysOnKcalTarget}/${n.daysWithData} j", "calories dans la cible")
+            list += SummaryHighlight("${n.avgProtein} g", "protéines / j")
+        }
+        list += SummaryHighlight(
+            "${t.sessionsInPeriod}",
+            "séance${if (t.sessionsInPeriod > 1) "s" else ""}",
+        )
         if (w.hasEnoughData) {
             val sign = if (w.deltaKg >= 0f) "+" else ""
-            parts += "$sign${"%.1f".format(w.deltaKg)} kg"
+            list += SummaryHighlight("$sign${"%.1f".format(w.deltaKg)} kg", "sur la période")
         }
-        return "$lead Sur ${period.days} jours : ${parts.joinToString(", ")}."
+        return list
     }
 }

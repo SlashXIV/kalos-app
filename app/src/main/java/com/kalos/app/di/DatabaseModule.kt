@@ -29,6 +29,7 @@ object DatabaseModule {
                 KalosDatabase.MIGRATION_12_13,
                 KalosDatabase.MIGRATION_13_14,
                 KalosDatabase.MIGRATION_14_15,
+                KalosDatabase.MIGRATION_15_16,
             )
             // Keep a safety net for downgrades only (dev/sideload scenarios).
             // Upgrades MUST be covered by an explicit migration — a missing one will crash
@@ -44,6 +45,7 @@ object DatabaseModule {
     @Provides fun provideWorkoutLogDao(db: KalosDatabase) = db.workoutLogDao()
     @Provides fun provideProgramDao(db: KalosDatabase) = db.programDao()
     @Provides fun provideWaterIntakeDao(db: KalosDatabase) = db.waterIntakeDao()
+    @Provides fun provideMealTemplateDao(db: KalosDatabase) = db.mealTemplateDao()
     @Provides fun provideExportDao(db: KalosDatabase): ExportDao = db.exportDao()
     @Provides fun provideImportDao(db: KalosDatabase): ImportDao = db.importDao()
 }

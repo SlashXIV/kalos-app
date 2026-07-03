@@ -26,8 +26,10 @@ import com.kalos.app.core.database.entity.*
         TrainingProgramEntity::class,
         ProgramWorkoutEntity::class,
         WaterIntakeEntity::class,
+        MealTemplateEntity::class,
+        MealTemplateItemEntity::class,
     ],
-    version = 15,
+    version = 16,
     exportSchema = true,
 )
 abstract class KalosDatabase : RoomDatabase() {
@@ -74,6 +76,33 @@ abstract class KalosDatabase : RoomDatabase() {
                 database.execSQL("ALTER TABLE food ADD COLUMN barcode TEXT")
             }
         }
+        val MIGRATION_15_16 = object : Migration(15, 16) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Favourite meals. DDL mirrors Room's generated schema (backticks, FK actions,
+                // index names index_<table>_<column>) so Room's validation passes.
+                database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `meal_template` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`name` TEXT NOT NULL, " +
+                        "`createdAt` INTEGER NOT NULL)"
+                )
+                database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `meal_template_item` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`templateId` INTEGER NOT NULL, " +
+                        "`foodId` INTEGER NOT NULL, " +
+                        "`amountG` REAL NOT NULL, " +
+                        "FOREIGN KEY(`templateId`) REFERENCES `meal_template`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE, " +
+                        "FOREIGN KEY(`foodId`) REFERENCES `food`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT)"
+                )
+                database.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_meal_template_item_templateId` ON `meal_template_item` (`templateId`)"
+                )
+                database.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_meal_template_item_foodId` ON `meal_template_item` (`foodId`)"
+                )
+            }
+        }
         val MIGRATION_11_12 = object : Migration(11, 12) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 // Recreate exercise table to:
@@ -116,6 +145,7 @@ abstract class KalosDatabase : RoomDatabase() {
     abstract fun workoutLogDao(): WorkoutLogDao
     abstract fun programDao(): ProgramDao
     abstract fun waterIntakeDao(): WaterIntakeDao
+    abstract fun mealTemplateDao(): MealTemplateDao
     abstract fun exportDao(): ExportDao
     abstract fun importDao(): ImportDao
 }

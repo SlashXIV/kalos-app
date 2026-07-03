@@ -6,6 +6,7 @@ import com.kalos.app.core.data.mapper.toEntity
 import com.kalos.app.core.data.util.normalizeForSearch
 import com.kalos.app.core.database.KalosDatabase
 import com.kalos.app.core.database.dao.FoodDao
+import com.kalos.app.core.database.dao.MealTemplateDao
 import com.kalos.app.core.domain.model.Food
 import com.kalos.app.core.domain.repository.FoodRepository
 import kotlinx.coroutines.flow.Flow
@@ -15,6 +16,7 @@ import javax.inject.Inject
 class FoodRepositoryImpl @Inject constructor(
     private val database: KalosDatabase,
     private val dao: FoodDao,
+    private val mealTemplateDao: MealTemplateDao,
 ) : FoodRepository {
     override fun search(query: String, category: String, onlyCustom: Boolean): Flow<List<Food>> =
         dao.search(query.normalizeForSearch(), category, if (onlyCustom) 1 else 0).map { list -> list.map { it.toDomain() } }
@@ -30,11 +32,13 @@ class FoodRepositoryImpl @Inject constructor(
     }
     override suspend fun delete(food: Food) = dao.delete(food.toEntity())
     override suspend fun archiveOrDelete(id: Long) {
-        // Transaction so countUsage + delete is atomic — without it, a concurrent
+        // Transaction so the usage count + delete is atomic — without it, a concurrent
         // addItemToMeal between the count and the delete could trigger an FK RESTRICT
-        // violation (food already referenced by a meal item).
+        // violation. Count references from BOTH meal items and meal templates: a food used
+        // only inside a favourite meal must be archived, not hard-deleted (RESTRICT would crash).
         database.withTransaction {
-            if (dao.countUsage(id) == 0) {
+            val referenced = dao.countUsage(id) > 0 || mealTemplateDao.countFoodUsage(id) > 0
+            if (!referenced) {
                 dao.getById(id)?.let { dao.delete(it) }
             } else {
                 dao.setArchived(id, true)

@@ -2,6 +2,20 @@
 
 ---
 
+## v3.20.0 — 3 July 2026
+
+### Added — thème clair et choix du thème
+
+Troisième lot de la revue générale. L'app n'était qu'en thème sombre.
+
+- **Thème clair** complet, même identité de marque (vert émeraude, accents orange), adapté aux surfaces claires.
+- **Sélecteur de thème** dans Paramètres > Apparence : Système / Clair / Sombre. « Système » suit le réglage de l'appareil.
+- Préférence persistée (`ThemePreferenceStore`) et appliquée en direct sans redémarrage.
+- Contraste des icônes de barre système (statut / navigation) aligné sur le thème résolu.
+- Toute l'UI reposant déjà sur les tokens Material 3, le basculement s'applique à l'ensemble des écrans.
+
+---
+
 ## v3.19.0 — 3 July 2026
 
 ### Added — variantes d'exercices

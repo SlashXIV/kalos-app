@@ -13,13 +13,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kalos.app.core.data.ThemePreferenceStore
 import com.kalos.app.core.notification.NotificationHelper
 import com.kalos.app.core.ui.theme.KalosTheme
 import com.kalos.app.navigation.KalosNavGraph
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var themePreferenceStore: ThemePreferenceStore
 
     // Destination requested by a notification tap; consumed once by the nav graph.
     private var pendingDestination by mutableStateOf<String?>(null)
@@ -30,7 +35,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         pendingDestination = intent?.getStringExtra(NotificationHelper.EXTRA_DESTINATION)
         setContent {
-            KalosTheme {
+            val themeMode by themePreferenceStore.mode.collectAsStateWithLifecycle()
+            KalosTheme(mode = themeMode) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,

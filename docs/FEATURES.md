@@ -195,6 +195,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Feature | Status | Notes |
 |---|---|---|
 | Link to Notifications screen | Done | |
+| Theme selector (system / light / dark) | Done | Light theme added; persisted, applied live; system-bar contrast follows theme (v3.20.0) |
 | Dietary filters (pork, alcohol, vegetarian, vegan) | Done | Persisted in DataStore |
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |

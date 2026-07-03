@@ -20,7 +20,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.data.DietaryPreferencesStore
+import com.kalos.app.core.data.ThemePreferenceStore
 import com.kalos.app.core.domain.model.DietaryFilter
+import com.kalos.app.core.ui.theme.ThemeMode
 import com.kalos.app.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
@@ -30,9 +32,13 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val prefsStore: DietaryPreferencesStore,
+    private val themeStore: ThemePreferenceStore,
 ) : ViewModel() {
     val filters: StateFlow<Set<DietaryFilter>> = prefsStore.filtersFlow
     fun toggle(filter: DietaryFilter, enabled: Boolean) = prefsStore.setFilter(filter, enabled)
+
+    val themeMode: StateFlow<ThemeMode> = themeStore.mode
+    fun setThemeMode(mode: ThemeMode) = themeStore.setMode(mode)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,6 +50,7 @@ fun SettingsScreen(
     importViewModel: ImportViewModel = hiltViewModel(),
 ) {
     val activeFilters by viewModel.filters.collectAsStateWithLifecycle()
+    val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     val exportState by exportViewModel.state.collectAsStateWithLifecycle()
     val importState by importViewModel.state.collectAsStateWithLifecycle()
 
@@ -128,6 +135,24 @@ fun SettingsScreen(
                 subtitle = "Rappels intelligents et rappels d'entraînement",
                 onClick = { navController.navigate(Screen.Notifications.route) },
             )
+
+            HorizontalDivider()
+
+            // ── Appearance ───────────────────────────────────────────────────
+            Text(
+                "Apparence",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                ThemeMode.entries.forEachIndexed { index, mode ->
+                    SegmentedButton(
+                        selected = themeMode == mode,
+                        onClick = { viewModel.setThemeMode(mode) },
+                        shape = SegmentedButtonDefaults.itemShape(index, ThemeMode.entries.size),
+                    ) { Text(mode.label) }
+                }
+            }
 
             HorizontalDivider()
 
@@ -222,7 +247,7 @@ fun SettingsScreen(
             SettingsItem(
                 icon = Icons.Filled.Info,
                 title = "Version",
-                subtitle = "Kalos 3.19.0",
+                subtitle = "Kalos 3.20.0",
                 enabled = false,
             )
         }

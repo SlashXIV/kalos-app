@@ -50,3 +50,35 @@ val md_theme_dark_surfaceContainerLow     = Color(0xFF111120)  // = surface → 
 val md_theme_dark_surfaceContainer        = Color(0xFF151530)
 val md_theme_dark_surfaceContainerHigh    = Color(0xFF1A1A38)
 val md_theme_dark_surfaceContainerHighest = Color(0xFF1F1F40)
+
+// ── Light theme ───────────────────────────────────────────────────────────────
+// Same emerald brand, adapted for light surfaces. Primary darkened (Emerald 600)
+// for contrast on white; containers use tints instead of deep shades.
+val PrimaryGreenLight                   = Color(0xFF059669)   // Emerald 600 — legible on white
+val md_theme_light_primary              = PrimaryGreenLight
+val md_theme_light_onPrimary            = Color(0xFFFFFFFF)
+val md_theme_light_primaryContainer     = Color(0xFFD1FAE5)   // Emerald 100
+val md_theme_light_onPrimaryContainer   = Color(0xFF022C22)
+val md_theme_light_secondary            = PrimaryGreenLight
+val md_theme_light_onSecondary          = Color(0xFFFFFFFF)
+val md_theme_light_secondaryContainer   = Color(0xFFD1FAE5)
+val md_theme_light_onSecondaryContainer = Color(0xFF022C22)
+val md_theme_light_tertiary             = Color(0xFF2563EB)   // Blue 600
+val md_theme_light_onTertiary           = Color(0xFFFFFFFF)
+val md_theme_light_background           = Color(0xFFF7F8FA)
+val md_theme_light_onBackground         = Color(0xFF16161F)
+val md_theme_light_surface              = Color(0xFFFFFFFF)
+val md_theme_light_onSurface            = Color(0xFF16161F)
+val md_theme_light_surfaceVariant       = Color(0xFFECECF2)
+val md_theme_light_onSurfaceVariant     = Color(0xFF5A5A72)
+val md_theme_light_outline              = Color(0xFFC9C9D6)
+val md_theme_light_error                = Color(0xFFDC2626)
+val md_theme_light_onError              = Color(0xFFFFFFFF)
+val md_theme_light_surfaceDim           = Color(0xFFE4E4EC)
+val md_theme_light_surfaceBright        = Color(0xFFFFFFFF)
+val md_theme_light_surfaceTint          = PrimaryGreenLight
+val md_theme_light_surfaceContainerLowest  = Color(0xFFFFFFFF)
+val md_theme_light_surfaceContainerLow     = Color(0xFFFFFFFF)  // = surface → ElevatedCard matches Card
+val md_theme_light_surfaceContainer        = Color(0xFFF2F2F7)
+val md_theme_light_surfaceContainerHigh    = Color(0xFFECECF2)
+val md_theme_light_surfaceContainerHighest = Color(0xFFE6E6EE)

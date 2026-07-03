@@ -98,17 +98,17 @@ class BackupImporter @Inject constructor(
 
         val validFoodIds = backupFoodIds + seedFoodIds
 
-        val orphanFoodIds = backup.mealEntries
-            .asSequence()
-            .flatMap { it.items.asSequence() }
-            .map { it.foodId }
+        val orphanFoodIds = (
+            backup.mealEntries.asSequence().flatMap { it.items.asSequence() }.map { it.foodId } +
+                backup.mealTemplates.asSequence().flatMap { it.items.asSequence() }.map { it.foodId }
+            )
             .filter { it !in validFoodIds }
             .toSet()
 
         if (orphanFoodIds.isNotEmpty()) {
             val sample = orphanFoodIds.take(5).joinToString()
             val suffix = if (orphanFoodIds.size > 5) " (+${orphanFoodIds.size - 5} autres)" else ""
-            error("Aliments introuvables référencés dans les repas : $sample$suffix")
+            error("Aliments introuvables référencés dans les repas ou favoris : $sample$suffix")
         }
 
         // Templates present in the backup.
@@ -137,7 +137,8 @@ class BackupImporter @Inject constructor(
         importDao.clearWorkoutLogs()        // cascades → workout_log_exercise → workout_log_set
         importDao.clearPrograms()           // cascades → program_workout
         importDao.clearWorkoutTemplates()   // cascades → workout_template_exercise
-        importDao.clearCustomFoods()        // safe: no more meal_entry_item references
+        importDao.clearMealTemplates()      // cascades → meal_template_item (before custom foods)
+        importDao.clearCustomFoods()        // safe: no meal_entry_item nor meal_template_item refs left
         importDao.clearWaterIntake()
         importDao.clearBodyWeight()
 
@@ -219,6 +220,22 @@ class BackupImporter @Inject constructor(
             importDao.insertBodyWeight(
                 BodyWeightEntity(id = 0, date = bw.date, weightKg = bw.weightKg, note = bw.note)
             )
+        }
+
+        // ── Meal templates (favourites) — remap custom food ids like meal items ──
+        backup.mealTemplates.forEach { t ->
+            val newTemplateId = importDao.insertMealTemplate(
+                MealTemplateEntity(id = 0, name = t.name, createdAt = t.createdAt)
+            )
+            t.items.forEach { item ->
+                val resolvedFoodId = foodIdMap[item.foodId] ?: item.foodId
+                importDao.insertMealTemplateItem(
+                    MealTemplateItemEntity(
+                        id = 0, templateId = newTemplateId,
+                        foodId = resolvedFoodId, amountG = item.amountG,
+                    )
+                )
+            }
         }
 
         // ── Workout templates — build old_id → new_id map ────────────────────

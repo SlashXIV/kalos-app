@@ -27,7 +27,12 @@ interface ImportDao {
     @Query("DELETE FROM workout_template")
     suspend fun clearWorkoutTemplates()
 
-    // 5. Custom foods — safe now that no meal_entry_item references them
+    // 5. Meal templates cascade to meal_template_item — must run BEFORE clearCustomFoods,
+    //    otherwise a favourite referencing a custom food blocks the food delete (FK RESTRICT).
+    @Query("DELETE FROM meal_template")
+    suspend fun clearMealTemplates()
+
+    // 6. Custom foods — safe now that no meal_entry_item nor meal_template_item references them
     @Query("DELETE FROM food WHERE isCustom = 1")
     suspend fun clearCustomFoods()
 
@@ -82,4 +87,10 @@ interface ImportDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProgramWorkout(entity: ProgramWorkoutEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMealTemplate(entity: MealTemplateEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMealTemplateItem(entity: MealTemplateItemEntity): Long
 }

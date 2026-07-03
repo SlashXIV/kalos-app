@@ -47,4 +47,10 @@ interface ExportDao {
 
     @Query("SELECT * FROM program_workout ORDER BY programId ASC, weekNumber ASC, dayOfWeek ASC")
     suspend fun getAllProgramWorkouts(): List<ProgramWorkoutEntity>
+
+    @Query("SELECT * FROM meal_template ORDER BY name ASC")
+    suspend fun getAllMealTemplates(): List<MealTemplateEntity>
+
+    @Query("SELECT * FROM meal_template_item ORDER BY templateId ASC")
+    suspend fun getAllMealTemplateItems(): List<MealTemplateItemEntity>
 }

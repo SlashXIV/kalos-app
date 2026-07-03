@@ -44,12 +44,15 @@ class BackupExporter @Inject constructor(
         val logSets         = exportDao.getAllWorkoutLogSets()
         val programs        = exportDao.getAllPrograms()
         val programWorkouts = exportDao.getAllProgramWorkouts()
+        val mealTemplates   = exportDao.getAllMealTemplates()
+        val mealTemplateItems = exportDao.getAllMealTemplateItems()
 
         val itemsByEntry    = allItems.groupBy { it.mealEntryId }
         val exsByTemplate   = templateExs.groupBy { it.templateId }
         val exsByLog        = logExs.groupBy { it.logId }
         val setsByLogEx     = logSets.groupBy { it.logExerciseId }
         val workoutsByProg  = programWorkouts.groupBy { it.programId }
+        val itemsByMealTemplate = mealTemplateItems.groupBy { it.templateId }
 
         return KalosBackup(
             appVersion    = runCatching {
@@ -143,6 +146,14 @@ class BackupExporter @Inject constructor(
                             templateId = w.templateId, dayOfWeek = w.dayOfWeek,
                             weekNumber = w.weekNumber,
                         )
+                    },
+                )
+            },
+            mealTemplates = mealTemplates.map { t ->
+                MealTemplateBackup(
+                    name = t.name, createdAt = t.createdAt,
+                    items = (itemsByMealTemplate[t.id] ?: emptyList()).map { i ->
+                        MealTemplateItemBackup(foodId = i.foodId, amountG = i.amountG)
                     },
                 )
             },

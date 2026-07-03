@@ -23,6 +23,7 @@ data class KalosBackup(
     val workoutTemplates: List<WorkoutTemplateBackup>,
     val workoutLogs: List<WorkoutLogBackup>,
     val trainingPrograms: List<TrainingProgramBackup>,
+    val mealTemplates: List<MealTemplateBackup> = emptyList(),  // added v3.16 — default preserves old backups
 )
 
 @Serializable
@@ -173,4 +174,17 @@ data class ProgramWorkoutBackup(
     val templateId: Long,
     val dayOfWeek: Int,
     val weekNumber: Int,
+)
+
+@Serializable
+data class MealTemplateBackup(
+    val name: String,
+    val createdAt: Long,
+    val items: List<MealTemplateItemBackup>,
+)
+
+@Serializable
+data class MealTemplateItemBackup(
+    val foodId: Long,
+    val amountG: Float,
 )

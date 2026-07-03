@@ -52,7 +52,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Custom food filter | Done | "Perso" toggle chip |
 | Create custom food from search screen | Done | |
 | Barcode scanner | Done | CameraX + ML Kit (bundled); local cache → OpenFoodFacts → manual, graceful offline fallback (v3.14.0) |
-| Calorie-density signal | Done | Coloured Léger/Dense label in food lists + density line in the portion sheet, green→amber never red (v3.15.0) |
+| Satiety / volume-eating signal | Done | Rule-based "Rassasiant/Peu rassasiant" label (density + protein + fibre) in food lists + portion sheet, plus a "Volume eating" sort in search; green→amber never red (v3.15.0) |
 
 ### Custom foods
 

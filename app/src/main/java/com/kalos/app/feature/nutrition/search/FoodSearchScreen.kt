@@ -28,7 +28,7 @@ import com.kalos.app.core.ui.component.EmptyState
 import com.kalos.app.core.ui.component.FoodListItem
 import com.kalos.app.core.ui.component.KalosSearchBar
 import com.kalos.app.core.ui.util.color
-import com.kalos.app.core.ui.util.foodDensityLevel
+import com.kalos.app.core.ui.util.foodSatietyLevel
 import com.kalos.app.feature.nutrition.scan.SCANNED_BARCODE_KEY
 import com.kalos.app.navigation.Screen
 import kotlin.math.roundToInt
@@ -149,6 +149,19 @@ fun FoodSearchScreen(
             Spacer(Modifier.height(8.dp))
 
             val hasActiveFilter = state.categoryFilter.isNotEmpty() || state.onlyCustom
+            // "Volume eating" sort — only where results are shown (search or filter active).
+            if (state.query.isNotEmpty() || hasActiveFilter) {
+                FilterChip(
+                    selected = state.sortVolumeEating,
+                    onClick = viewModel::onToggleVolumeSort,
+                    label = { Text("Volume eating", style = MaterialTheme.typography.labelSmall) },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
+                )
+                Spacer(Modifier.height(8.dp))
+            }
             LazyColumn(verticalArrangement = Arrangement.spacedBy(0.dp)) {
                 if (state.query.isEmpty() && !hasActiveFilter) {
                     if (state.recent.isNotEmpty()) {
@@ -184,7 +197,12 @@ fun FoodSearchScreen(
                             )
                         }
                     } else {
-                        items(state.results) { food ->
+                        val displayed = if (state.sortVolumeEating) {
+                            state.results.sortedBy { it.kcalPer100g }
+                        } else {
+                            state.results
+                        }
+                        items(displayed) { food ->
                             FoodListItem(food = food, onClick = { viewModel.selectFood(food) })
                             HorizontalDivider()
                         }
@@ -278,15 +296,16 @@ private fun FoodDetailSheet(
             Text(food.brand, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        // Calorie-density indicator — decision moment ("should I add this?").
-        val densityLevel = foodDensityLevel(food.kcalPer100g)
+        // Satiety (fullness-per-calorie) indicator — decision moment ("should I add this?").
+        // Raw kcal/100 g shown alongside so the label never misleads on its own.
+        val satietyLevel = foodSatietyLevel(food)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Box(Modifier.size(10.dp).clip(CircleShape).background(densityLevel.color()))
+            Box(Modifier.size(10.dp).clip(CircleShape).background(satietyLevel.color()))
             Text(
-                "Densité : ${densityLevel.label} · ${food.kcalPer100g.roundToInt()} kcal/100 g",
+                "${satietyLevel.label} · ${food.kcalPer100g.roundToInt()} kcal/100 g",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

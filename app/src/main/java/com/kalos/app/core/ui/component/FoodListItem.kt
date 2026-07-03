@@ -13,9 +13,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.kalos.app.core.domain.model.Food
-import com.kalos.app.core.ui.util.FoodDensityLevel
+import com.kalos.app.core.ui.util.SatietyLevel
 import com.kalos.app.core.ui.util.color
-import com.kalos.app.core.ui.util.foodDensityLevel
+import com.kalos.app.core.ui.util.foodSatietyLevel
 import kotlin.math.roundToInt
 
 @Composable
@@ -51,14 +51,14 @@ fun FoodListItem(
             }
         },
         supportingContent = {
-            // Calorie-density prefix, coloured — shown only for the actionable extremes
-            // (Léger / Dense); "Modéré" stays quiet to avoid noise on most foods.
-            val level = foodDensityLevel(food.kcalPer100g)
-            val densityColor = level.color()
+            // Satiety (fullness-per-calorie) prefix, coloured — shown only for the actionable
+            // extremes (Rassasiant / Peu rassasiant); "Modéré" stays quiet to avoid noise.
+            val level = foodSatietyLevel(food)
+            val satietyColor = level.color()
             Text(
                 buildAnnotatedString {
-                    if (level != FoodDensityLevel.MODERATE) {
-                        withStyle(SpanStyle(color = densityColor, fontWeight = FontWeight.SemiBold)) {
+                    if (level != SatietyLevel.MODERATE) {
+                        withStyle(SpanStyle(color = satietyColor, fontWeight = FontWeight.SemiBold)) {
                             append("${level.label} · ")
                         }
                     }

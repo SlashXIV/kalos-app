@@ -84,4 +84,4 @@ En phase de sèche, le budget calorique est contraint mais la faim ne l'est pas.
 
 **Prérequis :** aucun changement de schéma DB nécessaire pour le signal de densité et le tri — les données sont déjà là.
 
-**Statut :** signal de densité **livré en v3.15.0** (label coloré Léger/Dense dans les listes + indicateur dans la feuille de portion). Volets restants (différés) : tri "volume eating", indice de satiété, comparaison visuelle, suggestions intelligentes, densité moyenne journalière.
+**Statut : volet clos en v3.15.0.** Livré : indice de satiété "rassasiant par calorie" (règle densité + protéines + fibres, label vert/ambre dans les listes et la feuille de portion) + tri "volume eating" dans la recherche. Écartés (faible valeur) : comparaison vs moyenne de catégorie, densité moyenne journalière. Reste possible plus tard : suggestions intelligentes priorisant les aliments peu denses quand le solde calorique est serré (touche `SuggestFoodsUseCase`).

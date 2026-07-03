@@ -43,6 +43,8 @@ data class FoodSearchUiState(
     val isResolvingBarcode: Boolean = false,
     val categoryFilter: String = "",
     val onlyCustom: Boolean = false,
+    // "Volume eating" sort: results shown least-calorie-dense first.
+    val sortVolumeEating: Boolean = false,
     val categories: List<String> = emptyList(),
     // Daily context for nutritional preview
     val dailyKcal: Float = 0f,
@@ -143,6 +145,8 @@ class FoodSearchViewModel @Inject constructor(
         _onlyCustom.value = new
         _state.update { it.copy(onlyCustom = new) }
     }
+
+    fun onToggleVolumeSort() = _state.update { it.copy(sortVolumeEating = !it.sortVolumeEating) }
 
     fun selectFood(food: Food) {
         val defaultMode = if (food.servingUnit != "g") ServingMode.UNITS else ServingMode.GRAMS

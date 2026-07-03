@@ -4,15 +4,20 @@
 
 ## v3.15.0 — 5 June 2026
 
-### Added — signal de densité calorique (aide au volume eating)
+### Added — indice de satiété / volume eating
 
-Premier volet de la piste "densité / volume eating" (`docs/ROADMAP.md`). Aide à repérer les aliments rassasiants pour peu de calories, sans changement de base de données (calcul depuis `kcalPer100g`).
+Clôture de la piste "densité / volume eating" (`docs/ROADMAP.md`). Aide à repérer les aliments rassasiants pour peu de calories. Aucun changement de base de données (calcul depuis `kcalPer100g` + protéines + fibres).
 
-- **Recherche / favoris / récents** : préfixe coloré sur chaque aliment — "Léger" (vert, < 150 kcal/100 g) ou "Dense" (ambre, > 350). Les aliments modérés (150–350) restent neutres pour ne pas surcharger.
-- **Feuille de portion** (au moment d'ajouter) : indicateur explicite "Densité : Léger · 52 kcal/100 g" avec pastille colorée.
-- Jamais de rouge : le signal est positif (trouver du volume), pas culpabilisant — cohérent avec la logique vert→ambre du dépassement d'objectif.
+- **Indice de satiété "rassasiant par calorie"** : règle transparente combinant densité énergétique (dominante) et macros rassasiantes (protéines + fibres), plutôt qu'un score opaque.
+  - **Peu rassasiant** (ambre) : forte densité > 350 kcal/100 g (oléagineux, fromage, huiles) — dense par calorie même si nutritif
+  - **Rassasiant** (vert) : faible densité < 150, ou densité modérée mais riche en protéines+fibres (≥ 12 g/100 g) — poulet, lentilles, légumes
+  - **Modéré** sinon
+- **Recherche / favoris / récents** : préfixe coloré "Rassasiant" / "Peu rassasiant" sur chaque aliment (les modérés restent neutres, pas de surcharge).
+- **Feuille de portion** : indicateur "Rassasiant · 52 kcal/100 g" avec pastille colorée + les kcal/100 g bruts affichés, pour que le label ne trompe jamais seul.
+- **Tri "Volume eating"** : chip dans la recherche/filtre qui classe les résultats du moins au plus dense — idéal pour trouver l'option la plus légère d'une catégorie.
+- Jamais de rouge : signal positif (trouver du volume), pas culpabilisant — cohérent avec la logique vert→ambre du dépassement d'objectif.
 
-Volets suivants possibles (différés) : tri "volume eating" dans la recherche, indice de satiété (protéines + fibres), suggestions intelligentes à faible densité quand le solde calorique est serré.
+Volets écartés (faible valeur) : comparaison vs moyenne de catégorie, densité moyenne journalière. Suggestions intelligentes à faible densité : possibles plus tard si l'usage le demande.
 
 ---
 

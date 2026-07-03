@@ -12,15 +12,23 @@ import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Outcome of a barcode lookup, so the caller can give the user honest feedback. */
+sealed interface OffLookupResult {
+    data class Found(val food: Food) : OffLookupResult
+    /** OpenFoodFacts responded but has no (usable) product for this barcode. */
+    data object NotFound : OffLookupResult
+    /** No network / server error — the lookup couldn't be performed. */
+    data object Unavailable : OffLookupResult
+}
+
 /**
  * Resolves a barcode to a [Food] via the OpenFoodFacts REST API.
  *
  * Deliberately isolated: this is the only place the app touches the network. It is called
- * opportunistically after a local cache miss, never on the critical path of a manual entry,
- * and every failure mode (no network, HTTP error, product not found, unusable macros)
- * degrades gracefully to `null` so the caller falls back to manual creation.
+ * opportunistically after a local cache miss, never on the critical path of a manual entry.
  *
- * Uses HttpURLConnection + kotlinx.serialization to avoid pulling in a networking library.
+ * Uses the v0 endpoint (whose `status` is a stable integer: 1 found / 0 not found) with
+ * HttpURLConnection + kotlinx.serialization, to avoid pulling in a networking library.
  */
 @Singleton
 class OpenFoodFactsDataSource @Inject constructor() {
@@ -31,13 +39,13 @@ class OpenFoodFactsDataSource @Inject constructor() {
         isLenient = true
     }
 
-    suspend fun lookup(barcode: String): Food? = withContext(Dispatchers.IO) {
+    suspend fun lookup(barcode: String): OffLookupResult = withContext(Dispatchers.IO) {
         val clean = barcode.trim()
-        if (clean.isEmpty()) return@withContext null
+        if (clean.isEmpty()) return@withContext OffLookupResult.NotFound
         var conn: HttpURLConnection? = null
         try {
             val url = URL(
-                "https://world.openfoodfacts.org/api/v2/product/$clean.json" +
+                "https://world.openfoodfacts.org/api/v0/product/$clean.json" +
                     "?fields=product_name,brands,nutriments"
             )
             conn = (url.openConnection() as HttpURLConnection).apply {
@@ -47,32 +55,46 @@ class OpenFoodFactsDataSource @Inject constructor() {
                 // OpenFoodFacts asks callers to identify themselves.
                 setRequestProperty("User-Agent", "Kalos/3.14 (Android; offline-first fitness app)")
             }
-            if (conn.responseCode != HttpURLConnection.HTTP_OK) return@withContext null
+            val code = conn.responseCode
+            if (code != HttpURLConnection.HTTP_OK) {
+                // v0 answers 200 even for unknown products (status 0); a non-200 is a real
+                // availability problem, except 404 which we treat as "not found".
+                return@withContext if (code == HttpURLConnection.HTTP_NOT_FOUND) {
+                    OffLookupResult.NotFound
+                } else {
+                    OffLookupResult.Unavailable
+                }
+            }
             val body = conn.inputStream.use { it.readBytes().toString(Charsets.UTF_8) }
             val resp = json.decodeFromString<OffResponse>(body)
-            if (resp.status != 1 || resp.product == null) return@withContext null
-            resp.product.toFoodOrNull(clean)
+            if (resp.status != 1 || resp.product == null) return@withContext OffLookupResult.NotFound
+            val food = resp.product.toFoodOrNull(clean)
+                ?: return@withContext OffLookupResult.NotFound
+            OffLookupResult.Found(food)
         } catch (e: Exception) {
             Log.w(TAG, "OpenFoodFacts lookup failed for $clean", e)
-            null
+            OffLookupResult.Unavailable
         } finally {
             conn?.disconnect()
         }
     }
 
     private fun OffProduct.toFoodOrNull(barcode: String): Food? {
-        val n = nutriments ?: return null
-        val kcal = n.kcal?.toFloat() ?: 0f
-        // Validation: reject products without usable energy data rather than inserting zeros.
-        if (kcal <= 0f) return null
+        val name = productName?.trim().orEmpty()
+        val n = nutriments
+        val hasAnyNutriment = n != null &&
+            listOf(n.kcal, n.proteins, n.carbs, n.fat, n.fiber).any { it != null }
+        // Reject only genuinely empty entries (no name AND no nutritional data). A named
+        // product with 0 kcal (water, diet drinks, coffee…) is perfectly valid and pre-fills.
+        if (name.isBlank() && !hasAnyNutriment) return null
         return Food(
-            name = productName?.trim().orEmpty().ifBlank { "Produit $barcode" },
+            name = name.ifBlank { "Produit $barcode" },
             brand = brands?.substringBefore(",")?.trim().orEmpty(),
-            kcalPer100g = kcal,
-            proteinPer100g = n.proteins?.toFloat()?.coerceAtLeast(0f) ?: 0f,
-            carbsPer100g = n.carbs?.toFloat()?.coerceAtLeast(0f) ?: 0f,
-            fatPer100g = n.fat?.toFloat()?.coerceAtLeast(0f) ?: 0f,
-            fiberPer100g = n.fiber?.toFloat()?.coerceAtLeast(0f) ?: 0f,
+            kcalPer100g = n?.kcal?.toFloat()?.coerceAtLeast(0f) ?: 0f,
+            proteinPer100g = n?.proteins?.toFloat()?.coerceAtLeast(0f) ?: 0f,
+            carbsPer100g = n?.carbs?.toFloat()?.coerceAtLeast(0f) ?: 0f,
+            fatPer100g = n?.fat?.toFloat()?.coerceAtLeast(0f) ?: 0f,
+            fiberPer100g = n?.fiber?.toFloat()?.coerceAtLeast(0f) ?: 0f,
             isCustom = true,
             barcode = barcode,
         )

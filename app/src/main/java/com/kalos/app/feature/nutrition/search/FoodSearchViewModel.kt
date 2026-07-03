@@ -7,6 +7,7 @@ import com.kalos.app.core.domain.model.Food
 import com.kalos.app.core.domain.model.MealItem
 import com.kalos.app.core.domain.model.MealType
 import com.kalos.app.core.domain.model.NutritionGoal
+import com.kalos.app.core.data.remote.OffLookupResult
 import com.kalos.app.core.data.remote.OpenFoodFactsDataSource
 import com.kalos.app.core.data.remote.ScannedFoodHolder
 import com.kalos.app.core.domain.repository.FoodRepository
@@ -177,10 +178,28 @@ class FoodSearchViewModel @Inject constructor(
                 return@launch
             }
             _state.update { it.copy(isResolvingBarcode = true) }
-            val remote = openFoodFacts.lookup(barcode)
-            // Carries the pre-fill to CustomFoodViewModel (null → empty create with barcode only).
-            scannedFoodHolder.pending = remote
-            _state.update { it.copy(isResolvingBarcode = false, createBarcode = barcode) }
+            when (val result = openFoodFacts.lookup(barcode)) {
+                is OffLookupResult.Found -> {
+                    // Hand off the resolved product → manual creation opens pre-filled for review.
+                    scannedFoodHolder.pending = result.food
+                    _state.update { it.copy(isResolvingBarcode = false, createBarcode = barcode) }
+                }
+                OffLookupResult.NotFound -> {
+                    // Product unknown to OpenFoodFacts → empty manual creation with the barcode.
+                    scannedFoodHolder.pending = null
+                    _state.update { it.copy(isResolvingBarcode = false, createBarcode = barcode) }
+                }
+                OffLookupResult.Unavailable -> {
+                    // Network problem: stay put and tell the user, rather than a silent empty form.
+                    scannedFoodHolder.pending = null
+                    _state.update {
+                        it.copy(
+                            isResolvingBarcode = false,
+                            errorMessage = "Pas de connexion à OpenFoodFacts. Réessayez, ou créez l'aliment manuellement.",
+                        )
+                    }
+                }
+            }
         }
     }
 

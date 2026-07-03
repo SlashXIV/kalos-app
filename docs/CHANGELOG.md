@@ -2,6 +2,14 @@
 
 ---
 
+## v3.12.1 — 4 June 2026
+
+### Fixed
+- Remplacement d'exercice en séance : un exercice déjà remplacé (ou ajouté hors programme) ne proposait plus les boutons "Remplacer" / "Passer" — après un misclick sur le mauvais exercice de remplacement, il devenait impossible de le re-remplacer. Pire, après un kill de l'app, l'`originalTemplateExercise` (non persisté dans le draft) était perdu, faisant disparaître aussi "Annuler le remplacement" : l'exercice était totalement gelé.
+- Les actions "Remplacer" et "Passer" sont désormais **toujours disponibles** quel que soit le statut de l'exercice (PLANNED / REPLACED / ADDED). La ligne de contexte ("Remplace : X" + "Annuler", ou "Hors programme") reste affichée au-dessus. Correctif purement UI — la logique de remplacement du ViewModel enchaînait déjà correctement les remplacements successifs.
+
+---
+
 ## v3.12.0 — 4 June 2026
 
 Clôture de la revue UX (lot cosmétique restant) + trois corrections de logique produit.

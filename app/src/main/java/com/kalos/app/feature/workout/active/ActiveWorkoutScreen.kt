@@ -394,72 +394,80 @@ private fun ExerciseActionBar(
     onSkip: () -> Unit,
     onUndoReplace: () -> Unit,
 ) {
-    when (ep.status) {
-        ExerciseStatus.PLANNED -> {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                OutlinedButton(
-                    onClick = onReplace,
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+    // Skipped exercises are handled by the dedicated card in the main body.
+    if (ep.status == ExerciseStatus.SKIPPED) return
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        // Status context line — informative only, shown above the always-available actions.
+        when (ep.status) {
+            ExerciseStatus.REPLACED -> {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(Icons.Filled.SwapHoriz, null, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text("Remplacer", style = MaterialTheme.typography.labelMedium)
-                }
-                OutlinedButton(
-                    onClick = onSkip,
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
-                ) {
-                    Icon(Icons.Filled.SkipNext, null, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text("Passer", style = MaterialTheme.typography.labelMedium)
-                }
-            }
-        }
-        ExerciseStatus.REPLACED -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-            ) {
-                Text(
-                    "Remplace : ${ep.originalExerciseName}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.tertiary,
-                )
-                if (ep.originalTemplateExercise != null) {
-                    TextButton(
-                        onClick = onUndoReplace,
-                        contentPadding = PaddingValues(0.dp),
-                    ) {
-                        Text("Annuler le remplacement",
-                            style = MaterialTheme.typography.labelMedium)
+                    Text(
+                        "Remplace : ${ep.originalExerciseName}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.weight(1f),
+                    )
+                    // Undo is only possible while the original is still in memory
+                    // (lost after an app kill — the draft doesn't persist it).
+                    if (ep.originalTemplateExercise != null) {
+                        TextButton(
+                            onClick = onUndoReplace,
+                            contentPadding = PaddingValues(horizontal = 4.dp),
+                        ) {
+                            Text("Annuler", style = MaterialTheme.typography.labelMedium)
+                        }
                     }
                 }
             }
+            ExerciseStatus.ADDED -> {
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                    shape = MaterialTheme.shapes.small,
+                ) {
+                    Text(
+                        "Hors programme",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    )
+                }
+            }
+            else -> {}
         }
-        ExerciseStatus.ADDED -> {
-            Surface(
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                shape = MaterialTheme.shapes.small,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
+
+        // Remplacer / Passer are ALWAYS available, whatever the current status.
+        // Without this, a replaced (or added) exercise could never be re-replaced
+        // after a misclick — and became fully frozen after an app kill.
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                onClick = onReplace,
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
             ) {
-                Text(
-                    "Hors programme",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                )
+                Icon(Icons.Filled.SwapHoriz, null, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("Remplacer", style = MaterialTheme.typography.labelMedium)
+            }
+            OutlinedButton(
+                onClick = onSkip,
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+            ) {
+                Icon(Icons.Filled.SkipNext, null, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("Passer", style = MaterialTheme.typography.labelMedium)
             }
         }
-        ExerciseStatus.SKIPPED -> { /* handled by the skipped card in the main body */ }
     }
 }
 

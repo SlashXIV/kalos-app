@@ -2,6 +2,22 @@
 
 ---
 
+## v3.16.0 — 3 July 2026
+
+### Added — repas favoris (meal templates)
+
+Enregistrer un repas récurrent (ex. salade de thon) et le réappliquer en un tap. Livré en deux phases : données + sauvegarde (Phase A), puis interface (Phase B).
+
+- **Base de données** : nouvelles tables `meal_template` et `meal_template_item` (migration 15 → 16, schema v16). L'aliment référencé par un favori est protégé de la suppression définitive (FK RESTRICT + archivage), comme pour l'historique.
+- **Enregistrer comme favori** : depuis un repas déjà rempli, menu (⋮) → « Enregistrer comme favori », puis nommer. Les aliments en double sont fusionnés (grammages additionnés).
+- **Appliquer un favori** : menu (⋮) d'un repas → « Ajouter un repas favori » → choix dans la liste. Les aliments sont **ajoutés** au repas (jamais de remplacement) sur la date affichée.
+- **Gérer les favoris** : écran dédié (menu ⋮ de l'écran Nutrition → « Gérer les repas favoris ») listant chaque favori (kcal + aliments + grammages) avec suppression. Supprimer un favori n'affecte pas les repas déjà journalisés.
+- **Sauvegarde / restauration** : les favoris sont inclus dans l'export/import JSON (remappage des IDs d'aliments personnalisés, ordre de purge FK-safe).
+
+Écarté pour une passe ultérieure : éditeur de favori (création de zéro via sélecteur d'aliments, renommage, ajout/retrait d'aliments et ajustement des grammages).
+
+---
+
 ## v3.15.0 — 5 June 2026
 
 ### Added — indice de satiété / volume eating

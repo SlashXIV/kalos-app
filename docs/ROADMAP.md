@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: v3.12.0 — 4 June 2026
+> Last updated: v3.16.0 — 3 July 2026
 >
 > The June 2026 UX review cycle (18 findings, 3 waves: v3.10.1 / v3.11.0 / v3.12.0) is fully closed. No pending UX backlog.
 
@@ -85,3 +85,13 @@ En phase de sèche, le budget calorique est contraint mais la faim ne l'est pas.
 **Prérequis :** aucun changement de schéma DB nécessaire pour le signal de densité et le tri — les données sont déjà là.
 
 **Statut : volet clos en v3.15.0.** Livré : indice de satiété "rassasiant par calorie" (règle densité + protéines + fibres, label vert/ambre dans les listes et la feuille de portion) + tri "volume eating" dans la recherche. Écartés (faible valeur) : comparaison vs moyenne de catégorie, densité moyenne journalière. Reste possible plus tard : suggestions intelligentes priorisant les aliments peu denses quand le solde calorique est serré (touche `SuggestFoodsUseCase`).
+
+---
+
+### Repas favoris (meal templates)
+
+Beaucoup de repas sont récurrents (ex. salade de thon : quasi toujours les mêmes aliments et grammages). L'objectif : enregistrer un repas type et le réinjecter en un tap, sans re-saisir chaque aliment.
+
+**Statut : livré en v3.16.0 (Phase A data + Phase B UI).** Livré : tables `meal_template` / `meal_template_item` (migration 15 → 16), enregistrer un repas rempli comme favori (fusion des doublons), appliquer un favori en un tap (aliments ajoutés, jamais de remplacement), écran de gestion (liste + suppression), inclusion dans la sauvegarde/restauration JSON. Protection FK RESTRICT sur les aliments référencés par un favori.
+
+**Reste pour une passe ultérieure (Phase B2, non prioritaire tant que l'usage ne le demande pas) :** éditeur de favori — création de zéro via sélecteur d'aliments, renommage, ajout/retrait d'aliments et ajustement des grammages. Le socle data (`saveTemplate(id, …)` accepte déjà un id existant) est prêt ; il ne manque que l'UI d'édition.

@@ -1,6 +1,7 @@
 package com.kalos.app.feature.nutrition
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
@@ -50,6 +51,68 @@ fun NutritionScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val clipboardManager = LocalClipboardManager.current
+
+    val templates by viewModel.mealTemplates.collectAsStateWithLifecycle()
+    var applyForMeal by remember { mutableStateOf<MealType?>(null) }
+    var saveForMeal by remember { mutableStateOf<MealType?>(null) }
+
+    applyForMeal?.let { mealType ->
+        AlertDialog(
+            onDismissRequest = { applyForMeal = null },
+            title = { Text("Ajouter un repas favori") },
+            text = {
+                if (templates.isEmpty()) {
+                    Text("Aucun repas favori pour l'instant. Enregistrez-en un depuis le menu (⋮) d'un repas déjà rempli.")
+                } else {
+                    Column {
+                        templates.forEach { t ->
+                            ListItem(
+                                headlineContent = { Text(t.name) },
+                                supportingContent = {
+                                    Text("${t.items.size} aliment${if (t.items.size > 1) "s" else ""} · ${t.totalKcal.roundToInt()} kcal")
+                                },
+                                modifier = Modifier.clickable {
+                                    viewModel.applyTemplate(mealType, t.id)
+                                    applyForMeal = null
+                                    scope.launch { snackbarHostState.showSnackbar("« ${t.name} » ajouté") }
+                                },
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { applyForMeal = null }) { Text("Fermer") } },
+        )
+    }
+
+    saveForMeal?.let { mealType ->
+        var name by remember { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { saveForMeal = null },
+            title = { Text("Enregistrer comme favori") },
+            text = {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Nom du repas favori") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = name.isNotBlank(),
+                    onClick = {
+                        viewModel.saveMealAsFavorite(mealType, name)
+                        saveForMeal = null
+                        scope.launch { snackbarHostState.showSnackbar("Repas favori enregistré") }
+                    },
+                ) { Text("Enregistrer") }
+            },
+            dismissButton = { TextButton(onClick = { saveForMeal = null }) { Text("Annuler") } },
+        )
+    }
 
     val dateLabel = remember(state.date) {
         val d = LocalDate.parse(state.date)
@@ -101,6 +164,14 @@ fun NutritionScreen(
                                 menuExpanded = false
                                 clipboardManager.setText(AnnotatedString(buildDailySummary(state)))
                                 scope.launch { snackbarHostState.showSnackbar("Résumé nutritionnel copié") }
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Gérer les repas favoris") },
+                            leadingIcon = { Icon(Icons.Filled.Star, contentDescription = null) },
+                            onClick = {
+                                menuExpanded = false
+                                navController.navigate(Screen.MealTemplates.route)
                             },
                         )
                     }
@@ -199,15 +270,19 @@ fun NutritionScreen(
             // Meal sections
             MealType.entries.forEach { mealType ->
                 item(key = mealType.name) {
+                    val entry = state.meals.firstOrNull { it.mealType == mealType }
+                    val hasItems = entry?.items?.isNotEmpty() == true
                     MealSection(
                         mealType = mealType,
-                        entry = state.meals.firstOrNull { it.mealType == mealType },
+                        entry = entry,
                         onAddFood = {
                             navController.navigate(
                                 Screen.FoodSearch.route(mealType.name, state.date)
                             )
                         },
                         onDeleteItems = viewModel::deleteItems,
+                        onApplyFavorite = { applyForMeal = mealType },
+                        onSaveAsFavorite = if (hasItems) ({ saveForMeal = mealType }) else null,
                     )
                 }
             }
@@ -239,6 +314,8 @@ private fun MealSection(
     entry: MealEntry?,
     onAddFood: () -> Unit,
     onDeleteItems: (List<Long>) -> Unit,
+    onApplyFavorite: () -> Unit,
+    onSaveAsFavorite: (() -> Unit)?,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -267,15 +344,43 @@ private fun MealSection(
                         )
                     }
                 }
-                FilledTonalIconButton(
-                    onClick = onAddFood,
-                    modifier = Modifier.size(36.dp),
-                    colors = IconButtonDefaults.filledTonalIconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                        contentColor = MaterialTheme.colorScheme.primary,
-                    ),
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = "Ajouter", modifier = Modifier.size(18.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    var menuExpanded by remember { mutableStateOf(false) }
+                    Box {
+                        IconButton(onClick = { menuExpanded = true }, modifier = Modifier.size(36.dp)) {
+                            Icon(
+                                Icons.Filled.MoreVert,
+                                contentDescription = "Options du repas",
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Ajouter un repas favori") },
+                                leadingIcon = { Icon(Icons.Filled.Star, contentDescription = null) },
+                                onClick = { menuExpanded = false; onApplyFavorite() },
+                            )
+                            if (onSaveAsFavorite != null) {
+                                DropdownMenuItem(
+                                    text = { Text("Enregistrer comme favori") },
+                                    leadingIcon = { Icon(Icons.Filled.BookmarkAdd, contentDescription = null) },
+                                    onClick = { menuExpanded = false; onSaveAsFavorite() },
+                                )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.width(4.dp))
+                    FilledTonalIconButton(
+                        onClick = onAddFood,
+                        modifier = Modifier.size(36.dp),
+                        colors = IconButtonDefaults.filledTonalIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                            contentColor = MaterialTheme.colorScheme.primary,
+                        ),
+                    ) {
+                        Icon(Icons.Filled.Add, contentDescription = "Ajouter", modifier = Modifier.size(18.dp))
+                    }
                 }
             }
 

@@ -7,6 +7,7 @@ import com.kalos.app.core.domain.model.*
 import com.kalos.app.core.domain.model.DietaryFilter
 import com.kalos.app.core.domain.repository.FoodRepository
 import com.kalos.app.core.domain.repository.MealRepository
+import com.kalos.app.core.domain.repository.MealTemplateRepository
 import com.kalos.app.core.domain.repository.UserRepository
 import com.kalos.app.core.domain.repository.WaterRepository
 import com.kalos.app.core.domain.usecase.FoodSuggestion
@@ -47,10 +48,14 @@ class NutritionViewModel @Inject constructor(
     private val suggestFoods: SuggestFoodsUseCase,
     private val dietaryPrefsStore: DietaryPreferencesStore,
     private val waterRepository: WaterRepository,
+    private val mealTemplateRepository: MealTemplateRepository,
 ) : ViewModel() {
 
     private val _date = MutableStateFlow(LocalDate.now().toString())
     val date: StateFlow<String> = _date
+
+    val mealTemplates: StateFlow<List<MealTemplate>> = mealTemplateRepository.getTemplates()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val _waterGoalMl = MutableStateFlow(waterRepository.getGoalMl())
 
@@ -107,6 +112,27 @@ class NutritionViewModel @Inject constructor(
 
     fun deleteItems(itemIds: List<Long>) {
         viewModelScope.launch { itemIds.forEach { mealRepository.removeItem(it) } }
+    }
+
+    /** Applies a favourite meal to the given meal type on the current date (appends items). */
+    fun applyTemplate(mealType: MealType, templateId: Long) {
+        viewModelScope.launch { mealTemplateRepository.applyToMeal(templateId, _date.value, mealType) }
+    }
+
+    /** Saves the current content of a meal section as a reusable favourite. */
+    fun saveMealAsFavorite(mealType: MealType, name: String) {
+        if (name.isBlank()) return
+        val meal = uiState.value.meals.firstOrNull { it.mealType == mealType } ?: return
+        // Merge duplicate foods so the favourite stays clean.
+        val items = meal.items
+            .groupBy { it.food.id }
+            .map { (foodId, group) -> foodId to group.sumOf { it.amountG.toDouble() }.toFloat() }
+        if (items.isEmpty()) return
+        viewModelScope.launch { mealTemplateRepository.saveTemplate(0, name.trim(), items) }
+    }
+
+    fun deleteTemplate(id: Long) {
+        viewModelScope.launch { mealTemplateRepository.deleteTemplate(id) }
     }
 
     fun addWater(amountMl: Int) {

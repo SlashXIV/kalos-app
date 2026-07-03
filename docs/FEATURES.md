@@ -32,6 +32,10 @@ Statuses: **Done** · **Partial** · **Planned**
 | Add food to a meal | Done | |
 | Delete food from a meal | Done | |
 | Duplicate food consolidation (grouped display) | Done | |
+| Save a meal as a favourite (meal template) | Done | Menu (⋮) of a filled meal; duplicate foods merged (v3.16.0) |
+| Apply a favourite meal in one tap | Done | Menu (⋮) → picker; items appended, never replaced (v3.16.0) |
+| Manage favourite meals | Done | Dedicated screen (kcal + foods + grams, delete); deletion never affects logged meals (v3.16.0) |
+| Edit a favourite meal (rename / grams / add-remove) | Planned | Editor deferred to a later pass |
 | Copy daily summary to clipboard | Done | |
 | Water intake tracking | Done | Quick-add 250 / 500 / 750 ml + custom |
 | Configurable water goal | Done | In-screen dialog |

@@ -34,6 +34,7 @@ sealed class Screen(val route: String) {
     // then pops — it needs no arguments of its own.
     object BarcodeScanner : Screen("nutrition/scan")
     object MyFoods : Screen("nutrition/my_foods")
+    object MealTemplates : Screen("nutrition/meal_templates")
     object NutritionHistory : Screen("nutrition/history")
     object NutritionDay : Screen("nutrition/day/{date}") {
         fun route(date: String) = "nutrition/day/$date"

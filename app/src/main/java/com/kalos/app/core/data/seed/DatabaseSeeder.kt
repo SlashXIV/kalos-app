@@ -29,8 +29,8 @@ class DatabaseSeeder @Inject constructor(
         context.assets.open(name).bufferedReader().readText().trimStart('﻿')
 
     // Bump this whenever seed_exercises.json gains new entries, nameNormalized needs backfilling,
-    // or trackingMode values change.
-    private val SEED_EXERCISES_VERSION = 4
+    // or trackingMode/name values change.
+    private val SEED_EXERCISES_VERSION = 5
 
     suspend fun seedIfEmpty() = withContext(Dispatchers.IO) {
         if (foodDao.count() == 0) seedFoods()
@@ -106,6 +106,15 @@ class DatabaseSeeder @Inject constructor(
             for (seed in seeds) {
                 if (seed.id.isEmpty()) continue
                 exerciseDao.updateTrackingModeBySeedId(seed.id, seed.trackingMode)
+            }
+
+            // Phase 5 – align display names for seed rows to the current JSON (by seedId),
+            // so renamed/standardised seed exercises (e.g. "Extension triceps corde" ->
+            // "Extension triceps (corde)") propagate to existing installs, nameNormalized
+            // included for search. Custom exercises (seedId IS NULL) are never touched.
+            for (seed in seeds) {
+                if (seed.id.isEmpty()) continue
+                exerciseDao.updateNameBySeedId(seed.id, seed.name, seed.name.normalizeForSearch())
             }
         }
 

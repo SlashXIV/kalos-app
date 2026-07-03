@@ -24,9 +24,9 @@ Revue transverse demandée par l'utilisateur (app jugée globalement complète, 
 
 ### Sport — variantes d'exercices
 
-- **Variantes d'un même exercice** (ex. extension triceps corde / barre) non distinguées (Medium). Le modèle `Exercise` est plat (pas de parent/variante), les PR/progressions sont indexés par `exerciseId`.
-  - Phase 1 (faible effort) : convention de nommage « Exercice (attache) » dans `seed_exercises.json` (déjà partiellement le cas) — chaque variante = exercice distinct, progression suivie séparément (souhaitable, car biomécaniquement différentes).
-  - Phase 2 (si besoin) : champ `variant: String?` sur `Exercise` (migration non-breaking) + regroupement dans le catalogue. Éviter un modèle parent/enfant tant qu'il n'y a pas de besoin de rollup de PR entre variantes.
+- **Variantes d'un même exercice** (ex. extension triceps corde / barre). Le modèle `Exercise` est plat, les PR/progressions indexés par `exerciseId`.
+  - Phase 1 — Done v3.19.0 : convention de nommage « Exercice (attache) », ajout des variantes manquantes courantes (extension triceps barre, tirage prise serrée), phase de seed qui propage les renommages aux installs existants (`updateNameBySeedId`).
+  - Phase 2 (si besoin, Planned) : champ `variant: String?` sur `Exercise` (migration non-breaking — à grouper avec l'index `meal_entry.date`) + regroupement dans le catalogue. Éviter un modèle parent/enfant tant qu'il n'y a pas de besoin de rollup de PR entre variantes.
 
 ### Nouvelles pistes
 

@@ -2,6 +2,22 @@
 
 ---
 
+## v3.19.0 — 3 July 2026
+
+### Added — variantes d'exercices
+
+Deuxième lot de la revue générale. Distinction des variantes d'attache d'un même exercice, chacune avec sa propre progression/PR.
+
+- Nouvelles variantes câble : **Extension triceps (barre)** (poussée à la barre droite/V, complément de la corde) et **Tirage poitrine prise serrée (supination)**.
+- Convention de nommage « Exercice (attache) » homogénéisée sur la famille triceps (ex. « Extension triceps corde » -> « Extension triceps (corde) »).
+- Nouvelle phase du seeder différentiel (Phase 5) : les renommages d'exercices du seed se propagent désormais aux installations existantes (par `seedId`, `nameNormalized` inclus pour la recherche). Les exercices personnalisés ne sont jamais touchés. `SEED_EXERCISES_VERSION` 4 -> 5.
+
+### Performance
+
+- **Fin du N+1 sur le chargement des séances/templates** : `WorkoutRepositoryImpl` résout les exercices en une requête groupée (`exerciseDao.getByIds`) au lieu d'une par exercice (`buildLog`, `getTemplates`, `getTemplate`). L'historique muscu ne déclenche plus des dizaines de requêtes à l'ouverture. Aucun changement de schéma.
+
+---
+
 ## v3.18.0 — 3 July 2026
 
 ### Fixed — notifications

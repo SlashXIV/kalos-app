@@ -85,7 +85,8 @@ Statuses: **Done** · **Partial** · **Planned**
 
 | Feature | Status | Notes |
 |---|---|---|
-| ~100 seeded exercises | Done | |
+| ~150 seeded exercises | Done | |
+| Exercise attachment variants | Partial | Naming convention "Exercice (attache)"; e.g. triceps extension corde/barre/overhead as distinct exercises, separate PR history. Seeder Phase 5 propagates renames (v3.19.0). A dedicated `variant` field + catalog grouping remains Planned. |
 | Text search | Done | Accent-insensitive (nameNormalized), no debounce |
 | Filter by muscle group (13 options) | Done | |
 | Filter by type (5 options) | Done | |

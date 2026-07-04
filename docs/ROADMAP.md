@@ -12,11 +12,13 @@ Priorities are based on user impact relative to implementation effort. The list 
 
 Revue transverse demandée par l'utilisateur (app jugée globalement complète, focus sur l'amélioration de l'existant). Détail technique des défauts dans `docs/TECHNICAL_AUDIT.md` (section du 3 July 2026).
 
+**Statut : clôturée (v3.18.0 → v3.22.1).** Tout traité sauf : i18n (long terme, décision utilisateur), pagination historique séances (Medium, optionnel), champ `variant`/regroupement catalogue (écarté, sur-ingénierie). Détail par item ci-dessous.
+
 ### Corrections (défauts confirmés)
 
 - **Notifications — tap sans effet** — Done v3.18.0. `PendingIntent` vers `MainActivity` + deep-link vers l'écran concerné (nutrition / séance / eau), `launchMode=singleTop`.
 - **Notifications — heure non respectée** — Done v3.18.0. `OneTimeWorkRequest` auto-replanifié chaque jour à l'heure cible (remplace le `PeriodicWorkRequest` qui dérivait). Corrige aussi le faux positif « aucun repas loggé » du matin.
-- **Notifications — robustesse** — Partial v3.18.0. Replanification au lancement de l'app faite ; log sur permission refusée non fait (Low, optionnel).
+- **Notifications — robustesse** — Done v3.22.1. Replanification au lancement (v3.18.0) + log sur permission refusée (v3.22.1).
 
 ### Décision produit
 
@@ -31,7 +33,7 @@ Revue transverse demandée par l'utilisateur (app jugée globalement complète, 
 ### Nouvelles pistes
 
 - **Internationalisation / langues** (Medium-High) : les libellés sont actuellement en dur en français dans le code. Externaliser vers `res/values/strings.xml` (FR par défaut) puis ajouter l'anglais (`values-en`). Gros travail d'extraction mais sans risque. Prérequis à toute ouverture au-delà d'un usage FR.
-- **Thèmes multiples** — Done v3.20.0. Thème clair complet + sélecteur Système/Clair/Sombre dans Paramètres > Apparence (`ThemePreferenceStore`, appliqué en direct, contraste des barres système géré). Variantes d'accent : non faites (Planned, faible priorité). Note mineure connue : bref flash de la couleur de fenêtre XML (`Theme.Kalos`, fond sombre) au lancement en mode clair — cosmétique.
+- **Thèmes multiples** — Done v3.20.0 (thème clair + sélecteur Système/Clair/Sombre, `ThemePreferenceStore`, contraste des barres système). Flash de fond au lancement en clair corrigé en v3.22.1 (fond de fenêtre aligné sur le thème résolu). Variantes d'accent : non faites (Planned, faible priorité).
 - **Performance** (voir TECHNICAL_AUDIT) : N+1 chargement séances/templates — Done (batch `getByIds`). Pagination historique nutrition — Done v3.21.0 (fenêtre 30 j + « Charger plus », `getEarliestMealDate`). Index sur `meal_entry.date` — Done v3.22.0 (migration 16 -> 17). Reste : pagination historique séances (Medium, intriqué avec le graphe de volume).
 - **Deep-link notifications** : router chaque notification vers l'écran pertinent (dépend du fix tap-to-open ci-dessus).
 

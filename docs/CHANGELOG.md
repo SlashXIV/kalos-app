@@ -2,6 +2,17 @@
 
 ---
 
+## v3.22.1 — 4 July 2026
+
+### Fixed — polish de clôture de la revue
+
+- **Fond de lancement** : plus de bref flash sombre entre le splash et l'interface quand le thème clair est actif. Le fond de fenêtre est aligné sur le thème résolu (préférence lue au démarrage ; le splash de marque reste inchangé).
+- **Notifications** : log explicite lorsque la permission `POST_NOTIFICATIONS` est refusée (diagnostic plus clair d'une notification non affichée).
+
+Clôture de la revue générale du 3-4 July 2026. Reste optionnel : pagination de l'historique des séances (voir `docs/ROADMAP.md`).
+
+---
+
 ## v3.22.0 — 4 July 2026
 
 ### Performance — index base de données

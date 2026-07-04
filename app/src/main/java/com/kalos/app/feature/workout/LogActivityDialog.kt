@@ -2,18 +2,17 @@ package com.kalos.app.feature.workout
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kalos.app.core.domain.model.WorkoutLog
 import com.kalos.app.core.domain.repository.WorkoutRepository
+import com.kalos.app.core.ui.component.KalosNumberField
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -112,20 +111,16 @@ fun LogActivityDialog(
                     }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
+                    KalosNumberField(
                         value = hours,
                         onValueChange = { hours = it.filter(Char::isDigit).take(2) },
                         label = { Text("Heures") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
                         modifier = Modifier.weight(1f),
                     )
-                    OutlinedTextField(
+                    KalosNumberField(
                         value = minutes,
                         onValueChange = { minutes = it.filter(Char::isDigit).take(2) },
                         label = { Text("Minutes") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
                         modifier = Modifier.weight(1f),
                     )
                 }

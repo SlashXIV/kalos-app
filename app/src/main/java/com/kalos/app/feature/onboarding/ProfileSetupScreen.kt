@@ -13,6 +13,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.Sex
+import com.kalos.app.core.ui.component.KalosNumberField
 import com.kalos.app.navigation.Screen
 
 @Composable
@@ -70,44 +71,40 @@ fun ProfileSetupScreen(
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedTextField(
+            KalosNumberField(
                 value = state.age,
                 onValueChange = viewModel::onAgeChange,
                 label = { Text("Âge") },
                 suffix = { Text("ans") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.weight(1f),
-                singleLine = true,
             )
-            OutlinedTextField(
+            KalosNumberField(
                 value = state.heightCm,
                 onValueChange = viewModel::onHeightChange,
                 label = { Text("Taille") },
                 suffix = { Text("cm") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
-                singleLine = true,
             )
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedTextField(
+            KalosNumberField(
                 value = state.weightKg,
                 onValueChange = viewModel::onWeightChange,
                 label = { Text("Poids actuel") },
                 suffix = { Text("kg") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
-                singleLine = true,
             )
-            OutlinedTextField(
+            KalosNumberField(
                 value = state.targetWeightKg,
                 onValueChange = viewModel::onTargetWeightChange,
                 label = { Text("Poids cible") },
                 suffix = { Text("kg") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
-                singleLine = true,
             )
         }
 

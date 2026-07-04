@@ -24,6 +24,7 @@ import com.kalos.app.core.domain.repository.UserRepository
 import com.kalos.app.core.domain.usecase.CalculateBmrUseCase
 import com.kalos.app.core.domain.usecase.CalculateMacroGoalsUseCase
 import com.kalos.app.core.domain.usecase.CalculateTdeeUseCase
+import com.kalos.app.core.ui.component.KalosNumberField
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -363,9 +364,9 @@ private fun GoalField(
     onChange: (String) -> Unit,
     modifier: Modifier = Modifier.fillMaxWidth(),
 ) {
-    OutlinedTextField(
+    KalosNumberField(
         value = value, onValueChange = onChange, label = { Text(label) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        modifier = modifier, singleLine = true,
+        modifier = modifier,
     )
 }

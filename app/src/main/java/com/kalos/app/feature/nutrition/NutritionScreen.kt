@@ -26,6 +26,7 @@ import com.kalos.app.core.domain.model.MealEntry
 import com.kalos.app.core.domain.model.MealItem
 import com.kalos.app.core.domain.model.MealType
 import com.kalos.app.core.ui.component.CalorieProgressRing
+import com.kalos.app.core.ui.component.KalosNumberField
 import com.kalos.app.core.ui.component.MacroTrioRow
 import com.kalos.app.navigation.Screen
 import java.time.LocalDate
@@ -560,12 +561,11 @@ private fun WaterAmountDialog(
         title = { Text(title) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                OutlinedTextField(
+                KalosNumberField(
                     value = value,
                     onValueChange = { value = it },
                     suffix = { Text(suffix) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 if (hint != null) {

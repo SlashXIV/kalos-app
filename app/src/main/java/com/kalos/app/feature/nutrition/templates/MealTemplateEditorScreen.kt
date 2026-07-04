@@ -24,6 +24,7 @@ import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.Food
 import com.kalos.app.core.domain.repository.FoodRepository
 import com.kalos.app.core.domain.repository.MealTemplateRepository
+import com.kalos.app.core.ui.component.KalosNumberField
 import com.kalos.app.feature.nutrition.search.PICKED_FOOD_ID_KEY
 import com.kalos.app.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -247,7 +248,7 @@ private fun ItemRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        OutlinedTextField(
+        KalosNumberField(
             value = text,
             onValueChange = {
                 text = it
@@ -255,7 +256,6 @@ private fun ItemRow(
             },
             suffix = { Text("g") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            singleLine = true,
             modifier = Modifier.width(110.dp),
         )
         IconButton(onClick = onRemove) {

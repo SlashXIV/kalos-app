@@ -18,6 +18,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.TrainingProgram
+import com.kalos.app.core.ui.component.KalosNumberField
 import com.kalos.app.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,20 +57,18 @@ fun WorkoutBuilderScreen(
                 title = { Text(te.exercise.name, style = MaterialTheme.typography.titleMedium) },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        OutlinedTextField(
+                        KalosNumberField(
                             value = editSets,
                             onValueChange = { editSets = it },
                             label = { Text("Séries") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            singleLine = true,
                             modifier = Modifier.fillMaxWidth(),
                         )
-                        OutlinedTextField(
+                        KalosNumberField(
                             value = editReps,
                             onValueChange = { editReps = it },
                             label = { Text("Répétitions") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            singleLine = true,
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }

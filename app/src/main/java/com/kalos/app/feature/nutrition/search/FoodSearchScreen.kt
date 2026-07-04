@@ -26,6 +26,7 @@ import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.Food
 import com.kalos.app.core.ui.component.EmptyState
 import com.kalos.app.core.ui.component.FoodListItem
+import com.kalos.app.core.ui.component.KalosNumberField
 import com.kalos.app.core.ui.component.KalosSearchBar
 import com.kalos.app.core.ui.util.color
 import com.kalos.app.core.ui.util.foodSatietyLevel
@@ -352,17 +353,16 @@ private fun FoodDetailSheet(
         }
 
         if (hasUnitServing && servingMode == ServingMode.UNITS) {
-            OutlinedTextField(
+            KalosNumberField(
                 value = servingCount,
                 onValueChange = onServingCountChange,
                 label = { Text("Nombre de ${food.servingUnit}") },
                 suffix = { Text("× ${food.defaultServingG.toInt()}g") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
             )
         } else {
-            OutlinedTextField(
+            KalosNumberField(
                 value = amount,
                 onValueChange = onAmountChange,
                 label = { Text("Quantité") },

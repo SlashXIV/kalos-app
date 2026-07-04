@@ -19,6 +19,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.domain.model.*
+import com.kalos.app.core.ui.component.KalosNumberField
 import com.kalos.app.core.domain.repository.UserRepository
 import com.kalos.app.core.domain.usecase.CalculateMacroGoalsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -221,9 +222,9 @@ private fun ProfileNumField(
     onChange: (String) -> Unit,
     modifier: Modifier = Modifier.fillMaxWidth(),
 ) {
-    OutlinedTextField(
+    KalosNumberField(
         value = value, onValueChange = onChange, label = { Text(label) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-        modifier = modifier, singleLine = true,
+        modifier = modifier,
     )
 }

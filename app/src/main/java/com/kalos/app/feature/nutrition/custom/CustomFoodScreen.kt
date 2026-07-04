@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.kalos.app.core.ui.component.KalosNumberField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -176,13 +177,12 @@ fun CustomFoodScreen(
 
 @Composable
 private fun NumField(label: String, value: String, onChange: (String) -> Unit, modifier: Modifier = Modifier.fillMaxWidth()) {
-    OutlinedTextField(
+    KalosNumberField(
         value = value,
         onValueChange = onChange,
         label = { Text(label) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         modifier = modifier,
-        singleLine = true,
     )
 }
 

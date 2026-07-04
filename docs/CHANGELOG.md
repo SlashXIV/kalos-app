@@ -2,6 +2,16 @@
 
 ---
 
+## v3.24.0 — 4 July 2026
+
+### Changed — saisie des valeurs (sélection au focus, partout)
+
+Le comportement « sélectionne toute la valeur quand on tape dans le champ » (introduit sur les séries/répétitions en séance, pour éviter les fausses manips) est désormais **généralisé à tous les champs de saisie numérique** : quantités et portions d'aliments, grammages des repas favoris, poids corporel, objectifs caloriques/macros, âge/taille/poids (profil et onboarding), macros des aliments personnalisés, séries/répétitions du builder, durée d'une activité libre.
+
+- Nouveau composant partagé `KalosNumberField` (API `String`, sélection au focus gérée en interne via `TextFieldValue`). Un clic sur une valeur existante la sélectionne en entier — plus de curseur qui se pose au milieu et de chiffres accolés par erreur.
+
+---
+
 ## v3.23.0 — 4 July 2026
 
 ### Added — callisthénie / street workout & activités libres

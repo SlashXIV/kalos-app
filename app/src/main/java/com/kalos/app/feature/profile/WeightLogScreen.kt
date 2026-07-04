@@ -25,6 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.kalos.app.core.domain.repository.WorkoutRepository
+import com.kalos.app.core.ui.component.KalosNumberField
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -361,13 +362,12 @@ private fun WeightInputDialog(
         title = { Text(if (isUpdate) "Mettre à jour le poids" else "Enregistrer le poids") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
+                KalosNumberField(
                     value = input,
                     onValueChange = { input = it },
                     label = { Text("Poids (kg)") },
                     suffix = { Text("kg") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true,
                     isError = input.isNotEmpty() && !isValid,
                     modifier = Modifier.fillMaxWidth(),
                 )

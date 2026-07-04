@@ -13,4 +13,6 @@ interface MealRepository {
     suspend fun removeItem(itemId: Long)
     fun getDailySummaries(startDate: String, endDate: String): Flow<List<DailySummaryRow>>
     fun getLoggedDates(): Flow<List<String>>
+    /** Earliest date with any logged meal, or null if the journal is empty. */
+    suspend fun getEarliestMealDate(): String?
 }

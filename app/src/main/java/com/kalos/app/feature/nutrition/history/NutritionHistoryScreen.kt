@@ -82,6 +82,18 @@ fun NutritionHistoryScreen(
                         onClick = { navController.navigate(Screen.NutritionDay.route(summary.date)) },
                     )
                 }
+                if (state.canLoadMore) {
+                    item(key = "load_more") {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            OutlinedButton(onClick = viewModel::loadMore) {
+                                Text("Charger plus")
+                            }
+                        }
+                    }
+                }
             }
         }
     }

@@ -84,4 +84,6 @@ class MealRepositoryImpl @Inject constructor(
         mealDao.getDailySummaries(startDate, endDate)
 
     override fun getLoggedDates(): Flow<List<String>> = mealDao.getLoggedDates()
+
+    override suspend fun getEarliestMealDate(): String? = mealDao.getEarliestDate()
 }

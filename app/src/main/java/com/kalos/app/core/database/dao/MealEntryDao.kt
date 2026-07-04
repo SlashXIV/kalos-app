@@ -57,6 +57,10 @@ interface MealEntryDao {
     // Distinct dates that have any entries
     @Query("SELECT DISTINCT date FROM meal_entry ORDER BY date DESC LIMIT 60")
     fun getLoggedDates(): Flow<List<String>>
+
+    // Earliest logged date — lets the history know whether older data exists beyond the window.
+    @Query("SELECT MIN(date) FROM meal_entry")
+    suspend fun getEarliestDate(): String?
 }
 
 data class DailySummaryRow(

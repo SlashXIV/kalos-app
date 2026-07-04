@@ -2,6 +2,17 @@
 
 ---
 
+## v3.21.0 — 3 July 2026
+
+### Changed — historique nutritionnel paginé
+
+Quatrième lot de la revue générale.
+
+- L'historique nutritionnel était figé à 60 jours : au-delà, les jours plus anciens n'étaient plus consultables. Il charge désormais 30 jours puis un bouton « Charger plus » élargit la fenêtre par tranches de 30 jours, jusqu'au premier jour enregistré (bouton masqué ensuite). Nouvelle requête `getEarliestMealDate` pour savoir quand il n'y a plus rien à charger.
+- L'historique des séances reste sur le chargement complet (le graphe de volume dépend de l'ensemble) ; son N+1 a déjà été corrigé en v3.19.0.
+
+---
+
 ## v3.20.0 — 3 July 2026
 
 ### Added — thème clair et choix du thème

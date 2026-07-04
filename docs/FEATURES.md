@@ -74,7 +74,7 @@ Statuses: **Done** · **Partial** · **Planned**
 
 | Feature | Status | Notes |
 |---|---|---|
-| 60-day daily summaries | Done | kcal + protein / carbs / fat per day |
+| Daily summaries with pagination | Done | 30 days initially, "Charger plus" loads +30; button hidden once the earliest logged day is reached (v3.21.0). Previously capped at 60 days |
 | Day detail (which foods were logged) | Done | Tap opens editable journal for that date |
 
 ---

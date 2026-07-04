@@ -21,6 +21,7 @@ import com.kalos.app.feature.workout.program.ProgramsTabContent
 import com.kalos.app.core.ui.util.formatElapsedSince
 import com.kalos.app.navigation.Screen
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -194,21 +195,24 @@ private fun ActiveWorkoutBanner(
                     headline,
                     style = MaterialTheme.typography.bodyMedium,
                     color = contentColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     "${banner.exerciseCount} $plural · $elapsedLabel",
                     style = MaterialTheme.typography.bodySmall,
                     color = contentColor.copy(alpha = 0.8f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
             if (onAbandon != null) {
-                TextButton(
-                    onClick = onAbandon,
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error,
-                    ),
-                ) {
-                    Text("Abandonner")
+                IconButton(onClick = onAbandon) {
+                    Icon(
+                        Icons.Filled.Delete,
+                        contentDescription = "Abandonner la séance",
+                        tint = MaterialTheme.colorScheme.error,
+                    )
                 }
             }
             TextButton(

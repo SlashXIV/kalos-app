@@ -6,7 +6,8 @@
 
 ### Changed — bulle « séance en cours »
 
-- Le bouton **« Abandonner »** de la bulle de séance en cours (onglet Sport) est désormais **toujours disponible**, pas seulement quand la séance est périmée (>24h). On peut donc retirer une séance en cours à tout moment. La confirmation avant suppression est conservée (les séries saisies sont perdues).
+- On peut désormais **retirer une séance en cours à tout moment** : l'action de suppression est toujours proposée (avant, seulement pour une séance périmée >24h). Confirmation conservée.
+- **Bulle allégée** : l'action de suppression est passée d'un bouton texte « Abandonner » à une **icône corbeille** (comme sur les cartes de séance). Ça libère de la largeur, évite le texte qui se chevauchait, et les lignes (« Séance en cours · … », « 6 exercices · il y a 13 h ») tiennent proprement sur une ligne. La carte reste entièrement cliquable pour reprendre.
 
 ---
 

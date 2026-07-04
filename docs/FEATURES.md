@@ -196,7 +196,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Feature | Status | Notes |
 |---|---|---|
 | Link to Notifications screen | Done | |
-| Theme selector (system / light / dark) | Done | Light theme added; persisted, applied live; system-bar contrast follows theme (v3.20.0) |
+| Theme selector | Done | Émeraude (system/light/dark) + 4 colour palettes: Pastel (light), Berry, Aurora, Monochrome (dark). Full M3 schemes, colour-dot picker, persisted, live (v3.20.0 base, palettes v3.25.0) |
 | Dietary filters (pork, alcohol, vegetarian, vegan) | Done | Persisted in DataStore |
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |

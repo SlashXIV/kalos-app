@@ -2,6 +2,21 @@
 
 ---
 
+## v3.25.0 — 4 July 2026
+
+### Added — thèmes de couleur
+
+En plus d'Émeraude (Système / Clair / Sombre), quatre palettes complètes au choix dans Paramètres > Apparence :
+
+- **Pastel** (clair) — lavande, rose bonbon, bleus doux.
+- **Berry** (sombre) — velours berry, blush, apricot.
+- **Aurora** (sombre) — violets profonds vers le noir, lavande, neige.
+- **Monochrome** (sombre) — gris graphite et ivoire avec accent doré.
+
+Chaque thème est un jeu de couleurs Material 3 complet appliqué à toute l'app. Le sélecteur affiche une pastille de couleur par thème. La contrainte de contraste des barres système et le fond de démarrage suivent le thème choisi. Choix persisté, appliqué en direct. Les couleurs de macros (protéines/glucides/lipides) restent fixes (sémantiques).
+
+---
+
 ## v3.24.1 — 4 July 2026
 
 ### Changed — bulle « séance en cours »

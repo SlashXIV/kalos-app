@@ -33,7 +33,7 @@ Revue transverse demandée par l'utilisateur (app jugée globalement complète, 
 ### Nouvelles pistes
 
 - **Internationalisation / langues** (Medium-High) : les libellés sont actuellement en dur en français dans le code. Externaliser vers `res/values/strings.xml` (FR par défaut) puis ajouter l'anglais (`values-en`). Gros travail d'extraction mais sans risque. Prérequis à toute ouverture au-delà d'un usage FR.
-- **Thèmes multiples** — Done v3.20.0 (thème clair + sélecteur Système/Clair/Sombre, `ThemePreferenceStore`, contraste des barres système). Flash de fond au lancement en clair corrigé en v3.22.1 (fond de fenêtre aligné sur le thème résolu). Variantes d'accent : non faites (Planned, faible priorité).
+- **Thèmes multiples** — Done v3.20.0 (thème clair + sélecteur) puis **étendu en v3.25.0** : 4 palettes de couleur complètes (Pastel/Berry/Aurora/Monochrome) en plus d'Émeraude, sélecteur à pastilles (`ThemePalettes.kt`, `colorSchemeFor`). Flash de fond au lancement corrigé en v3.22.1.
 - **Performance** (voir TECHNICAL_AUDIT) : N+1 chargement séances/templates — Done (batch `getByIds`). Pagination historique nutrition — Done v3.21.0 (fenêtre 30 j + « Charger plus », `getEarliestMealDate`). Index sur `meal_entry.date` — Done v3.22.0 (migration 16 -> 17). Reste : pagination historique séances (Medium, intriqué avec le graphe de volume).
 - **Deep-link notifications** : router chaque notification vers l'écran pertinent (dépend du fix tap-to-open ci-dessus).
 

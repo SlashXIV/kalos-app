@@ -2,6 +2,7 @@ package com.kalos.app.core.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -70,17 +71,32 @@ private val LightColorScheme = lightColorScheme(
     onError = md_theme_light_onError,
 )
 
+/** Whether the resolved theme is dark (drives system-bar icon contrast & window background). */
+fun ThemeMode.isDark(systemInDark: Boolean): Boolean = when (this) {
+    ThemeMode.SYSTEM -> systemInDark
+    ThemeMode.LIGHT, ThemeMode.PASTEL -> false
+    ThemeMode.DARK, ThemeMode.BERRY, ThemeMode.AURORA, ThemeMode.MONOCHROME -> true
+}
+
+/** Resolves the Material 3 colour scheme for a theme (SYSTEM follows the device setting). */
+fun colorSchemeFor(mode: ThemeMode, systemInDark: Boolean): ColorScheme = when (mode) {
+    ThemeMode.SYSTEM -> if (systemInDark) DarkColorScheme else LightColorScheme
+    ThemeMode.LIGHT -> LightColorScheme
+    ThemeMode.DARK -> DarkColorScheme
+    ThemeMode.PASTEL -> PastelScheme
+    ThemeMode.BERRY -> BerryScheme
+    ThemeMode.AURORA -> AuroraScheme
+    ThemeMode.MONOCHROME -> MonochromeScheme
+}
+
 @Composable
 fun KalosTheme(
     mode: ThemeMode = ThemeMode.SYSTEM,
     content: @Composable () -> Unit,
 ) {
-    val darkTheme = when (mode) {
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
-        ThemeMode.LIGHT -> false
-        ThemeMode.DARK -> true
-    }
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val systemInDark = isSystemInDarkTheme()
+    val darkTheme = mode.isDark(systemInDark)
+    val colorScheme = colorSchemeFor(mode, systemInDark)
 
     // Keep the status/navigation bar icon contrast aligned with the resolved theme,
     // not the device setting (edge-to-edge draws behind the bars).

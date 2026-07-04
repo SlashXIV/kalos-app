@@ -85,8 +85,9 @@ Statuses: **Done** · **Partial** · **Planned**
 
 | Feature | Status | Notes |
 |---|---|---|
-| ~150 seeded exercises | Done | |
+| ~160 seeded exercises | Done | Incl. calisthénie / street workout pack (v3.23.0): front/back lever, planche, handstand, HSPU, human flag, rowing inversé… |
 | Exercise attachment variants | Partial | Naming convention "Exercice (attache)"; e.g. triceps extension corde/barre/overhead as distinct exercises, separate PR history. Seeder Phase 5 propagates renames (v3.19.0). A dedicated `variant` field + catalog grouping remains Planned. |
+| Free activity logging | Done | Log another sport without detail (name + duration + date + note) from the Sport screen; stored as an exercise-less session, counts in history & calendar (v3.23.0) |
 | Text search | Done | Accent-insensitive (nameNormalized), no debounce |
 | Filter by muscle group (13 options) | Done | |
 | Filter by type (5 options) | Done | |

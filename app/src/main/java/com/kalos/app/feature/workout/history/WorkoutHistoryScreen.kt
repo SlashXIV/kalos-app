@@ -266,7 +266,9 @@ private fun WorkoutLogCard(log: WorkoutLog, onClick: () -> Unit) {
             }
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 LogStat(Icons.Filled.Timer, formatDuration(log.durationSecs))
-                LogStat(Icons.Filled.FitnessCenter, "${log.exercises.size} exercice${if (log.exercises.size > 1) "s" else ""}")
+                if (log.exercises.isNotEmpty()) {
+                    LogStat(Icons.Filled.FitnessCenter, "${log.exercises.size} exercice${if (log.exercises.size > 1) "s" else ""}")
+                }
                 val completed = log.exercises.sumOf { le -> le.sets.count { it.isCompleted } }
                 if (completed > 0) LogStat(Icons.Filled.CheckCircle, "$completed série${if (completed > 1) "s" else ""}")
                 if (log.totalVolumeKg > 0f) LogStat(Icons.Filled.MonitorWeight, "%.0f kg".format(log.totalVolumeKg))

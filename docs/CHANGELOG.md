@@ -2,6 +2,17 @@
 
 ---
 
+## v3.23.0 — 4 July 2026
+
+### Added — callisthénie / street workout & activités libres
+
+Suite à l'audit « callisthénie + autres sports ».
+
+- **Pack callisthénie (11 exercices)** : Rowing inversé (Australian pull-up), Handstand (ATR), Handstand push-up (HSPU), Front lever (+ variante groupée tuck), Back lever, Planche (lever), Planche groupée (tuck), Human flag (drapeau), Pompes diamant, Squat (poids du corps). Holds isométriques en mode durée ; le reste en répétitions. Ajoutés via le seed (aucune migration ; propagés aux installations existantes). « Planche (lever) » nommé pour le distinguer du gainage « Planche ».
+- **Activité libre** : nouvel enregistrement léger pour les sports « sans détail » (escalade, randonnée, natation, foot…). Icône dédiée sur l'écran Sport → nom (avec suggestions rapides) + durée + date + note. Stocké comme une séance sans exercice, compté dans l'historique et le calendrier. La carte d'historique n'affiche plus « 0 exercice » pour ces entrées.
+
+---
+
 ## v3.22.1 — 4 July 2026
 
 ### Fixed — polish de clôture de la revue

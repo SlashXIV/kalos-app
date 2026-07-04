@@ -21,6 +21,7 @@ import com.kalos.app.feature.workout.program.ProgramsTabContent
 import com.kalos.app.core.ui.util.formatElapsedSince
 import com.kalos.app.navigation.Screen
 import androidx.compose.foundation.clickable
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,6 +34,19 @@ fun WorkoutScreen(
     val tabs = listOf("Séances", "Programmes", "Historique")
     var templateToDelete by remember { mutableStateOf<WorkoutTemplate?>(null) }
     var showAbandonConfirm by remember { mutableStateOf(false) }
+    var showActivityDialog by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    if (showActivityDialog) {
+        LogActivityDialog(
+            onDismiss = { showActivityDialog = false },
+            onSaved = {
+                showActivityDialog = false
+                scope.launch { snackbarHostState.showSnackbar("Activité enregistrée") }
+            },
+        )
+    }
 
     if (showAbandonConfirm) {
         AlertDialog(
@@ -56,12 +70,16 @@ fun WorkoutScreen(
             TopAppBar(
                 title = { Text("Sport") },
                 actions = {
+                    IconButton(onClick = { showActivityDialog = true }) {
+                        Icon(Icons.Filled.DirectionsRun, contentDescription = "Enregistrer une activité")
+                    }
                     IconButton(onClick = { navController.navigate(Screen.ExerciseCatalog.standalone()) }) {
                         Icon(Icons.Filled.FitnessCenter, contentDescription = "Catalogue d'exercices")
                     }
                 }
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             when (selectedTab) {
                 0 -> FloatingActionButton(onClick = { navController.navigate(Screen.WorkoutBuilder.create()) }) {

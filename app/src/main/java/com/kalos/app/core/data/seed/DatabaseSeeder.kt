@@ -30,7 +30,7 @@ class DatabaseSeeder @Inject constructor(
 
     // Bump this whenever seed_exercises.json gains new entries, nameNormalized needs backfilling,
     // or trackingMode/name values change.
-    private val SEED_EXERCISES_VERSION = 5
+    private val SEED_EXERCISES_VERSION = 6
 
     suspend fun seedIfEmpty() = withContext(Dispatchers.IO) {
         if (foodDao.count() == 0) seedFoods()

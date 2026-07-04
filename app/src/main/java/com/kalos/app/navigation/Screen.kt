@@ -43,6 +43,7 @@ sealed class Screen(val route: String) {
     }
     object NutritionHistory : Screen("nutrition/history")
     object Insights : Screen("insights")
+    object Appearance : Screen("appearance")
     object NutritionDay : Screen("nutrition/day/{date}") {
         fun route(date: String) = "nutrition/day/$date"
     }

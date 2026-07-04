@@ -2,6 +2,14 @@
 
 ---
 
+## v3.25.1 — 4 July 2026
+
+### Changed — écran Apparence dédié
+
+- Le choix du thème quitte la liste des Paramètres pour un **écran « Apparence » dédié** (Paramètres > Apparence, qui rappelle le thème actif en sous-titre). Chaque thème y est présenté sur sa propre ligne avec un **aperçu de trois couleurs** (primaire, secondaire, surface) et un bouton radio. Plus lisible que la rangée de chips, et les Paramètres sont allégés.
+
+---
+
 ## v3.25.0 — 4 July 2026
 
 ### Added — thèmes de couleur

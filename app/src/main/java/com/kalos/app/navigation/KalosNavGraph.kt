@@ -24,6 +24,7 @@ import com.kalos.app.feature.nutrition.templates.MealTemplatesScreen
 import com.kalos.app.feature.nutrition.scan.BarcodeScannerScreen
 import com.kalos.app.feature.nutrition.search.FoodSearchScreen
 import com.kalos.app.feature.onboarding.*
+import com.kalos.app.feature.profile.AppearanceScreen
 import com.kalos.app.feature.profile.EditGoalsScreen
 import com.kalos.app.feature.profile.EditProfileScreen
 import com.kalos.app.feature.profile.NotificationsScreen
@@ -243,6 +244,7 @@ fun KalosNavGraph(
             composable(Screen.Notifications.route) { NotificationsScreen(navController) }
             composable(Screen.WeightLog.route) { WeightLogScreen(navController) }
             composable(Screen.Insights.route) { InsightsScreen(navController) }
+            composable(Screen.Appearance.route) { AppearanceScreen(navController) }
         }
     }
 }

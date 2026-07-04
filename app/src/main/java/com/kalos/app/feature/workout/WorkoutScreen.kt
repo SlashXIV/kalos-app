@@ -52,7 +52,7 @@ fun WorkoutScreen(
         AlertDialog(
             onDismissRequest = { showAbandonConfirm = false },
             title = { Text("Abandonner la séance ?") },
-            text = { Text("Les séries saisies dans cette séance interrompue seront définitivement perdues.") },
+            text = { Text("Les séries saisies dans cette séance seront définitivement perdues.") },
             confirmButton = {
                 TextButton(onClick = {
                     showAbandonConfirm = false
@@ -102,9 +102,7 @@ fun WorkoutScreen(
                     onResume = {
                         navController.navigate(Screen.ActiveWorkout.route(banner.templateId))
                     },
-                    onAbandon = if (banner.isStale) {
-                        { showAbandonConfirm = true }
-                    } else null,
+                    onAbandon = { showAbandonConfirm = true },
                 )
             }
             TabRow(selectedTabIndex = selectedTab) {

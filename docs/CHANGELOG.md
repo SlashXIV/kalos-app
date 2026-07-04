@@ -2,6 +2,14 @@
 
 ---
 
+## v3.24.1 — 4 July 2026
+
+### Changed — bulle « séance en cours »
+
+- Le bouton **« Abandonner »** de la bulle de séance en cours (onglet Sport) est désormais **toujours disponible**, pas seulement quand la séance est périmée (>24h). On peut donc retirer une séance en cours à tout moment. La confirmation avant suppression est conservée (les séries saisies sont perdues).
+
+---
+
 ## v3.24.0 — 4 July 2026
 
 ### Changed — saisie des valeurs (sélection au focus, partout)

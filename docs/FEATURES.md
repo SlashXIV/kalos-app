@@ -196,7 +196,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Feature | Status | Notes |
 |---|---|---|
 | Link to Notifications screen | Done | |
-| Theme selector | Done | Émeraude (system/light/dark) + 4 colour palettes: Pastel (light), Berry, Aurora, Monochrome (dark). Full M3 schemes, colour-dot picker, persisted, live (v3.20.0 base, palettes v3.25.0) |
+| Theme selector | Done | Dedicated Appearance screen. Émeraude (system/light/dark) + 8 palettes: Pastel (light); Berry, Aurora, Monochrome, Aqua, Océan, Sunset (dark). Full M3 schemes, colour-swatch rows, persisted, live (v3.20.0 → v3.26.0) |
 | Dietary filters (pork, alcohol, vegetarian, vegan) | Done | Persisted in DataStore |
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |

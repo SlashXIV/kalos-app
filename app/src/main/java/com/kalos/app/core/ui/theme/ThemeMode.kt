@@ -12,4 +12,7 @@ enum class ThemeMode(val label: String) {
     BERRY("Berry"),
     AURORA("Aurora"),
     MONOCHROME("Monochrome"),
+    AQUA("Aqua"),
+    OCEAN("Océan"),
+    SUNSET("Sunset"),
 }

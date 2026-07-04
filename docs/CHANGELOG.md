@@ -2,6 +2,20 @@
 
 ---
 
+## v3.26.0 — 4 July 2026
+
+### Added — trois thèmes de plus
+
+Trois nouvelles palettes dans Paramètres > Apparence, toutes sombres :
+
+- **Aqua** — turquoise et cyan sur fond quasi-noir, énergie aquatique.
+- **Océan** — bleu marine profond avec accents sable et pêche (Ocean Breeze).
+- **Sunset** — bleu crépuscule avec corail, bronze et lavande (Ocean Sunset).
+
+La palette « Black & Gold » proposée n'a pas été retenue car trop proche de Monochrome (sombre + accent doré). Total : 9 thèmes.
+
+---
+
 ## v3.25.1 — 4 July 2026
 
 ### Changed — écran Apparence dédié

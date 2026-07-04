@@ -75,7 +75,8 @@ private val LightColorScheme = lightColorScheme(
 fun ThemeMode.isDark(systemInDark: Boolean): Boolean = when (this) {
     ThemeMode.SYSTEM -> systemInDark
     ThemeMode.LIGHT, ThemeMode.PASTEL -> false
-    ThemeMode.DARK, ThemeMode.BERRY, ThemeMode.AURORA, ThemeMode.MONOCHROME -> true
+    ThemeMode.DARK, ThemeMode.BERRY, ThemeMode.AURORA, ThemeMode.MONOCHROME,
+    ThemeMode.AQUA, ThemeMode.OCEAN, ThemeMode.SUNSET -> true
 }
 
 /** Resolves the Material 3 colour scheme for a theme (SYSTEM follows the device setting). */
@@ -87,6 +88,9 @@ fun colorSchemeFor(mode: ThemeMode, systemInDark: Boolean): ColorScheme = when (
     ThemeMode.BERRY -> BerryScheme
     ThemeMode.AURORA -> AuroraScheme
     ThemeMode.MONOCHROME -> MonochromeScheme
+    ThemeMode.AQUA -> AquaScheme
+    ThemeMode.OCEAN -> OceanScheme
+    ThemeMode.SUNSET -> SunsetScheme
 }
 
 @Composable

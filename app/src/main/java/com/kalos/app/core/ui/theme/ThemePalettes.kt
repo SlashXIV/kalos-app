@@ -136,3 +136,99 @@ internal val MonochromeScheme = darkColorScheme(
     surfaceContainerHigh = Color(0xFF333533),
     surfaceContainerHighest = Color(0xFF3D3F3C),
 )
+
+// ── Aqua Whimsy (dark, cyan / teal) ─────────────────────────────────────────────
+internal val AquaScheme = darkColorScheme(
+    primary = Color(0xFF14B3BA),              // Dark Cyan, brightened
+    onPrimary = Color(0xFF00272A),
+    primaryContainer = Color(0xFF0C7489),     // Cerulean
+    onPrimaryContainer = Color(0xFFADE8EC),
+    secondary = Color(0xFF5FC2C9),
+    onSecondary = Color(0xFF00272A),
+    secondaryContainer = Color(0xFF13505B),   // Dark Teal
+    onSecondaryContainer = Color(0xFFCDEEF1),
+    tertiary = Color(0xFFD7D9CE),             // Dust Grey (neutral warm accent)
+    onTertiary = Color(0xFF2B2D26),
+    background = Color(0xFF071417),
+    onBackground = Color(0xFFE4EEED),
+    surface = Color(0xFF0E2529),
+    onSurface = Color(0xFFE4EEED),
+    surfaceVariant = Color(0xFF163C43),
+    onSurfaceVariant = Color(0xFFA6C2C5),
+    outline = Color(0xFF2F6068),
+    outlineVariant = Color(0xFF163C43),
+    error = Color(0xFFFFB4AB),
+    onError = Color(0xFF5F1418),
+    surfaceTint = Color(0xFF14B3BA),
+    surfaceDim = Color(0xFF071417),
+    surfaceBright = Color(0xFF244449),
+    surfaceContainerLowest = Color(0xFF040F11),
+    surfaceContainerLow = Color(0xFF0E2529),
+    surfaceContainer = Color(0xFF122C31),
+    surfaceContainerHigh = Color(0xFF17363C),
+    surfaceContainerHighest = Color(0xFF1D4147),
+)
+
+// ── Ocean Breeze (dark, navy + warm sand) ───────────────────────────────────────
+internal val OceanScheme = darkColorScheme(
+    primary = Color(0xFF88BCA2),              // Muted Teal, lifted
+    onPrimary = Color(0xFF06251A),
+    primaryContainer = Color(0xFF2F5D47),
+    onPrimaryContainer = Color(0xFFCDEEDA),
+    secondary = Color(0xFFDAB785),            // Tan
+    onSecondary = Color(0xFF3A2A12),
+    secondaryContainer = Color(0xFF5A4527),
+    onSecondaryContainer = Color(0xFFF5E3C8),
+    tertiary = Color(0xFFD5896F),             // Burnt Peach
+    onTertiary = Color(0xFF3A1710),
+    background = Color(0xFF04162E),
+    onBackground = Color(0xFFE6EDF5),
+    surface = Color(0xFF072240),
+    onSurface = Color(0xFFE6EDF5),
+    surfaceVariant = Color(0xFF0E3557),
+    onSurfaceVariant = Color(0xFFA9C0D6),
+    outline = Color(0xFF2F5378),
+    outlineVariant = Color(0xFF0E3557),
+    error = Color(0xFFFFB4AB),
+    onError = Color(0xFF5F1418),
+    surfaceTint = Color(0xFF88BCA2),
+    surfaceDim = Color(0xFF04162E),
+    surfaceBright = Color(0xFF1E3E5E),
+    surfaceContainerLowest = Color(0xFF020F22),
+    surfaceContainerLow = Color(0xFF072240),
+    surfaceContainer = Color(0xFF0A2A4A),
+    surfaceContainerHigh = Color(0xFF0F3558),
+    surfaceContainerHighest = Color(0xFF154066),
+)
+
+// ── Ocean Sunset (dark, dusk blue + coral) ──────────────────────────────────────
+internal val SunsetScheme = darkColorScheme(
+    primary = Color(0xFFE56B6F),              // Light Coral
+    onPrimary = Color(0xFF3A0E12),
+    primaryContainer = Color(0xFFB56576),     // Rosewood
+    onPrimaryContainer = Color(0xFFFFD9DD),
+    secondary = Color(0xFFEAAC8B),            // Light Bronze
+    onSecondary = Color(0xFF3A2113),
+    secondaryContainer = Color(0xFF5A4433),
+    onSecondaryContainer = Color(0xFFF7DDC8),
+    tertiary = Color(0xFFB39CC0),             // Dusty Lavender, lifted
+    onTertiary = Color(0xFF2A1F33),
+    background = Color(0xFF18243B),
+    onBackground = Color(0xFFEDEFF5),
+    surface = Color(0xFF20304C),
+    onSurface = Color(0xFFEDEFF5),
+    surfaceVariant = Color(0xFF33455F),
+    onSurfaceVariant = Color(0xFFB2BCCF),
+    outline = Color(0xFF4A5F80),
+    outlineVariant = Color(0xFF33455F),
+    error = Color(0xFFFFB4AB),
+    onError = Color(0xFF5F1418),
+    surfaceTint = Color(0xFFE56B6F),
+    surfaceDim = Color(0xFF18243B),
+    surfaceBright = Color(0xFF35496A),
+    surfaceContainerLowest = Color(0xFF121B2C),
+    surfaceContainerLow = Color(0xFF20304C),
+    surfaceContainer = Color(0xFF263856),
+    surfaceContainerHigh = Color(0xFF2E4262),
+    surfaceContainerHighest = Color(0xFF374D6F),
+)

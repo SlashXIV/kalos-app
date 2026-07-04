@@ -2,6 +2,18 @@
 
 ---
 
+## v3.22.0 — 4 July 2026
+
+### Performance — index base de données
+
+Cinquième lot de la revue générale.
+
+- **Index sur `meal_entry.date`** (migration 16 -> 17) : accélère toutes les requêtes par date (vue du jour, historique, résumés journaliers, détection du premier jour) au lieu d'un balayage de table. Gain croissant avec l'accumulation de données.
+
+Périmètre volontairement restreint : le champ `variant` + regroupement des variantes dans le catalogue, envisagé pour ce lot, a été écarté (sur-ingénierie — un regroupement fiable exigerait un modèle parent/enfant curé sur ~150 exercices ; le nommage « Exercice (attache) » de la v3.19.0 + la recherche couvrent déjà l'usage). Voir `docs/ROADMAP.md`.
+
+---
+
 ## v3.21.0 — 3 July 2026
 
 ### Changed — historique nutritionnel paginé

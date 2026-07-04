@@ -29,7 +29,7 @@ import com.kalos.app.core.database.entity.*
         MealTemplateEntity::class,
         MealTemplateItemEntity::class,
     ],
-    version = 16,
+    version = 17,
     exportSchema = true,
 )
 abstract class KalosDatabase : RoomDatabase() {
@@ -100,6 +100,15 @@ abstract class KalosDatabase : RoomDatabase() {
                 )
                 database.execSQL(
                     "CREATE INDEX IF NOT EXISTS `index_meal_template_item_foodId` ON `meal_template_item` (`foodId`)"
+                )
+            }
+        }
+        val MIGRATION_16_17 = object : Migration(16, 17) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Index on meal_entry.date — speeds date-scoped queries (day view, history,
+                // daily summaries, MIN(date)). Name mirrors Room's generated form.
+                database.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_meal_entry_date` ON `meal_entry` (`date`)"
                 )
             }
         }

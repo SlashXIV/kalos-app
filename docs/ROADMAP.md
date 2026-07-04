@@ -26,13 +26,13 @@ Revue transverse demandée par l'utilisateur (app jugée globalement complète, 
 
 - **Variantes d'un même exercice** (ex. extension triceps corde / barre). Le modèle `Exercise` est plat, les PR/progressions indexés par `exerciseId`.
   - Phase 1 — Done v3.19.0 : convention de nommage « Exercice (attache) », ajout des variantes manquantes courantes (extension triceps barre, tirage prise serrée), phase de seed qui propage les renommages aux installs existants (`updateNameBySeedId`).
-  - Phase 2 (si besoin, Planned) : champ `variant: String?` sur `Exercise` (migration non-breaking — à grouper avec l'index `meal_entry.date`) + regroupement dans le catalogue. Éviter un modèle parent/enfant tant qu'il n'y a pas de besoin de rollup de PR entre variantes.
+  - Phase 2 — évaluée puis **écartée (sur-ingénierie)** lors du lot v3.22.0 : un regroupement fiable des variantes dans le catalogue exigerait un champ clé de groupe/parent curé sur ~150 exercices + une UI dépliable interférant avec le flux d'ajout du builder, pour un bénéfice marginal (la Phase 1 nommage + recherche couvre déjà l'usage). À rouvrir seulement sur signal d'usage réel (catalogue jugé encombré).
 
 ### Nouvelles pistes
 
 - **Internationalisation / langues** (Medium-High) : les libellés sont actuellement en dur en français dans le code. Externaliser vers `res/values/strings.xml` (FR par défaut) puis ajouter l'anglais (`values-en`). Gros travail d'extraction mais sans risque. Prérequis à toute ouverture au-delà d'un usage FR.
 - **Thèmes multiples** — Done v3.20.0. Thème clair complet + sélecteur Système/Clair/Sombre dans Paramètres > Apparence (`ThemePreferenceStore`, appliqué en direct, contraste des barres système géré). Variantes d'accent : non faites (Planned, faible priorité). Note mineure connue : bref flash de la couleur de fenêtre XML (`Theme.Kalos`, fond sombre) au lancement en mode clair — cosmétique.
-- **Performance** (voir TECHNICAL_AUDIT) : N+1 chargement séances/templates — Done (batch `getByIds`). Pagination historique nutrition — Done v3.21.0 (fenêtre 30 j + « Charger plus », `getEarliestMealDate`). Reste : pagination historique séances (Medium, intriqué avec le graphe de volume) ; index sur `meal_entry.date` (Low, nécessite une migration — à grouper avec la prochaine évolution de schéma, ex. champ `variant`).
+- **Performance** (voir TECHNICAL_AUDIT) : N+1 chargement séances/templates — Done (batch `getByIds`). Pagination historique nutrition — Done v3.21.0 (fenêtre 30 j + « Charger plus », `getEarliestMealDate`). Index sur `meal_entry.date` — Done v3.22.0 (migration 16 -> 17). Reste : pagination historique séances (Medium, intriqué avec le graphe de volume).
 - **Deep-link notifications** : router chaque notification vers l'écran pertinent (dépend du fix tap-to-open ci-dessus).
 
 ---

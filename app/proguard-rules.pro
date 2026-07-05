@@ -21,3 +21,10 @@
 # Hilt
 -dontwarn com.google.dagger.**
 -keep class dagger.hilt.** { *; }
+
+# Enums resolved by name at runtime (ThemeMode/ExerciseStatus/MealType/DietaryFilter/
+# FitnessGoal via valueOf). Keep values()/valueOf so R8 can't rename or strip them.
+-keepclassmembers enum com.kalos.app.** {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}

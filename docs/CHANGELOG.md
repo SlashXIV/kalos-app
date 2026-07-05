@@ -2,6 +2,16 @@
 
 ---
 
+## v3.26.1 — 4 July 2026
+
+### Changed — build signé (release)
+
+- Première release **signée avec une clé de release dédiée** (au lieu de la clé de debug). Config de signature dans `app/build.gradle.kts`, lisant `keystore.properties` (racine du dépôt, git-ignoré, jamais commité) ; repli sur la signature debug si le fichier est absent (clone/CI).
+- R8/minification laissés désactivés pour cette première release afin de garantir un build fonctionnel ; règles proguard (sérialisation, enums) préparées pour un futur passage à R8.
+- **Note d'installation** : la signature change par rapport aux versions précédentes (debug) → il faut **désinstaller l'ancienne version de Kalos** avant d'installer celle-ci. Les mises à jour ultérieures s'installeront normalement.
+
+---
+
 ## v3.26.0 — 4 July 2026
 
 ### Added — trois thèmes de plus

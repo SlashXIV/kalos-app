@@ -15,6 +15,7 @@ captures/
 # Keystore
 *.jks
 *.keystore
+keystore.properties
 
 # APK / AAB (committed separately as release assets)
 *.apk

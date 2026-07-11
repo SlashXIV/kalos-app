@@ -112,8 +112,6 @@ fun FoodSearchScreen(
         )
     }
 
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -228,8 +226,11 @@ fun FoodSearchScreen(
         }
     }
 
-    // Food detail bottom sheet
+    // Food detail bottom sheet. The sheet state is created here (inside the conditional)
+    // so each open gets a fresh state — reusing a hoisted state across open/dismiss cycles
+    // left it stuck "hidden", so the sheet stopped re-opening until the screen was recreated.
     if (state.selectedFood != null) {
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ModalBottomSheet(
             onDismissRequest = viewModel::dismissSheet,
             sheetState = sheetState,

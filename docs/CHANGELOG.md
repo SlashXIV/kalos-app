@@ -2,6 +2,14 @@
 
 ---
 
+## v3.26.2 — 6 July 2026
+
+### Fixed — feuille de quantité qui ne se rouvrait plus
+
+- Depuis la recherche d'aliment, après plusieurs ouvertures/fermetures, la feuille de saisie de quantité (bottom sheet) finissait par ne plus s'ouvrir — il fallait quitter l'écran et revenir. Cause : le `ModalBottomSheet` réutilisait un état hoisté qui restait bloqué sur « caché ». Corrigé en créant un état neuf à chaque ouverture (`rememberModalBottomSheetState` déplacé dans le bloc conditionnel).
+
+---
+
 ## v3.26.1 — 4 July 2026
 
 ### Changed — build signé (release)

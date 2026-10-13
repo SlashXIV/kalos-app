@@ -9,7 +9,6 @@ com/kalos/app/core/ui/component/WorkoutCard.kt
 com/kalos/app/core/ui/motion/Entrances.kt
 com/kalos/app/feature/calendar/CalendarScreen.kt
 com/kalos/app/feature/insights/InsightsScreen.kt
-com/kalos/app/feature/nutrition/NutritionScreen.kt
 com/kalos/app/feature/nutrition/custom/CustomFoodScreen.kt
 com/kalos/app/feature/nutrition/history/NutritionHistoryScreen.kt
 com/kalos/app/feature/nutrition/myfoods/MyFoodsScreen.kt

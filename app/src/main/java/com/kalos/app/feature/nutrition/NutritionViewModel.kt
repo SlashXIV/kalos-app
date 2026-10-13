@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.kalos.app.core.domain.model.*
 import com.kalos.app.core.domain.repository.MealRepository
 import com.kalos.app.core.domain.repository.MealTemplateRepository
+import com.kalos.app.core.domain.repository.ProgramRepository
+import com.kalos.app.core.domain.repository.WorkoutRepository
 import com.kalos.app.core.domain.repository.UserRepository
 import com.kalos.app.core.domain.repository.WaterRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,6 +35,8 @@ data class NutritionUiState(
     val waterDisplayGoal: String get() = if (waterGoalMl >= 1000) "${"%.1f".format(waterGoalMl / 1000f)} L" else "$waterGoalMl ml"
 }
 
+data class TodayWorkout(val template: WorkoutTemplate, val done: Boolean)
+
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class NutritionViewModel @Inject constructor(
@@ -40,7 +44,19 @@ class NutritionViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val waterRepository: WaterRepository,
     private val mealTemplateRepository: MealTemplateRepository,
+    programRepository: ProgramRepository,
+    workoutRepository: WorkoutRepository,
 ) : ViewModel() {
+
+    /** Séance du programme actif prévue aujourd'hui (même règle que le calendrier), et si elle est faite. */
+    val todayWorkout: StateFlow<TodayWorkout?> = combine(
+        programRepository.getActive(),
+        workoutRepository.getLogsForDate(LocalDate.now().toString()),
+    ) { program, logs ->
+        val today = LocalDate.now().dayOfWeek.value
+        program?.workouts?.firstOrNull { it.dayOfWeek == today }?.template
+            ?.let { TodayWorkout(it, done = logs.isNotEmpty()) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     private val _date = MutableStateFlow(LocalDate.now().toString())
     val date: StateFlow<String> = _date

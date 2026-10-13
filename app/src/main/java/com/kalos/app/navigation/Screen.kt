@@ -1,5 +1,8 @@
 package com.kalos.app.navigation
 
+import androidx.annotation.StringRes
+import com.kalos.app.R
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -90,14 +93,14 @@ sealed class Screen(val route: String) {
 
 data class BottomNavItem(
     val screen: Screen,
-    val label: String,
+    @StringRes val label: Int,
     val icon: ImageVector,
     val selectedIcon: ImageVector = icon,
 )
 
 val bottomNavItems = listOf(
-    BottomNavItem(Screen.Nutrition, "Nutrition", Icons.Filled.Restaurant),
-    BottomNavItem(Screen.Workout, "Sport", Icons.Filled.FitnessCenter),
-    BottomNavItem(Screen.Calendar, "Calendrier", Icons.Filled.CalendarMonth),
-    BottomNavItem(Screen.Profile, "Profil", Icons.Filled.Person),
+    BottomNavItem(Screen.Nutrition, R.string.nav_nutrition, Icons.Filled.Restaurant),
+    BottomNavItem(Screen.Workout, R.string.nav_workout, Icons.Filled.FitnessCenter),
+    BottomNavItem(Screen.Calendar, R.string.nav_calendar, Icons.Filled.CalendarMonth),
+    BottomNavItem(Screen.Profile, R.string.nav_profile, Icons.Filled.Person),
 )

@@ -4,7 +4,7 @@
 
     <!-- Navigation -->
     <string name="nav_home">Accueil</string>
-    <string name="nav_nutrition">Nutrition</string>
+    <string name="nav_nutrition">Aujourd’hui</string>
     <string name="nav_workout">Sport</string>
     <string name="nav_calendar">Calendrier</string>
     <string name="nav_profile">Profil</string>
@@ -86,4 +86,60 @@
     <string name="appearance_motion_calm_desc">Mouvement réduit au strict utile : valeurs affichées directement, transitions brèves.</string>
     <string name="appearance_vibrations">Vibrations</string>
     <string name="appearance_vibrations_desc">Aliment ajouté, série validée, fin du repos.</string>
+    <!-- Aujourd’hui (journal du jour) -->
+    <string name="today_title">Aujourd’hui</string>
+    <string name="yesterday">Hier</string>
+    <string name="action_history">Historique</string>
+    <string name="action_more">Plus d’options</string>
+    <string name="action_close">Fermer</string>
+    <string name="action_save">Enregistrer</string>
+    <string name="action_cancel">Annuler</string>
+    <string name="action_validate">Valider</string>
+    <string name="day_previous">Jour précédent</string>
+    <string name="day_next">Jour suivant</string>
+    <string name="day_back_to_today">Revenir à aujourd’hui</string>
+    <string name="summary_copy">Copier le résumé du jour</string>
+    <string name="summary_copied">Résumé nutritionnel copié</string>
+    <string name="favorites_manage">Gérer les repas favoris</string>
+    <string name="favorite_apply_title">Ajouter un repas favori</string>
+    <string name="favorite_apply_empty">Aucun repas favori pour l’instant. Enregistrez-en un depuis le menu d’un repas déjà rempli.</string>
+    <plurals name="favorite_summary">
+        <item quantity="one">%1$d aliment · %2$s kcal</item>
+        <item quantity="other">%1$d aliments · %2$s kcal</item>
+    </plurals>
+    <string name="favorite_added">« %1$s » ajouté</string>
+    <string name="favorite_save_title">Enregistrer comme favori</string>
+    <string name="favorite_name">Nom du repas favori</string>
+    <string name="favorite_saved">Repas favori enregistré</string>
+    <string name="kcal_label">kcal</string>
+    <string name="kcal_of">sur %1$s</string>
+    <string name="kcal_remaining">%1$s restantes</string>
+    <string name="kcal_over">%1$s au-dessus</string>
+    <string name="kcal_dial_sentence">Calories, %1$s sur %2$s kilocalories, %3$s</string>
+    <string name="water_title">Eau</string>
+    <string name="water_goal_edit">Modifier l’objectif d’eau</string>
+    <string name="water_quick_add">+%1$d ml</string>
+    <plurals name="water_quick_add_spoken">
+        <item quantity="one">Ajouter %1$d millilitre</item>
+        <item quantity="other">Ajouter %1$d millilitres</item>
+    </plurals>
+    <string name="water_other">Autre</string>
+    <string name="water_goal_dialog">Objectif quotidien</string>
+    <string name="water_custom_dialog">Quantité personnalisée</string>
+    <string name="water_custom_hint">Valeur négative pour corriger (ex. : -250)</string>
+    <string name="unit_ml">ml</string>
+    <string name="unit_g">g</string>
+    <string name="unit_l">L</string>
+    <string name="meal_empty">Rien de pesé</string>
+    <string name="meal_options">Options : %1$s</string>
+    <string name="meal_add_food">Ajouter un aliment : %1$s</string>
+    <string name="meal_item_remove">Retirer %1$s</string>
+    <string name="meal_item_spoken">%1$s, %2$s grammes, %3$s kilocalories</string>
+    <string name="today_workout">Séance du jour</string>
+    <plurals name="workout_exercise_count">
+        <item quantity="one">%1$d exercice · ~%2$d min</item>
+        <item quantity="other">%1$d exercices · ~%2$d min</item>
+    </plurals>
+    <string name="workout_start_action">Démarrer</string>
+    <string name="workout_done_today">Séance faite</string>
 </resources>

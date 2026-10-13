@@ -165,7 +165,9 @@ fun GraduatedDial(
                 val majorW = 2.2.dp.toPx()
                 val minorW = 1.4.dp.toPx()
                 val needleW = 3.2.dp.toPx()
-                val nr = r - 30.dp.toPx()
+                // L'aiguille couvre l'anneau des graduations sans entrer dans le centre (chiffres).
+                val needleOut = r + 2.dp.toPx()
+                val needleIn = r - 26.dp.toPx()
                 onDrawBehind {
                     if (goal > 0f) drawArc(
                         nutrients.goalReached, zoneStart, zoneSweep, false,
@@ -183,7 +185,7 @@ fun GraduatedDial(
                         drawLine(col, outer[i], inner[i], if (i % 5 == 0) majorW else minorW, StrokeCap.Round)
                     }
                     val a = angle(f)
-                    drawLine(needleColor, polar(c, nr - 26.dp.toPx(), a), polar(c, nr, a), needleW, StrokeCap.Round)
+                    drawLine(needleColor, polar(c, needleIn, a), polar(c, needleOut, a), needleW, StrokeCap.Round)
                 }
             },
         contentAlignment = Alignment.Center,

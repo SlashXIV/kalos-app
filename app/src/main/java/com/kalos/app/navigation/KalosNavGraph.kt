@@ -2,6 +2,7 @@ package com.kalos.app.navigation
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
@@ -76,6 +77,9 @@ fun KalosNavGraph(
     } == true
 
     Scaffold(
+        // Chaque écran gère ses propres marges système (barre d'état, clavier) : sans ça, elles
+        // s'additionnent et le titre descend de la hauteur d'une barre d'état.
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (showBottomBar) {
                 KalosBottomNavBar(

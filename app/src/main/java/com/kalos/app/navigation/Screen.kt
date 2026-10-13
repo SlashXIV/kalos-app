@@ -8,14 +8,8 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val route: String) {
-    // Onboarding
-    object Welcome : Screen("onboarding/welcome")
-    object ProfileSetup : Screen("onboarding/profile")
-    object GoalSetup : Screen("onboarding/goal")
-    object OnboardingResult : Screen("onboarding/result")
 
     // Main tabs
-    object Home : Screen("home")
     object Nutrition : Screen("nutrition")
     object Workout : Screen("workout")
     object Calendar : Screen("calendar")

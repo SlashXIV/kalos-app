@@ -30,7 +30,6 @@ import com.kalos.app.feature.nutrition.templates.MealTemplateEditorScreen
 import com.kalos.app.feature.nutrition.templates.MealTemplatesScreen
 import com.kalos.app.feature.nutrition.scan.BarcodeScannerScreen
 import com.kalos.app.feature.nutrition.search.FoodSearchScreen
-import com.kalos.app.feature.onboarding.*
 import com.kalos.app.feature.profile.AppearanceScreen
 import com.kalos.app.feature.profile.EditGoalsScreen
 import com.kalos.app.feature.profile.EditProfileScreen

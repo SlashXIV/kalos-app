@@ -1,5 +1,2 @@
 # Fichiers à migrer vers strings.xml pendant la refonte 4.0.0. La liste ne fait que rétrécir.
-com/kalos/app/feature/onboarding/GoalSetupScreen.kt
-com/kalos/app/feature/onboarding/OnboardingResultScreen.kt
-com/kalos/app/feature/onboarding/ProfileSetupScreen.kt
-com/kalos/app/feature/onboarding/WelcomeScreen.kt
+

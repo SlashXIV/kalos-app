@@ -33,9 +33,13 @@ class CalculateMacroGoalsUseCaseTest {
     )
 
     @Test
-    fun `protein is 2g per kg body weight`() {
-        val result = useCase(profile(weightKg = 80f))
-        assertEquals(160, result.proteinG)
+    fun `protein follows the goal's grams per kg`() {
+        // Ratio propre à chaque objectif depuis la transparence des macros (1,8 g/kg en maintien).
+        FitnessGoal.entries.forEach { goal ->
+            val result = useCase(profile(weightKg = 80f, goal = goal))
+            assertEquals(goal.name, (80f * goal.proteinPerKg).roundToInt(), result.proteinG)
+        }
+        assertEquals(144, useCase(profile(weightKg = 80f)).proteinG)
     }
 
     @Test

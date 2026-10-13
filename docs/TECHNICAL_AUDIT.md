@@ -523,4 +523,4 @@ Périmètre : couche d'interface uniquement. Aucun changement de calcul métier,
 **Dette connue après la refonte** (Low sauf mention)
 - Graphiques de progression et de volume (Sport) seulement restylés : à refaire avec `MeSeriesChart` (Medium).
 - Unités TalkBack au pluriel pour une quantité de 1 ; bouton Enregistrer sans indicateur de chargement (aliment perso, objectifs) ; mise en forme « Aujourd'hui / Hier » dupliquée à cinq endroits ; `formatElapsedSince` encore en dur.
-- Mesure du défilement à refaire sur téléphone (émulateur non concluant).
+- Le téléphone de test porte encore une version signée avec la clé de debug (installée avant la 3.26.1) : pour suivre les releases GitHub, export JSON → désinstallation → installation de `Kalos.apk` → import.

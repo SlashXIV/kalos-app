@@ -13,6 +13,11 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -117,18 +122,27 @@ fun FoodListItem(
     }
 }
 
-/** Répartition de l'énergie des macros (4 / 4 / 9 kcal par gramme), dans l'ordre P, G, L du texte. */
+/**
+ * Répartition de l'énergie des macros (4 / 4 / 9 kcal par gramme), dans l'ordre P, G, L du texte.
+ * Un seul nœud dessiné par ligne : la liste de recherche en compte des centaines.
+ */
 @Composable
 private fun MacroSplitBar(protein: Float, carbs: Float, fat: Float) {
     val n = KalosTheme.nutrients
-    val parts = listOf(protein * 4f to n.protein, carbs * 4f to n.carbs, fat * 9f to n.fat).filter { it.first > 0f }
-    if (parts.isEmpty()) return
-    Row(
-        Modifier.fillMaxWidth(0.6f).height(3.dp),
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        parts.forEach { (energy, color) ->
-            Box(Modifier.weight(energy).fillMaxHeight().clip(KalosShape.chip).background(color))
-        }
-    }
+    val total = protein * 4f + carbs * 4f + fat * 9f
+    if (total <= 0f) return
+    Spacer(
+        Modifier.fillMaxWidth(0.6f).height(3.dp).drawBehind {
+            val gap = 2.dp.toPx()
+            val radius = CornerRadius(1.dp.toPx())
+            var x = 0f
+            val usable = size.width - gap * 2
+            for ((energy, color) in arrayOf(protein * 4f to n.protein, carbs * 4f to n.carbs, fat * 9f to n.fat)) {
+                if (energy <= 0f) continue
+                val w = usable * energy / total
+                drawRoundRect(color, Offset(x, 0f), Size(w, size.height), radius)
+                x += w + gap
+            }
+        },
+    )
 }

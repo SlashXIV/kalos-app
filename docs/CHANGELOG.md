@@ -2,23 +2,45 @@
 
 ---
 
-## v4.0.0 — en cours (refonte « Graduation »)
+## v4.0.0 — 13 October 2026
 
-### Added — fondations du thème et du mouvement
+Refonte graphique « Graduation » : Kalos quitte l'allure Material par défaut. Tout ce que l'appli compte se mesure (kcal, grammes, millilitres, kilos, secondes) ; son langage visuel devient celui de l'instrument de mesure : règles graduées, aiguille qui se pose, cadran à la place de l'anneau, repas en tickets de pesée. Planche validée avant le code. Aucun calcul métier ni schéma de données modifié.
 
-- **Polices embarquées** (licence OFL, hors-ligne) : Big Shoulders Display pour les titres, Hanken Grotesk pour le texte, Martian Mono pour les chiffres (chasse fixe : kcal, grammes et chronos ne « dansent » plus).
+### Added — système visuel maison
+
+- **Polices embarquées** (licence OFL, hors-ligne) : Big Shoulders Display pour les titres, Hanken Grotesk pour le texte, Martian Mono pour les chiffres (chasse fixe : kcal, grammes et chronos ne « dansent » plus). Licences dans l'appli (`assets/licenses`).
 - **Trois palettes** en clair et en sombre : Jade (par défaut), Encre, Océan. La luminosité (Système / Clair / Sombre) se choisit à part.
-- **Couleurs des nutriments** identiques dans toutes les palettes et distinctes pour les daltoniens (protéines violet, glucides ambre, lipides rose, eau cyan).
-- **Réglage « Ambiance »** (Expressive / Sobre) et **réglage « Vibrations »** dans Apparence. Le réglage Android « Supprimer les animations » est toujours respecté.
-- Tests : contrastes WCAG et daltonisme (protan, deutan) de chaque palette, registre des palettes, migration des anciens thèmes, niveau de mouvement, textes d'interface codés en dur.
+- **Couleurs des nutriments** identiques dans toutes les palettes et distinctes pour les daltoniens (protéines violet, glucides ambre, lipides rose, eau cyan) ; états « objectif atteint » et « au-dessus » toujours accompagnés d'un libellé.
+- **Réglages « Ambiance »** (Expressive / Sobre) **et « Vibrations »** dans Apparence. Le réglage Android « Supprimer les animations » est toujours respecté, relu à chaque retour dans l'appli.
+- **Briques maison** : cadran et règles graduées, tickets de pesée, en-têtes d'affiche, étiquettes d'instrument, boutons à pression, puces de valeur, barre de navigation soulignée d'une graduation, graphiques à curseur réglable au doigt, au clavier et avec TalkBack.
+- **Icône et écran de lancement** : un K d'affiche posé sur une règle graduée.
 
-### Changed — thèmes 3.x
+### Changed — tous les écrans dans le nouveau langage
 
-- Pastel, Berry, Aurora, Aqua et Sunset sont retirés ; Monochrome devient Encre, Océan est redessiné. Le thème choisi est converti automatiquement au premier lancement : une palette retirée devient Jade en gardant sa luminosité.
+- **« Aujourd'hui »** remplace l'onglet Nutrition : cadran gradué du jour, règles des macros, eau, repas en tickets, séance du programme prévue aujourd'hui.
+- Recherche d'aliment et feuille de quantité (règles « après ajout »), scanner (viseur gradué statique), aliments perso, repas favoris en tickets, historique.
+- Sport : séances, programmes, historique, séance en cours (séries en tableau, validation en tampon, repos en cadran qui se vide), récapitulatif, catalogue, éditeurs.
+- Calendrier (jauge des calories par jour, pastilles de séance faite ou planifiée), bilan et suivi du poids (graphiques refaits), profil, réglages, notifications.
+- **Thèmes 3.x** : Pastel, Berry, Aurora, Aqua et Sunset sont retirés ; Monochrome devient Encre, Océan est redessiné. Le thème choisi est converti automatiquement au premier lancement (une palette retirée devient Jade en gardant sa luminosité).
+- Tous les textes de l'interface passent dans `strings.xml`, en français soigné (apostrophes et guillemets typographiques, espaces insécables, pluriels).
+- Accessibilité : chaque mesure est lue en une phrase par TalkBack (« Protéines, 82 sur 140 grammes »), titres en un seul nœud, états des interrupteurs et choix annoncés, cibles de 48 dp, textes qui se réduisent au lieu d'être rognés à la police système 200 % et sur écran étroit.
+
+### Removed
+
+- Écrans d'onboarding jamais branchés à la navigation (code mort) ; dépendance Vico jamais utilisée ; anciens composants (anneau de calories, barres de macros).
 
 ### Fixed
 
+- Le titre de chaque écran ne descend plus de la hauteur d'une barre d'état ; le contenu ne passe plus sous l'heure en défilant.
+- Le calendrier utilise l'objectif calorique par défaut tant qu'aucun n'est enregistré, comme l'écran Aujourd'hui.
+- La version affichée dans les réglages est lue dans l'appli installée (elle affichait une version figée).
+- `versionName` / `versionCode` alignés sur le CHANGELOG (4.0.0 / 40000).
 - Lint : annotation `@OptIn` de CameraX dans le scanner, BOM littéral dans le chargement des données de démarrage.
+
+### Tests
+
+- Contrastes WCAG (texte 7:1, accents 4,5:1, graphiques 3:1) et daltonisme (protan, deutan, ΔE OKLab ≥ 8) de chaque palette en clair et en sombre ; registre des palettes ; migration des thèmes 3.x ; niveau de mouvement ; aucun texte d'interface codé en dur.
+- `CalculateMacroGoalsUseCaseTest` vérifie le ratio de protéines propre à chaque objectif (il attendait encore 2 g/kg, antérieur à la transparence des macros ; le calcul n'est pas modifié).
 
 ---
 

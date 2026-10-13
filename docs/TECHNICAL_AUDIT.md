@@ -503,3 +503,24 @@ L'agent nutrition signalait la logique `vegetarian/vegan` (`CustomFoodViewModel.
 | C1, C2, C3, C4 — robustesse persistance & erreurs | M1, M2, M6, M9 — optimisations & cleanup |
 | H1 — déduplication écrans édition de set | H4 — décision PRODUCT_AUDIT.md |
 | H2, H3, M3 — qualité du backup | B1, B2, B3 — notes diverses |
+
+---
+
+## Refonte graphique « Graduation » — 13 October 2026 (v4.0.0)
+
+Périmètre : couche d'interface uniquement. Aucun changement de calcul métier, de repository, de DAO ni de schéma Room (version 17 inchangée). Détail des jalons dans `docs/ROADMAP.md`.
+
+**Ajouté**
+- Système de thème maison dans `core/ui/theme/` : registre de palettes (`Palettes`, `KalosPalette`, neutres communs `Neutrals.kt`), `NutrientColors` hors Material, styles nommés par usage (`KalosType`), formes en jetons (`KalosShape`). Pas de couleurs dynamiques.
+- Mouvement dans `core/ui/motion/` : jetons, `MotionLevel` (FULL / REDUCED / NONE, testé), haptique centralisée et désactivable.
+- Préférences d'apparence (`ThemePreferenceStore`, SharedPreferences `kalos_theme`) : palette, luminosité, ambiance, vibrations ; migration testée des valeurs 3.x (`migrateLegacyTheme`).
+- Tests JVM : `PaletteContrastTest` (WCAG + Machado 2009 / OKLab), `PalettesTest`, `MotionLevelTest`, `HardcodedUiTextTest` (remplace une tâche Gradle : Kalos n'a qu'un module).
+- `app/lint-baseline.xml` : avertissements antérieurs figés (dont 90 mises à jour de dépendances, décision à part).
+
+**Retiré**
+- Onboarding jamais branché (5 fichiers + ViewModel), route `home` morte, dépendance Vico jamais importée, anneau et barres de macros remplacés.
+
+**Dette connue après la refonte** (Low sauf mention)
+- Graphiques de progression et de volume (Sport) seulement restylés : à refaire avec `MeSeriesChart` (Medium).
+- Unités TalkBack au pluriel pour une quantité de 1 ; bouton Enregistrer sans indicateur de chargement (aliment perso, objectifs) ; mise en forme « Aujourd'hui / Hier » dupliquée à cinq endroits ; `formatElapsedSince` encore en dur.
+- Mesure du défilement à refaire sur téléphone (émulateur non concluant).

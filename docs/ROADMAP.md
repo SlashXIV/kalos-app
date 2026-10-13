@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: v4.0.0 (en cours) — 13 October 2026
+> Last updated: v4.0.0 — 13 October 2026
 >
 > The June 2026 UX review cycle (18 findings, 3 waves: v3.10.1 / v3.11.0 / v3.12.0) is fully closed. No pending UX backlog.
 
@@ -18,7 +18,7 @@ Sortir Kalos de son allure « Material par défaut » avec la méthode mise au p
 
 | Jalon | Version | Statut | Preuve |
 |---|---|---|---|
-| R1 — Fondations | v4.0.0 | Partial | Lot F1-F2 : 10 tests JVM ajoutés (contrastes et daltonisme des 3 palettes, registre, migration des thèmes 3.x, niveau de mouvement, textes en dur) |
+| R1 — Fondations | v4.0.0 | Partial (livrée ; restent les graphiques Sport et la mesure du défilement sur téléphone) | 28 tests JVM verts (contrastes et daltonisme des 3 palettes × clair/sombre, registre, migration des thèmes 3.x, niveau de mouvement, textes en dur, calculs) ; lint sans nouvel avertissement ; tous les écrans vérifiés sur émulateur en sombre et clair, police 200 %, densités 520 et 600, paysage ; arbre TalkBack (uiautomator) : une phrase par mesure ; CPU au repos sur Aujourd'hui ≈ 0,02 s/min, scanner 57,5 s/min (identique à 3.26.2 : le viseur ne coûte rien) |
 | R2 — Moments | v4.1.0 | Planned | |
 | R3 — Vitrine (README, kit portfolio) | — | Planned | |
 
@@ -30,11 +30,11 @@ Sortir Kalos de son allure « Material par défaut » avec la méthode mise au p
 - **Couleurs des nutriments hors Material** — Done. `NutrientColors` (protéines, glucides, lipides, eau, objectif atteint, au-dessus), identiques dans toutes les palettes.
 - **Palettes en registre + test** — Done. Jade (par défaut), Encre, Océan, en clair et en sombre ; neutres communs. Pastel, Berry, Aurora, Aqua, Sunset retirés (repli sur Jade en gardant la luminosité). `PaletteContrastTest`.
 - **Mouvement** — Done. `Motion` (pesée, entrée, transition), `MotionLevel` FULL / REDUCED / NONE, réglage « Ambiance » (Expressive / Sobre) ; « Supprimer les animations » relu à chaque retour dans l'appli. `Haptics` centralisée, coupée par le réglage « Vibrations ».
-- **Textes dans strings.xml** — Partial. `HardcodedUiTextTest` + liste d'attente `hardcoded-ui-pending.txt` qui doit être vide en 4.0.0.
-- **Composants maison** — Partial. `FitText`, `RisingText`, `CountUp`, `RollingDigits`, `GraduatedScale`, `GraduatedDial`, `Graduation`.
-- **Tous les écrans dans le nouveau langage, clair et sombre** — Planned. Aujourd'hui (ex-Nutrition, corrige la route `home` non déclarée), nutrition, sport, calendrier, bilan, profil, réglages, onboarding.
-- **Graphiques refaits (méthode dataviz)** — Planned. Curseur au doigt et réglable par TalkBack ; retrait de Vico (jamais utilisé).
-- **Accessibilité et performance mesurées** — Planned. TalkBack (arbre uiautomator), police 200 %, écran étroit, paysage ; défilement des listes, minuteur de repos, scanner.
+- **Textes dans strings.xml** — Done. `HardcodedUiTextTest` ; la liste d'attente `hardcoded-ui-pending.txt` est vide.
+- **Composants maison** — Done. `FitText`, `RisingText`, `CountUp`, `RollingDigits`, `GraduatedScale`, `GraduatedDial`, `Graduation`, `MeasureRow`, `MeasureTicket`, `ScreenHeader`, `KalosButton`, `ValueChip`, `KalosFilterChip`, `MeSeriesChart`.
+- **Tous les écrans dans le nouveau langage, clair et sombre** — Done. Aujourd'hui (ex-Nutrition), nutrition, sport, calendrier, bilan, profil, réglages. L'onboarding, jamais branché, est supprimé (et avec lui la route `home` morte).
+- **Graphiques refaits (méthode dataviz)** — Partial. Bilan et poids refaits (`MeSeriesChart` : curseur au doigt, au clavier et TalkBack) ; Vico retiré. Progression d'exercice et volume d'entraînement seulement restylés : à refaire avec la même brique (Medium).
+- **Accessibilité et performance mesurées** — Partial. Accessibilité vérifiée (voir Preuve) ; `FitText` réduit d'après la taille réellement dessinée. Performance : CPU au repos et scanner mesurés ; les mesures de défilement sur émulateur ne sont pas exploitables (écarts de 22 à 80 % d'images en retard d'une série à l'autre sur le même APK) — à refaire sur téléphone. Minuteur de repos : à mesurer avec les moments (R2).
 
 **Critère d'acceptation.** Aucun écran ne « fait Material par défaut » ; Sobre et « Supprimer les animations » coupent tout mouvement décoratif ; tests JVM verts ; aucun nouvel avertissement lint.
 
@@ -53,12 +53,16 @@ Aliment ajouté (l'aiguille avance), objectif du jour atteint (les graduations s
 | Polices embarquées (OFL), variables | hors-ligne ; une graisse = un réglage d'axe |
 | Réglage « Ambiance » + respect de « Supprimer les animations » | le mouvement ne doit jamais coûter la lisibilité ni le confort |
 | Contrôle des textes en dur par test JVM plutôt que tâche Gradle | Kalos n'a qu'un module : pas de `buildSrc` à maintenir, et le détecteur est testé |
+| Écrans migrés en trois familles parallèles, puis relecture indépendante | la relecture n'a trouvé aucune régression de comportement, et quelques défauts d'accessibilité corrigés avant la release |
+| Performance de défilement à mesurer sur téléphone | l'émulateur (rendu logiciel partagé avec les builds) donne des écarts plus grands que l'effet mesuré |
 | Avertissements lint antérieurs figés dans `lint-baseline.xml` | tout nouvel avertissement se voit ; les 90 mises à jour de dépendances restent une décision à part |
 
 ### Hors refonte, relevé au passage
 
-- `CalculateMacroGoalsUseCaseTest.protein is 2g per kg body weight` échoue sur master : le test attend 2 g/kg alors que le calcul utilise un ratio par objectif depuis le lot « macro transparency ». Test à mettre à jour (décision de Gabriel, calcul métier). — Blocked
-- `versionName = "1.0.0"` / `versionCode = 1` ne suivent pas le CHANGELOG. Alignement proposé à la release 4.0.0. — Blocked (accord attendu)
+- `CalculateMacroGoalsUseCaseTest` attendait 2 g/kg de protéines alors que le calcul applique le ratio de chaque objectif depuis la transparence des macros : test aligné sur le calcul (décision de Gabriel), calcul inchangé. — Done v4.0.0
+- `versionName` / `versionCode` alignés sur le CHANGELOG : 4.0.0 / 40000 (décision de Gabriel). — Done v4.0.0
+- Onboarding jamais branché à la navigation : supprimé (décision de Gabriel). — Done v4.0.0
+- Défauts relevés à la relecture, non bloquants (Low) : libellés TalkBack qui gardent l'unité au pluriel pour une quantité de 1 (« 1 grammes ») ; bouton Enregistrer sans indicateur pendant la sauvegarde (aliment perso, objectifs) ; libellés de date « Aujourd'hui / Hier » mis en forme à cinq endroits ; `formatElapsedSince` encore en dur dans le code. — Planned
 
 ---
 

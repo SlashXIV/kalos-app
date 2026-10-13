@@ -1,34 +1,38 @@
 # Features
 
-> Version: 3.15.0
+> Version: 4.0.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
 ---
 
-## Onboarding
+## Visual identity « Graduation » (v4.0.0)
 
 | Feature | Status | Notes |
 |---|---|---|
-| Welcome screen | Done | |
-| Profile setup (age, sex, height, weight, target weight) | Done | |
-| Activity level + goal selection | Done | 5 levels, 5 goals |
-| BMR / TDEE / macro calculation (Mifflin-St Jeor) | Done | Displayed on result screen |
-| Profile and goals persistence on first launch | Done | |
-| Database seeding (foods, exercises, programs) | Done | Runs once when food table is empty |
+| Embedded fonts (OFL, offline) | Done | Big Shoulders Display (titles), Hanken Grotesk (text), Martian Mono (tabular numbers); licences in `assets/licenses` |
+| Palette registry (Jade, Encre, Océan) × brightness (System / Light / Dark) | Done | `Palettes.kt`; contrast + colour-blindness test per palette (`PaletteContrastTest`) |
+| Nutrient colours outside Material | Done | Protein / carbs / fat / water + goal reached / over target, same in every palette |
+| Motion levels FULL / REDUCED / NONE | Done | « Ambiance » setting (Expressive / Sobre) + Android « Remove animations » |
+| Centralised haptics + « Vibrations » setting | Done | `Haptics.tick()` / `confirm()`; used by the moments (v4.1.0) |
+| House components | Done | Graduated dial and scales, measure tickets, screen headers, instrument labels, value chips, filter chips, graduated nav bar, charts with adjustable cursor |
+| All UI text in `strings.xml` (French) | Done | `HardcodedUiTextTest` guards against hardcoded text |
+| Launcher icon and splash | Done | K on a graduated rule |
+| Removal of the unused onboarding screens | Done | Never wired to navigation (dead code); profile is filled from Profile › Edit profile. Database seeding still runs once on first launch |
 
 ---
 
 
 ## Nutrition
 
-### Daily journal
+### Today (« Aujourd’hui », formerly Daily journal)
 
 | Feature | Status | Notes |
 |---|---|---|
 | Date navigation (previous / next / today) | Done | Future dates disabled |
-| Daily summary (calorie ring + macro bars) | Done | Over-target state: amber value + amber ring beyond goal (v3.11.0) |
-| 4 meal sections (Breakfast / Lunch / Dinner / Snacks) | Done | |
+| Daily summary (graduated dial + macro scales) | Done | Goal zone 90–105 % on the dial; over-target in orange with a label; one TalkBack sentence per measure (v4.0.0) |
+| Today's planned workout | Done | Session of the active program for today's weekday, with Start / done state (v4.0.0) |
+| 4 meal sections (Breakfast / Lunch / Dinner / Snacks) | Done | Shown as weighing tickets (v4.0.0) |
 | Add food to a meal | Done | |
 | Delete food from a meal | Done | |
 | Duplicate food consolidation (grouped display) | Done | |
@@ -196,12 +200,12 @@ Statuses: **Done** · **Partial** · **Planned**
 | Feature | Status | Notes |
 |---|---|---|
 | Link to Notifications screen | Done | |
-| Theme selector | Done | Dedicated Appearance screen. Émeraude (system/light/dark) + 8 palettes: Pastel (light); Berry, Aurora, Monochrome, Aqua, Océan, Sunset (dark). Full M3 schemes, colour-swatch rows, persisted, live (v3.20.0 → v3.26.0) |
+| Appearance | Done | Palette (Jade / Encre / Océan), brightness (System / Light / Dark), Ambiance (Expressive / Sobre), Vibrations. 3.x themes migrated automatically (v4.0.0) |
 | Dietary filters (pork, alcohol, vegetarian, vegan) | Done | Persisted in DataStore |
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |
 | Data import / restore | Done | Confirmation dialog (destructive) |
-| Version display | Done | Kalos 3.15.0 |
+| Version display | Done | Read from the installed package (v4.0.0) |
 
 ---
 

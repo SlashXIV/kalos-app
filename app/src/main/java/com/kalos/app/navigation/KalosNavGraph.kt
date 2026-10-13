@@ -2,7 +2,13 @@ package com.kalos.app.navigation
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
@@ -250,5 +256,13 @@ fun KalosNavGraph(
             composable(Screen.Insights.route) { InsightsScreen(navController) }
             composable(Screen.Appearance.route) { AppearanceScreen(navController) }
         }
+        // Bord à bord : un bandeau de la couleur du fond derrière la barre d'état, pour que le
+        // contenu qui défile ne passe pas sous l'heure et les icônes système.
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .windowInsetsTopHeight(WindowInsets.statusBars)
+                .background(MaterialTheme.colorScheme.background),
+        )
     }
 }

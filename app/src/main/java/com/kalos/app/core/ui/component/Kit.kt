@@ -198,7 +198,7 @@ fun TicketLine(
     modifier: Modifier = Modifier,
     trailing: @Composable () -> Unit = {},
 ) {
-    val leader = MaterialTheme.colorScheme.outlineVariant
+    val leader = MaterialTheme.colorScheme.outline
     var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
     Row(modifier.fillMaxWidth().heightIn(min = 40.dp), verticalAlignment = Alignment.CenterVertically) {
       // Une phrase pour TalkBack (« Riz, 200 grammes, 260 kilocalories ») ; l'action à droite reste à part.

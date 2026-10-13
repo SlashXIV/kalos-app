@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Splash icon — même bitmap pré-paddé que le foreground launcher
-    Dans le contexte 240dp splash : artwork à 64% = 154dp, centré dans le cercle
-    Coins du K à ~109dp du centre < 120dp rayon → toujours visibles
-    windowSplashScreenIconBackgroundColor = splash_background (#09090F)
-    → fond cercle = fond splash → invisible → K blanc flotte directement sur le fond app
+    Icône du splash : l'icône sans son fond (le cercle prend splash_background, identique).
+    Dérivé de design/icon/kalos-icon.svg : modifier la source d'abord.
 -->
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/ic_launcher_foreground_padded"
-    android:gravity="fill" />
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:pathData="M58.24,23.8 A30.5,30.5 0 0,1 83.03,63.34" android:strokeColor="@color/icon_macro_protein"
+        android:strokeWidth="2.6" android:strokeLineCap="round" />
+    <path android:pathData="M79.33,70.98 A30.5,30.5 0 0,1 24.17,60.34" android:strokeColor="@color/icon_macro_carbs"
+        android:strokeWidth="2.6" android:strokeLineCap="round" />
+    <path android:pathData="M23.57,51.87 A30.5,30.5 0 0,1 49.76,23.8" android:strokeColor="@color/icon_macro_fat"
+        android:strokeWidth="2.6" android:strokeLineCap="round" />
+    <path android:pathData="M41.5,35 H50 V47.5 L57.5,35 H66.5 L57.8,48.2 L67,64 H57.6 L52.3,54.4 L50,57.8 V64 H41.5 Z" android:fillColor="@color/icon_letter" />
+    <path android:pathData="M39.5,66.8 V72 M43.13,69 V72 M46.75,69 V72 M50.38,69 V72 M54,66.8 V72 M57.63,69 V72 M61.25,69 V72 M64.88,69 V72 M68.5,66.8 V72" android:strokeColor="@color/icon_accent"
+        android:strokeWidth="1.6" android:strokeLineCap="round" />
+</vector>

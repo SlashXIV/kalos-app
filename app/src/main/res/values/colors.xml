@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="splash_background">#0F1113</color>
-    <!--
-        Fond de l'icône et du splash : le neutre sombre de l'appli (#0F1113, refonte 4.0)
-    -->
+    <!-- Icône (source : design/icon/kalos-icon.svg) : fond = neutre sombre de l'appli -->
     <color name="icon_card_color">#0F1113</color>
+    <color name="icon_letter">#E8EAE6</color>
+    <color name="icon_accent">#3CCB98</color>
+    <color name="icon_macro_protein">#8A78EE</color>
+    <color name="icon_macro_carbs">#BA841C</color>
+    <color name="icon_macro_fat">#D45A80</color>
 </resources>

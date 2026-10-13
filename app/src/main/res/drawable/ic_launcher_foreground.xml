@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Foreground adaptive icon — bitmap pré-paddé à 18% de chaque côté
-    Artwork à 64% du canvas (108dp) = 69dp → dans la safe zone 72dp (3dp de marge)
-    PNG simple (pas de layer-list) → chargement atomique, pas de flicker sur MIUI
+    Premier plan de l'icône adaptative : K et règle graduée.
+    Dérivé de design/icon/kalos-icon.svg : modifier la source d'abord.
 -->
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/ic_launcher_foreground_padded"
-    android:gravity="fill" />
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:pathData="M41.5,35 H50 V47.5 L57.5,35 H66.5 L57.8,48.2 L67,64 H57.6 L52.3,54.4 L50,57.8 V64 H41.5 Z" android:fillColor="@color/icon_letter" />
+    <path android:pathData="M39.5,66.8 V72 M43.13,69 V72 M46.75,69 V72 M50.38,69 V72 M54,66.8 V72 M57.63,69 V72 M61.25,69 V72 M64.88,69 V72 M68.5,66.8 V72" android:strokeColor="@color/icon_accent"
+        android:strokeWidth="1.6" android:strokeLineCap="round" />
+</vector>

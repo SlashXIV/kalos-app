@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Android 12+ (API 31+) splash screen
-    windowSplashScreenIconBackgroundColor = splash_background (#09090F)
+    windowSplashScreenIconBackgroundColor = splash_background (#0F1113)
     → fond du cercle = fond général du splash → le cercle est INVISIBLE
     → le K blanc apparaît directement sur le fond sombre, rendu épuré et premium
     → plus de carré/cercle gris technique visible au lancement

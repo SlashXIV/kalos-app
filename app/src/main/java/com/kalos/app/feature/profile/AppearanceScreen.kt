@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -25,7 +26,6 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -41,6 +41,8 @@ import androidx.navigation.NavController
 import com.kalos.app.R
 import com.kalos.app.core.ui.component.FitText
 import com.kalos.app.core.ui.component.Graduation
+import com.kalos.app.core.ui.component.ScreenHeader
+import com.kalos.app.core.ui.component.SectionLabel
 import com.kalos.app.core.ui.motion.rememberHaptics
 import com.kalos.app.core.ui.theme.Brightness
 import com.kalos.app.core.ui.theme.KalosShape
@@ -60,18 +62,7 @@ fun AppearanceScreen(
     val dark = settings.brightness.isDark(isSystemInDarkTheme())
     val haptics = rememberHaptics()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.appearance_title)) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
-                    }
-                },
-            )
-        },
-    ) { padding ->
+    Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -80,6 +71,15 @@ fun AppearanceScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            ScreenHeader(
+                title = stringResource(R.string.appearance_title),
+                small = true,
+                navigation = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                    }
+                },
+            )
             SectionLabel(stringResource(R.string.appearance_palette))
             Palettes.all.forEach { palette ->
                 val selected = palette.id == settings.paletteId
@@ -101,7 +101,7 @@ fun AppearanceScreen(
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
                     Text(stringResource(palette.nameRes), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                    Graduation(color = accent, modifier = Modifier.weight(1f).heightIn(min = 14.dp))
+                    Graduation(color = accent, modifier = Modifier.weight(1f).height(14.dp))
                     RadioButton(selected = selected, onClick = null)
                 }
             }
@@ -155,16 +155,6 @@ fun AppearanceScreen(
             }
         }
     }
-}
-
-@Composable
-private fun SectionLabel(text: String) {
-    Text(
-        text.uppercase(),
-        style = KalosTheme.type.label,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(top = 8.dp).semantics { heading() },
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

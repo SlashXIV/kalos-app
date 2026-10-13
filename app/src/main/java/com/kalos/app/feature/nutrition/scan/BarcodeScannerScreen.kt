@@ -11,6 +11,7 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -18,7 +19,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -29,6 +34,10 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
+import com.kalos.app.R
+import com.kalos.app.core.ui.component.KalosButton
+import com.kalos.app.core.ui.component.ScreenHeader
+import com.kalos.app.core.ui.theme.KalosShape
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -37,7 +46,6 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 const val SCANNED_BARCODE_KEY = "scanned_barcode"
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BarcodeScannerScreen(navController: NavController) {
     val context = LocalContext.current
@@ -69,56 +77,106 @@ fun BarcodeScannerScreen(navController: NavController) {
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Scanner un code-barres") },
-                navigationIcon = {
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
+        Column(Modifier.fillMaxSize().padding(padding)) {
+            ScreenHeader(
+                title = stringResource(R.string.food_scan_action),
+                small = true,
+                modifier = Modifier.padding(horizontal = 16.dp),
+                navigation = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
             )
-        },
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (hasPermission) {
-                CameraPreview(onDecoded = onDecoded, modifier = Modifier.fillMaxSize())
-                Surface(
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
-                    shape = MaterialTheme.shapes.small,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(24.dp),
-                ) {
-                    Text(
-                        "Cadrez le code-barres du produit",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    )
-                }
-            } else {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.padding(32.dp),
-                ) {
-                    Text(
-                        "L'accès à la caméra est nécessaire pour scanner un code-barres.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Button(onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }) {
-                        Text("Autoriser la caméra")
+            Box(
+                modifier = Modifier.fillMaxWidth().weight(1f).padding(top = 8.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (hasPermission) {
+                    CameraPreview(onDecoded = onDecoded, modifier = Modifier.fillMaxSize())
+                    Viewfinder(Modifier.fillMaxSize())
+                    Surface(
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
+                        shape = KalosShape.control,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(24.dp),
+                    ) {
+                        Text(
+                            stringResource(R.string.food_scan_hint),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        )
+                    }
+                } else {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.padding(32.dp),
+                    ) {
+                        Text(
+                            stringResource(R.string.food_scan_permission),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        KalosButton(
+                            stringResource(R.string.food_scan_allow),
+                            onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
+                        )
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * Viseur gradué, statique (rien ne bouge pendant l'analyse) : voile autour de la fenêtre,
+ * équerres aux coins, graduations sur les bords haut et bas comme une règle. Purement décoratif.
+ */
+@Composable
+private fun Viewfinder(modifier: Modifier = Modifier) {
+    // Sur l'image caméra, blanc et voile noir restent lisibles quel que soit le thème.
+    val ink = Color.White
+    val faint = ink.copy(alpha = 0.7f)
+    val veil = Color.Black.copy(alpha = 0.45f)
+    Canvas(modifier) {
+        val w = size.width * 0.8f
+        val h = (w * 0.45f).coerceAtMost(size.height * 0.5f)
+        val left = (size.width - w) / 2f
+        val top = (size.height - h) / 2f
+        val right = left + w
+        val bottom = top + h
+        // Voile : quatre bandes autour de la fenêtre.
+        drawRect(veil, Offset.Zero, Size(size.width, top))
+        drawRect(veil, Offset(0f, bottom), Size(size.width, size.height - bottom))
+        drawRect(veil, Offset(0f, top), Size(left, h))
+        drawRect(veil, Offset(right, top), Size(size.width - right, h))
+
+        // Équerres aux quatre coins.
+        val stroke = 2.dp.toPx()
+        val arm = 22.dp.toPx()
+        for ((x, dx) in listOf(left to arm, right to -arm)) {
+            for ((y, dy) in listOf(top to arm, bottom to -arm)) {
+                drawLine(ink, Offset(x, y), Offset(x + dx, y), stroke)
+                drawLine(ink, Offset(x, y), Offset(x, y + dy), stroke)
+            }
+        }
+
+        // Graduations entre les équerres, longues tous les 5 pas.
+        val tick = 1.dp.toPx()
+        val step = 6.dp.toPx()
+        val start = left + arm + step
+        val count = ((w - 2 * (arm + step)) / step).toInt()
+        val long = 9.dp.toPx()
+        val short = 5.dp.toPx()
+        for (i in 0..count) {
+            val x = start + i * step
+            val len = if (i % 5 == 0) long else short
+            drawLine(faint, Offset(x, top), Offset(x, top + len), tick)
+            drawLine(faint, Offset(x, bottom), Offset(x, bottom - len), tick)
         }
     }
 }

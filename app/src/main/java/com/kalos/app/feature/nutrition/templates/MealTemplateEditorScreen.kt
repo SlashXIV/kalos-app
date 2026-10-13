@@ -6,13 +6,16 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -21,10 +24,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.kalos.app.R
 import com.kalos.app.core.domain.model.Food
 import com.kalos.app.core.domain.repository.FoodRepository
 import com.kalos.app.core.domain.repository.MealTemplateRepository
+import com.kalos.app.core.ui.component.KalosButton
 import com.kalos.app.core.ui.component.KalosNumberField
+import com.kalos.app.core.ui.component.ScreenHeader
+import com.kalos.app.core.ui.theme.KalosShape
+import com.kalos.app.core.ui.theme.KalosTheme
+import com.kalos.app.core.ui.util.formatGroupedInt
 import com.kalos.app.feature.nutrition.search.PICKED_FOOD_ID_KEY
 import com.kalos.app.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -121,7 +130,6 @@ class MealTemplateEditorViewModel @Inject constructor(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MealTemplateEditorScreen(
     navController: NavController,
@@ -146,52 +154,51 @@ fun MealTemplateEditorScreen(
             }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(if (state.isNew) "Nouveau repas favori" else "Modifier le favori") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
-                    }
-                },
-                actions = {
-                    TextButton(onClick = viewModel::save, enabled = state.canSave) {
-                        Text("Enregistrer")
-                    }
-                },
-            )
-        },
-    ) { padding ->
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            item(key = "header") {
+                ScreenHeader(
+                    title = stringResource(if (state.isNew) R.string.food_template_new_title else R.string.food_template_edit_title),
+                    small = true,
+                    navigation = {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                        }
+                    },
+                )
+            }
+
             item(key = "name") {
                 OutlinedTextField(
                     value = state.name,
                     onValueChange = viewModel::onNameChange,
-                    label = { Text("Nom du repas favori") },
+                    label = { Text(stringResource(R.string.favorite_name)) },
                     singleLine = true,
+                    shape = KalosShape.control,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
 
             item(key = "total") {
                 Text(
-                    "${state.totalKcal.roundToInt()} kcal · ${state.items.size} aliment${if (state.items.size > 1) "s" else ""}",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
+                    pluralStringResource(
+                        R.plurals.food_template_total, state.items.size,
+                        formatGroupedInt(state.totalKcal.roundToInt()), state.items.size,
+                    ),
+                    style = KalosTheme.type.metric,
                 )
             }
 
             if (state.items.isEmpty()) {
                 item(key = "empty") {
                     Text(
-                        "Aucun aliment. Ajoutez-en avec le bouton ci-dessous.",
+                        stringResource(R.string.food_template_empty_items),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -203,18 +210,24 @@ fun MealTemplateEditorScreen(
                         onAmountChange = { viewModel.onAmountChange(index, it) },
                         onRemove = { viewModel.removeItem(index) },
                     )
-                    HorizontalDivider()
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 }
             }
 
-            item(key = "add") {
-                OutlinedButton(
-                    onClick = { navController.navigate(Screen.FoodSearch.pick()) },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text("Ajouter un aliment")
+            item(key = "actions") {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    KalosButton(
+                        stringResource(R.string.nutrition_add_food),
+                        onClick = { navController.navigate(Screen.FoodSearch.pick()) },
+                        modifier = Modifier.fillMaxWidth(),
+                        ghost = true,
+                    )
+                    KalosButton(
+                        stringResource(R.string.action_save),
+                        onClick = viewModel::save,
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = state.canSave,
+                    )
                 }
             }
         }
@@ -229,6 +242,9 @@ private fun ItemRow(
 ) {
     // Local text buffer so partial edits (empty, trailing separator) don't fight the model.
     var text by remember(item.food.id) { mutableStateOf(item.amountG.roundToInt().toString()) }
+    val kcal = formatGroupedInt(item.kcal.roundToInt())
+    val spoken = stringResource(R.string.food_item_kcal_spoken, item.food.name, kcal)
+    val amountDesc = stringResource(R.string.food_item_amount_desc, item.food.name)
 
     Row(
         modifier = Modifier
@@ -237,14 +253,11 @@ private fun ItemRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.weight(1f).clearAndSetSemantics { contentDescription = spoken }) {
+            Text(item.food.name, style = MaterialTheme.typography.bodyLarge)
             Text(
-                item.food.name,
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
-            )
-            Text(
-                "${item.kcal.roundToInt()} kcal",
-                style = MaterialTheme.typography.labelSmall,
+                stringResource(R.string.food_kcal_value, kcal),
+                style = KalosTheme.type.metricSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -254,15 +267,15 @@ private fun ItemRow(
                 text = it
                 it.replace(',', '.').toFloatOrNull()?.let(onAmountChange)
             },
-            suffix = { Text("g") },
+            suffix = { Text(stringResource(R.string.unit_g)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            modifier = Modifier.width(110.dp),
+            modifier = Modifier.width(110.dp).semantics { contentDescription = amountDesc },
         )
         IconButton(onClick = onRemove) {
             Icon(
                 Icons.Filled.Close,
-                contentDescription = "Retirer",
-                tint = MaterialTheme.colorScheme.error,
+                contentDescription = stringResource(R.string.meal_item_remove, item.food.name),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

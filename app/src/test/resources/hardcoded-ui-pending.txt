@@ -2,17 +2,9 @@
 com/kalos/app/core/notification/NotificationHelper.kt
 com/kalos/app/core/ui/component/EditWorkoutSetDialog.kt
 com/kalos/app/core/ui/component/ExerciseListItem.kt
-com/kalos/app/core/ui/component/KalosSearchBar.kt
 com/kalos/app/core/ui/component/WorkoutCard.kt
 com/kalos/app/feature/calendar/CalendarScreen.kt
 com/kalos/app/feature/insights/InsightsScreen.kt
-com/kalos/app/feature/nutrition/custom/CustomFoodScreen.kt
-com/kalos/app/feature/nutrition/history/NutritionHistoryScreen.kt
-com/kalos/app/feature/nutrition/myfoods/MyFoodsScreen.kt
-com/kalos/app/feature/nutrition/scan/BarcodeScannerScreen.kt
-com/kalos/app/feature/nutrition/search/FoodSearchScreen.kt
-com/kalos/app/feature/nutrition/templates/MealTemplateEditorScreen.kt
-com/kalos/app/feature/nutrition/templates/MealTemplatesScreen.kt
 com/kalos/app/feature/onboarding/GoalSetupScreen.kt
 com/kalos/app/feature/onboarding/OnboardingResultScreen.kt
 com/kalos/app/feature/onboarding/ProfileSetupScreen.kt

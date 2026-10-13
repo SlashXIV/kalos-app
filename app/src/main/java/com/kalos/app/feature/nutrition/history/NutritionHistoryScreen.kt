@@ -1,6 +1,5 @@
 package com.kalos.app.feature.nutrition.history
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,21 +11,31 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.kalos.app.R
 import com.kalos.app.core.database.dao.DailySummaryRow
 import com.kalos.app.core.ui.component.EmptyState
+import com.kalos.app.core.ui.component.InstrumentLabel
+import com.kalos.app.core.ui.component.KalosButton
+import com.kalos.app.core.ui.component.KalosCard
+import com.kalos.app.core.ui.component.ScreenHeader
+import com.kalos.app.core.ui.component.Swatch
+import com.kalos.app.core.ui.theme.KalosTheme
+import com.kalos.app.core.ui.util.formatGroupedInt
 import com.kalos.app.navigation.Screen
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NutritionHistoryScreen(
     navController: NavController,
@@ -38,60 +47,96 @@ fun NutritionHistoryScreen(
     val scope = rememberCoroutineScope()
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Historique nutritionnel") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
-                    }
-                },
-                actions = {
+        containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+    ) { padding ->
+        val copied = stringResource(R.string.food_history_copied)
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(padding),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            item(key = "header") {
+                ScreenHeader(
+                    title = stringResource(R.string.food_history_title),
+                    small = true,
+                    navigation = {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                        }
+                    },
+                ) {
                     if (state.summaries.isNotEmpty()) {
                         IconButton(onClick = {
                             clipboardManager.setText(AnnotatedString(buildNutritionTsv(state.summaries)))
-                            scope.launch { snackbarHostState.showSnackbar("Copié") }
+                            scope.launch { snackbarHostState.showSnackbar(copied) }
                         }) {
-                            Icon(Icons.Filled.ContentCopy, contentDescription = "Copier l'historique")
+                            Icon(Icons.Filled.ContentCopy, contentDescription = stringResource(R.string.food_history_copy))
                         }
                     }
-                },
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { padding ->
-        if (state.summaries.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                EmptyState(
-                    title = "Aucun historique",
-                    subtitle = "Commencez à logger vos repas pour voir votre historique",
-                )
+                }
             }
-        } else {
-            LazyColumn(
-                contentPadding = PaddingValues(
-                    start = 16.dp, end = 16.dp,
-                    top = padding.calculateTopPadding() + 8.dp,
-                    bottom = padding.calculateBottomPadding() + 16.dp,
-                ),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(state.summaries, key = { it.date }) { summary ->
-                    DaySummaryCard(
-                        summary = summary,
-                        onClick = { navController.navigate(Screen.NutritionDay.route(summary.date)) },
+            if (state.summaries.isEmpty()) {
+                item(key = "empty") {
+                    EmptyState(
+                        title = stringResource(R.string.food_history_empty_title),
+                        subtitle = stringResource(R.string.food_history_empty_subtitle),
                     )
                 }
-                if (state.canLoadMore) {
-                    item(key = "load_more") {
-                        Box(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            OutlinedButton(onClick = viewModel::loadMore) {
-                                Text("Charger plus")
-                            }
-                        }
+            }
+            items(state.summaries, key = { it.date }) { summary ->
+                DaySummaryCard(
+                    summary = summary,
+                    onClick = { navController.navigate(Screen.NutritionDay.route(summary.date)) },
+                )
+            }
+            if (state.canLoadMore) {
+                item(key = "load_more") {
+                    KalosButton(
+                        stringResource(R.string.food_history_load_more),
+                        onClick = viewModel::loadMore,
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        ghost = true,
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Un jour : date, kcal en grand, grammes des macros avec leur pastille. Une phrase TalkBack. */
+@Composable
+private fun DaySummaryCard(summary: DailySummaryRow, onClick: () -> Unit) {
+    val date = formatHistoryDate(summary.date)
+    val kcal = formatGroupedInt((summary.totalKcal ?: 0f).roundToInt())
+    val p = formatGroupedInt((summary.totalProtein ?: 0f).roundToInt())
+    val c = formatGroupedInt((summary.totalCarbs ?: 0f).roundToInt())
+    val f = formatGroupedInt((summary.totalFat ?: 0f).roundToInt())
+    val spoken = stringResource(R.string.food_history_day_spoken, date, kcal, p, c, f)
+    val nutrients = KalosTheme.nutrients
+    KalosCard(onClick = onClick) {
+        Column(
+            Modifier.clearAndSetSemantics { contentDescription = spoken },
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            InstrumentLabel(date)
+            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(kcal, style = KalosTheme.type.metricLarge)
+                Text(
+                    stringResource(R.string.kcal_label),
+                    style = KalosTheme.type.metricSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                listOf(
+                    R.string.food_macro_p to p to nutrients.protein,
+                    R.string.food_macro_c to c to nutrients.carbs,
+                    R.string.food_macro_f to f to nutrients.fat,
+                ).forEach { (labelValue, color) ->
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                        Swatch(color)
+                        Text(stringResource(labelValue.first, labelValue.second), style = KalosTheme.type.metricSmall)
                     }
                 }
             }
@@ -99,33 +144,7 @@ fun NutritionHistoryScreen(
     }
 }
 
-@Composable
-private fun DaySummaryCard(summary: DailySummaryRow, onClick: () -> Unit) {
-    ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                formatHistoryDate(summary.date),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(4.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("${(summary.totalKcal ?: 0f).roundToInt()} kcal", style = MaterialTheme.typography.titleMedium)
-            }
-            Spacer(Modifier.height(4.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text("P: ${(summary.totalProtein ?: 0f).roundToInt()}g", style = MaterialTheme.typography.bodySmall)
-                Text("G: ${(summary.totalCarbs ?: 0f).roundToInt()}g", style = MaterialTheme.typography.bodySmall)
-                Text("L: ${(summary.totalFat ?: 0f).roundToInt()}g", style = MaterialTheme.typography.bodySmall)
-            }
-        }
-    }
-}
-
+// texte-technique : export TSV pour le presse-papiers, en-têtes de colonnes en texte brut.
 private fun buildNutritionTsv(summaries: List<DailySummaryRow>): String {
     val recent = summaries.take(14)
     val sb = StringBuilder()
@@ -154,12 +173,13 @@ private fun buildNutritionTsv(summaries: List<DailySummaryRow>): String {
     return sb.toString()
 }
 
+@Composable
 private fun formatHistoryDate(dateStr: String): String {
     val d = LocalDate.parse(dateStr)
     val today = LocalDate.now()
     return when (d) {
-        today -> "Aujourd'hui"
-        today.minusDays(1) -> "Hier"
+        today -> stringResource(R.string.today_title)
+        today.minusDays(1) -> stringResource(R.string.yesterday)
         else -> {
             val pattern = if (d.year == today.year) "EEEE d MMMM" else "EEEE d MMMM yyyy"
             d.format(DateTimeFormatter.ofPattern(pattern, Locale.FRENCH))

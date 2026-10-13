@@ -2,7 +2,6 @@ package com.kalos.app.core.ui.component
 
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,6 +12,8 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import com.kalos.app.core.ui.theme.KalosShape
+import com.kalos.app.core.ui.theme.KalosTheme
 
 /**
  * Outlined text field for entering a short value that selects its whole content on focus,
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.input.TextFieldValue
  *
  * String-based API (callers keep their own `String` state and any filtering in [onValueChange]);
  * the select-all behaviour is handled internally via [TextFieldValue].
+ * Value in the fixed-width metric face so digits don't shift while typing.
  */
 @Composable
 fun KalosNumberField(
@@ -54,6 +56,7 @@ fun KalosNumberField(
                 tfv = tfv.copy(selection = TextRange(0, tfv.text.length))
             }
         },
+        textStyle = KalosTheme.type.metric,
         label = label,
         placeholder = placeholder,
         prefix = prefix,
@@ -62,5 +65,6 @@ fun KalosNumberField(
         singleLine = singleLine,
         isError = isError,
         enabled = enabled,
+        shape = KalosShape.control,
     )
 }

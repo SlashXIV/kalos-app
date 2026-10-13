@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Recherche d’aliment -->
+    <string name="food_search_title_add">Ajouter un aliment</string>
+    <string name="food_search_title_pick">Choisir un aliment</string>
+    <string name="food_scan_action">Scanner un code-barres</string>
+    <string name="food_my_foods">Mes aliments</string>
+    <string name="food_create_action">Créer un aliment</string>
+    <string name="food_search_placeholder">Rechercher un aliment…</string>
+    <string name="food_search_placeholder_default">Rechercher…</string>
+    <string name="food_search_clear">Effacer la recherche</string>
+    <string name="food_resolving_title">Recherche du produit</string>
+    <string name="food_resolving_body">Interrogation d’OpenFoodFacts…</string>
+    <string name="food_filter_custom">Perso</string>
+    <string name="food_volume_eating">Volume eating</string>
+    <string name="food_section_recent">Récents</string>
+    <string name="food_section_favorites">Favoris</string>
+    <string name="food_search_empty_title">Recherchez un aliment</string>
+    <string name="food_search_empty_subtitle">Tapez le nom d’un aliment pour commencer</string>
+    <string name="food_no_result">Aucun résultat</string>
+    <string name="food_no_result_subtitle">Essayez un autre terme ou créez un aliment personnalisé</string>
+
+    <!-- Ligne d’aliment -->
+    <string name="food_custom_badge">Perso</string>
+    <string name="food_custom_spoken">aliment personnalisé</string>
+    <string name="food_per100_line">%1$s kcal · P %2$s g · G %3$s g · L %4$s g / 100 g</string>
+    <string name="food_item_spoken">%1$s kilocalories, protéines %2$s grammes, glucides %3$s grammes, lipides %4$s grammes, pour 100 grammes</string>
+
+    <!-- Feuille de quantité -->
+    <string name="food_satiety_line">%1$s · %2$s kcal/100 g</string>
+    <string name="food_unit_grams_mode">Grammes</string>
+    <string name="food_serving_count">Nombre de %1$s</string>
+    <string name="food_serving_suffix">× %1$s g</string>
+    <string name="food_quantity">Quantité</string>
+    <string name="food_portion_label">Cette portion</string>
+    <string name="food_stat_spoken">%1$s, %2$s %3$s</string>
+    <string name="food_after_add">Après ajout</string>
+    <string name="food_add">Ajouter</string>
+
+    <!-- Scanner -->
+    <string name="food_scan_hint">Cadrez le code-barres du produit</string>
+    <string name="food_scan_permission">L’accès à la caméra est nécessaire pour scanner un code-barres.</string>
+    <string name="food_scan_allow">Autoriser la caméra</string>
+
+    <!-- Aliment personnalisé -->
+    <string name="food_custom_title_new">Nouvel aliment</string>
+    <string name="food_custom_title_edit">Modifier l’aliment</string>
+    <string name="food_delete">Supprimer</string>
+    <string name="food_delete_title">Supprimer l’aliment</string>
+    <string name="food_delete_body">Cet aliment sera supprimé. S’il a déjà été utilisé dans votre historique, il sera archivé et n’apparaîtra plus dans la recherche.</string>
+    <string name="food_delete_named_body">« %1$s » sera supprimé. S’il a été utilisé dans votre historique, il sera archivé et n’apparaîtra plus dans la recherche.</string>
+    <string name="food_duplicate_title">Doublon détecté</string>
+    <string name="food_duplicate_body">Un aliment portant un nom similaire existe déjà : « %1$s ».\n\nVoulez-vous quand même créer un nouvel aliment ?</string>
+    <string name="food_duplicate_confirm">Créer quand même</string>
+    <string name="food_section_general">Informations générales</string>
+    <string name="food_field_name">Nom *</string>
+    <string name="food_field_brand">Marque (optionnel)</string>
+    <string name="food_section_values">Valeurs nutritionnelles pour 100 g / 100 ml</string>
+    <string name="food_field_kcal">Calories (kcal) *</string>
+    <string name="food_field_protein">Protéines (g) *</string>
+    <string name="food_field_carbs">Glucides (g) *</string>
+    <string name="food_field_fat">Lipides (g) *</string>
+    <string name="food_field_fiber">Fibres (g)</string>
+    <string name="food_section_serving">Portion de référence</string>
+    <string name="food_field_unit">Unité</string>
+    <string name="food_section_diet">Compatibilité alimentaire</string>
+    <string name="food_diet_hint">Optionnel : permet au filtre de préférences de classer correctement cet aliment.</string>
+    <string name="food_diet_pork">Contient du porc</string>
+    <string name="food_diet_alcohol">Contient de l’alcool</string>
+    <string name="food_diet_vegetarian">Convient aux végétariens</string>
+    <string name="food_diet_vegan">Convient aux végans</string>
+
+    <!-- Mes aliments -->
+    <string name="food_my_search_placeholder">Rechercher dans mes aliments…</string>
+    <string name="food_my_empty_title">Aucun aliment personnalisé</string>
+    <string name="food_my_empty_subtitle">Créez votre premier aliment avec le bouton +</string>
+    <string name="food_try_other">Essayez un autre terme</string>
+    <string name="food_edit_named">Modifier %1$s</string>
+    <string name="food_delete_named">Supprimer %1$s</string>
+
+    <!-- Repas favoris -->
+    <string name="food_templates_title">Repas favoris</string>
+    <string name="food_template_create">Créer un repas favori</string>
+    <string name="food_template_delete_title">Supprimer le repas favori</string>
+    <string name="food_template_delete_body">« %1$s » sera supprimé. Les repas déjà enregistrés dans votre journal ne sont pas affectés.</string>
+    <string name="food_templates_empty_title">Aucun repas favori</string>
+    <string name="food_templates_empty_subtitle">Créez-en un avec le bouton +, ou depuis un repas déjà rempli via le menu (⋮) → « Enregistrer comme favori ».</string>
+    <string name="food_template_edit_action">modifier</string>
+    <string name="food_template_new_title">Nouveau repas favori</string>
+    <string name="food_template_edit_title">Modifier le favori</string>
+    <plurals name="food_template_total">
+        <item quantity="one">%1$s kcal · %2$d aliment</item>
+        <item quantity="other">%1$s kcal · %2$d aliments</item>
+    </plurals>
+    <string name="food_template_empty_items">Aucun aliment. Ajoutez-en avec le bouton ci-dessous.</string>
+    <string name="food_item_kcal_spoken">%1$s, %2$s kilocalories</string>
+    <string name="food_item_amount_desc">Quantité de %1$s, en grammes</string>
+    <string name="food_kcal_value">%1$s kcal</string>
+
+    <!-- Historique -->
+    <string name="food_history_title">Historique nutritionnel</string>
+    <string name="food_history_copy">Copier l’historique</string>
+    <string name="food_history_copied">Historique copié</string>
+    <string name="food_history_empty_title">Aucun historique</string>
+    <string name="food_history_empty_subtitle">Enregistrez vos repas pour voir votre historique</string>
+    <string name="food_history_load_more">Charger plus</string>
+    <string name="food_history_day_spoken">%1$s, %2$s kilocalories, protéines %3$s grammes, glucides %4$s grammes, lipides %5$s grammes</string>
+    <string name="food_macro_p">P %1$s g</string>
+    <string name="food_macro_c">G %1$s g</string>
+    <string name="food_macro_f">L %1$s g</string>
+</resources>

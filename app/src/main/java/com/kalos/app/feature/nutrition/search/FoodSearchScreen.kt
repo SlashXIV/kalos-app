@@ -1,6 +1,5 @@
 package com.kalos.app.feature.nutrition.search
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -15,21 +14,35 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.kalos.app.R
 import com.kalos.app.core.domain.model.Food
+import com.kalos.app.core.ui.component.Dot
 import com.kalos.app.core.ui.component.EmptyState
 import com.kalos.app.core.ui.component.FoodListItem
+import com.kalos.app.core.ui.component.InstrumentLabel
+import com.kalos.app.core.ui.component.KalosButton
 import com.kalos.app.core.ui.component.KalosNumberField
 import com.kalos.app.core.ui.component.KalosSearchBar
+import com.kalos.app.core.ui.component.MeasureRow
+import com.kalos.app.core.ui.component.ScreenHeader
+import com.kalos.app.core.ui.component.SectionLabel
+import com.kalos.app.core.ui.component.Swatch
+import com.kalos.app.core.ui.theme.KalosShape
+import com.kalos.app.core.ui.theme.KalosTheme
 import com.kalos.app.core.ui.util.color
 import com.kalos.app.core.ui.util.foodSatietyLevel
+import com.kalos.app.core.ui.util.formatGroupedInt
 import com.kalos.app.feature.nutrition.scan.SCANNED_BARCODE_KEY
 import com.kalos.app.navigation.Screen
 import kotlin.math.roundToInt
@@ -99,56 +112,54 @@ fun FoodSearchScreen(
         AlertDialog(
             onDismissRequest = {},
             confirmButton = {},
-            title = { Text("Recherche du produit") },
+            title = { Text(stringResource(R.string.food_resolving_title)) },
             text = {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                    Text("Interrogation d'OpenFoodFacts…")
+                    Text(stringResource(R.string.food_resolving_body))
                 }
             },
         )
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(if (pickForResult) "Choisir un aliment" else "Ajouter un aliment") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { navController.navigate(Screen.BarcodeScanner.route) }) {
-                        Icon(Icons.Filled.QrCodeScanner, contentDescription = "Scanner un code-barres")
-                    }
-                    IconButton(onClick = { navController.navigate(Screen.MyFoods.route) }) {
-                        Icon(Icons.Filled.RestaurantMenu, contentDescription = "Mes aliments")
-                    }
-                    TextButton(onClick = { navController.navigate(Screen.CustomFood.create()) }) {
-                        Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("Créer")
-                    }
-                }
-            )
-        },
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
+        // En-tête et recherche fixes au-dessus des résultats : le champ garde le focus quand la liste défile.
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = 16.dp),
         ) {
+            ScreenHeader(
+                title = stringResource(if (pickForResult) R.string.food_search_title_pick else R.string.food_search_title_add),
+                small = true,
+                navigation = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                    }
+                },
+            ) {
+                IconButton(onClick = { navController.navigate(Screen.BarcodeScanner.route) }) {
+                    Icon(Icons.Filled.QrCodeScanner, contentDescription = stringResource(R.string.food_scan_action))
+                }
+                IconButton(onClick = { navController.navigate(Screen.MyFoods.route) }) {
+                    Icon(Icons.Filled.RestaurantMenu, contentDescription = stringResource(R.string.food_my_foods))
+                }
+                IconButton(onClick = { navController.navigate(Screen.CustomFood.create()) }) {
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.food_create_action))
+                }
+            }
             Spacer(Modifier.height(8.dp))
             KalosSearchBar(
                 query = state.query,
                 onQueryChange = viewModel::onQueryChange,
-                placeholder = "Rechercher un aliment…",
+                placeholder = stringResource(R.string.food_search_placeholder),
             )
             if (state.categories.isNotEmpty()) {
                 Spacer(Modifier.height(6.dp))
@@ -160,43 +171,38 @@ fun FoodSearchScreen(
                     onCustomToggle = viewModel::onCustomToggle,
                 )
             }
-            Spacer(Modifier.height(8.dp))
 
             val hasActiveFilter = state.categoryFilter.isNotEmpty() || state.onlyCustom
             // "Volume eating" sort — only where results are shown (search or filter active).
             if (state.query.isNotEmpty() || hasActiveFilter) {
-                FilterChip(
+                KalosFilterChip(
                     selected = state.sortVolumeEating,
                     onClick = viewModel::onToggleVolumeSort,
-                    label = { Text("Volume eating", style = MaterialTheme.typography.labelSmall) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    ),
+                    label = stringResource(R.string.food_volume_eating),
                 )
-                Spacer(Modifier.height(8.dp))
             }
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+            Spacer(Modifier.height(4.dp))
+            LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
                 if (state.query.isEmpty() && !hasActiveFilter) {
                     if (state.recent.isNotEmpty()) {
-                        item { SectionHeader("Récents") }
+                        item { SectionHeader(stringResource(R.string.food_section_recent)) }
                         items(state.recent) { food ->
                             FoodListItem(food = food, onClick = { onFoodClick(food) })
-                            HorizontalDivider()
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         }
                     }
                     if (state.favorites.isNotEmpty()) {
-                        item { SectionHeader("Favoris") }
+                        item { SectionHeader(stringResource(R.string.food_section_favorites)) }
                         items(state.favorites) { food ->
                             FoodListItem(food = food, onClick = { onFoodClick(food) })
-                            HorizontalDivider()
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         }
                     }
                     if (state.recent.isEmpty() && state.favorites.isEmpty()) {
                         item {
                             EmptyState(
-                                title = "Recherchez un aliment",
-                                subtitle = "Tapez le nom d'un aliment pour commencer",
+                                title = stringResource(R.string.food_search_empty_title),
+                                subtitle = stringResource(R.string.food_search_empty_subtitle),
                             )
                         }
                     }
@@ -206,8 +212,8 @@ fun FoodSearchScreen(
                     } else if (state.results.isEmpty()) {
                         item {
                             EmptyState(
-                                title = "Aucun résultat",
-                                subtitle = "Essayez un autre terme ou créez un aliment personnalisé",
+                                title = stringResource(R.string.food_no_result),
+                                subtitle = stringResource(R.string.food_no_result_subtitle),
                             )
                         }
                     } else {
@@ -218,7 +224,7 @@ fun FoodSearchScreen(
                         }
                         items(displayed) { food ->
                             FoodListItem(food = food, onClick = { onFoodClick(food) })
-                            HorizontalDivider()
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         }
                     }
                 }
@@ -234,6 +240,7 @@ fun FoodSearchScreen(
         ModalBottomSheet(
             onDismissRequest = viewModel::dismissSheet,
             sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
         ) {
             FoodDetailSheet(
                 food = state.selectedFood!!,
@@ -260,12 +267,7 @@ fun FoodSearchScreen(
 
 @Composable
 private fun SectionHeader(title: String) {
-    Text(
-        title,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(vertical = 8.dp),
-    )
+    SectionLabel(title, Modifier.padding(top = 12.dp, bottom = 4.dp))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -301,16 +303,23 @@ private fun FoodDetailSheet(
     val protein = food.proteinForAmount(amountFloat)
     val carbs = food.carbsForAmount(amountFloat)
     val fat = food.fatForAmount(amountFloat)
+    val nutrients = KalosTheme.nutrients
+    val g = stringResource(R.string.unit_g)
+    val grams = stringResource(R.string.unit_grams_spoken)
 
     Column(
         modifier = Modifier
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = 20.dp)
             .padding(bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(food.name, style = MaterialTheme.typography.headlineSmall)
-        if (food.brand.isNotEmpty()) {
-            Text(food.brand, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            if (food.brand.isNotEmpty()) InstrumentLabel(food.brand)
+            Text(
+                food.name,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.semantics { heading() },
+            )
         }
 
         // Satiety (fullness-per-calorie) indicator — decision moment ("should I add this?").
@@ -320,9 +329,9 @@ private fun FoodDetailSheet(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Box(Modifier.size(10.dp).clip(CircleShape).background(satietyLevel.color()))
+            Dot(satietyLevel.color())
             Text(
-                "${satietyLevel.label} · ${food.kcalPer100g.roundToInt()} kcal/100 g",
+                stringResource(R.string.food_satiety_line, satietyLevel.label, formatGroupedInt(food.kcalPer100g.roundToInt())),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -333,23 +342,13 @@ private fun FoodDetailSheet(
                 SegmentedButton(
                     selected = servingMode == ServingMode.UNITS,
                     onClick = { onServingModeChange(ServingMode.UNITS) },
-                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                    colors = SegmentedButtonDefaults.colors(
-                        activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        activeBorderColor = MaterialTheme.colorScheme.primary,
-                    ),
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2, baseShape = KalosShape.control),
                 ) { Text(food.servingUnit.replaceFirstChar { it.uppercaseChar() }) }
                 SegmentedButton(
                     selected = servingMode == ServingMode.GRAMS,
                     onClick = { onServingModeChange(ServingMode.GRAMS) },
-                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                    colors = SegmentedButtonDefaults.colors(
-                        activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        activeBorderColor = MaterialTheme.colorScheme.primary,
-                    ),
-                ) { Text("Grammes") }
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2, baseShape = KalosShape.control),
+                ) { Text(stringResource(R.string.food_unit_grams_mode)) }
             }
         }
 
@@ -357,8 +356,8 @@ private fun FoodDetailSheet(
             KalosNumberField(
                 value = servingCount,
                 onValueChange = onServingCountChange,
-                label = { Text("Nombre de ${food.servingUnit}") },
-                suffix = { Text("× ${food.defaultServingG.toInt()}g") },
+                label = { Text(stringResource(R.string.food_serving_count, food.servingUnit)) },
+                suffix = { Text(stringResource(R.string.food_serving_suffix, food.defaultServingG.roundToInt().toString())) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -366,105 +365,82 @@ private fun FoodDetailSheet(
             KalosNumberField(
                 value = amount,
                 onValueChange = onAmountChange,
-                label = { Text("Quantité") },
-                suffix = { Text("g") },
+                label = { Text(stringResource(R.string.food_quantity)) },
+                suffix = { Text(g) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
         }
 
-        // This food's contribution
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            MacroStat("Calories", "${kcal.roundToInt()} kcal")
-            MacroStat("Protéines", "${protein.roundToInt()}g")
-            MacroStat("Glucides", "${carbs.roundToInt()}g")
-            MacroStat("Lipides", "${fat.roundToInt()}g")
+        // This food's contribution, in tabular digits.
+        InstrumentLabel(stringResource(R.string.food_portion_label))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            MacroStat(
+                stringResource(R.string.nutrition_calories), formatGroupedInt(kcal.roundToInt()),
+                stringResource(R.string.kcal_label), stringResource(R.string.unit_kcal_spoken), null,
+            )
+            MacroStat(stringResource(R.string.nutrition_protein), protein.roundToInt().toString(), g, grams, nutrients.protein)
+            MacroStat(stringResource(R.string.nutrition_carbs), carbs.roundToInt().toString(), g, grams, nutrients.carbs)
+            MacroStat(stringResource(R.string.nutrition_fat), fat.roundToInt().toString(), g, grams, nutrients.fat)
         }
 
         // Projected totals preview (shown only when goals are set and there's a meaningful amount)
         if (goalKcal > 0f && amountFloat > 0f) {
-            ProjectedNutritionStrip(
-                projKcal = dailyKcal + kcal, projProtein = dailyProtein + protein,
-                projCarbs = dailyCarbs + carbs, projFat = dailyFat + fat,
-                goalKcal = goalKcal, goalProtein = goalProtein,
-                goalCarbs = goalCarbs, goalFat = goalFat,
+            SectionLabel(stringResource(R.string.food_after_add))
+            MeasureRow(
+                label = stringResource(R.string.nutrition_calories),
+                value = dailyKcal + kcal, goal = goalKcal,
+                valueText = formatGroupedInt((dailyKcal + kcal).roundToInt()), goalText = formatGroupedInt(goalKcal.roundToInt()),
+                unit = stringResource(R.string.kcal_label), spokenUnit = stringResource(R.string.unit_kcal_spoken),
+                color = MaterialTheme.colorScheme.primary,
             )
+            listOf(
+                Triple(R.string.nutrition_protein, (dailyProtein + protein) to goalProtein, nutrients.protein),
+                Triple(R.string.nutrition_carbs, (dailyCarbs + carbs) to goalCarbs, nutrients.carbs),
+                Triple(R.string.nutrition_fat, (dailyFat + fat) to goalFat, nutrients.fat),
+            ).forEach { (label, values, color) ->
+                MeasureRow(
+                    label = stringResource(label),
+                    value = values.first, goal = values.second,
+                    valueText = formatGroupedInt(values.first.roundToInt()), goalText = formatGroupedInt(values.second.roundToInt()),
+                    unit = g, spokenUnit = grams, color = color,
+                )
+            }
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("Annuler") }
-            Button(
-                onClick = onAdd,
-                modifier = Modifier.weight(1f),
-                enabled = amountFloat > 0,
-            ) {
-                Text("Ajouter")
-            }
+            KalosButton(stringResource(R.string.action_cancel), onClick = onDismiss, modifier = Modifier.weight(1f), ghost = true)
+            KalosButton(stringResource(R.string.food_add), onClick = onAdd, modifier = Modifier.weight(1f), enabled = amountFloat > 0)
         }
     }
 }
 
+/** Une valeur de la portion : chiffres tabulaires, libellé (avec sa pastille de macro), une phrase TalkBack. */
 @Composable
-private fun ProjectedNutritionStrip(
-    projKcal: Float,
-    projProtein: Float,
-    projCarbs: Float,
-    projFat: Float,
-    goalKcal: Float,
-    goalProtein: Float,
-    goalCarbs: Float,
-    goalFat: Float,
-) {
-    Surface(
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-        modifier = Modifier.fillMaxWidth(),
+private fun MacroStat(label: String, value: String, unit: String, spokenUnit: String, color: Color?) {
+    val spoken = stringResource(R.string.food_stat_spoken, label, value, spokenUnit)
+    Column(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        modifier = Modifier.clearAndSetSemantics { contentDescription = spoken },
     ) {
-        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(
-                "Après ajout",
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                ProjectedMacro(label = "kcal", projected = projKcal, goal = goalKcal)
-                ProjectedMacro(label = "prot.", projected = projProtein, goal = goalProtein)
-                ProjectedMacro(label = "gluc.", projected = projCarbs, goal = goalCarbs)
-                ProjectedMacro(label = "lip.", projected = projFat, goal = goalFat)
-            }
+        Text("$value $unit", style = KalosTheme.type.metric)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (color != null) Swatch(color)
+            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
 
 @Composable
-private fun ProjectedMacro(label: String, projected: Float, goal: Float) {
-    val ratio = if (goal > 0f) projected / goal else 0f
-    val valueColor = when {
-        ratio > 1.0f -> MaterialTheme.colorScheme.error
-        ratio > 0.9f -> MaterialTheme.colorScheme.tertiary
-        else -> MaterialTheme.colorScheme.onSurface
-    }
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            "${projected.roundToInt()}",
-            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-            color = valueColor,
-        )
-        Text(
-            "/ ${goal.roundToInt()} $label",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-@Composable
-private fun MacroStat(label: String, value: String) {
-    Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
-        Text(value, style = MaterialTheme.typography.titleSmall)
-        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
+private fun KalosFilterChip(selected: Boolean, onClick: () -> Unit, label: String) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label) },
+        shape = KalosShape.chip,
+    )
 }
 
 @Composable
@@ -475,40 +451,15 @@ private fun FoodFilterRow(
     onCategorySelect: (String) -> Unit,
     onCustomToggle: () -> Unit,
 ) {
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(horizontal = 0.dp),
-    ) {
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         item {
-            FilterChip(
-                selected = onlyCustom,
-                onClick = onCustomToggle,
-                label = { Text("Perso") },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ),
-                border = FilterChipDefaults.filterChipBorder(
-                    enabled = true,
-                    selected = onlyCustom,
-                    selectedBorderColor = MaterialTheme.colorScheme.primary,
-                ),
-            )
+            KalosFilterChip(selected = onlyCustom, onClick = onCustomToggle, label = stringResource(R.string.food_filter_custom))
         }
         items(categories) { category ->
-            FilterChip(
+            KalosFilterChip(
                 selected = selectedCategory == category,
                 onClick = { onCategorySelect(category) },
-                label = { Text(category) },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ),
-                border = FilterChipDefaults.filterChipBorder(
-                    enabled = true,
-                    selected = selectedCategory == category,
-                    selectedBorderColor = MaterialTheme.colorScheme.primary,
-                ),
+                label = category,
             )
         }
     }

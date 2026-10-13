@@ -6,17 +6,23 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import com.kalos.app.R
+import com.kalos.app.core.ui.theme.KalosShape
 
 @Composable
 fun KalosSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
-    placeholder: String = "Rechercher…",
+    placeholder: String = stringResource(R.string.food_search_placeholder_default),
     modifier: Modifier = Modifier,
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
@@ -29,13 +35,13 @@ fun KalosSearchBar(
         trailingIcon = {
             if (query.isNotEmpty()) {
                 IconButton(onClick = { onQueryChange("") }) {
-                    Icon(Icons.Filled.Clear, contentDescription = "Effacer")
+                    Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.food_search_clear))
                 }
             }
         },
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = { keyboard?.hide() }),
-        shape = MaterialTheme.shapes.large,
+        shape = KalosShape.control,
     )
 }

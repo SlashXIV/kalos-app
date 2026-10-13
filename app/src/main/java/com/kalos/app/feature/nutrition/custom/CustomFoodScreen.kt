@@ -2,6 +2,7 @@ package com.kalos.app.feature.nutrition.custom
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -11,14 +12,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.kalos.app.R
+import com.kalos.app.core.ui.component.KalosButton
 import com.kalos.app.core.ui.component.KalosNumberField
+import com.kalos.app.core.ui.component.ScreenHeader
+import com.kalos.app.core.ui.component.SectionLabel
+import com.kalos.app.core.ui.theme.KalosShape
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomFoodScreen(
     navController: NavController,
@@ -47,130 +54,128 @@ fun CustomFoodScreen(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Supprimer l'aliment") },
-            text = { Text("Cet aliment sera supprimé. S'il a déjà été utilisé dans votre historique, il sera archivé et n'apparaîtra plus dans la recherche.") },
+            title = { Text(stringResource(R.string.food_delete_title)) },
+            text = { Text(stringResource(R.string.food_delete_body)) },
             confirmButton = {
                 TextButton(onClick = { showDeleteConfirm = false; viewModel.delete() }) {
-                    Text("Supprimer", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.food_delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("Annuler") }
+                TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.action_cancel)) }
             },
         )
     }
 
-    if (state.duplicateFood != null) {
+    state.duplicateFood?.let { duplicate ->
         AlertDialog(
             onDismissRequest = viewModel::onDismissDuplicate,
-            title = { Text("Doublon détecté") },
-            text = {
-                Text(
-                    "Un aliment portant un nom similaire existe déjà : « ${state.duplicateFood!!.name} ».\n\n" +
-                    "Voulez-vous quand même créer un nouvel aliment ?",
-                )
-            },
+            title = { Text(stringResource(R.string.food_duplicate_title)) },
+            text = { Text(stringResource(R.string.food_duplicate_body, duplicate.name)) },
             confirmButton = {
-                TextButton(onClick = viewModel::onConfirmSaveAnyway) { Text("Créer quand même") }
+                TextButton(onClick = viewModel::onConfirmSaveAnyway) { Text(stringResource(R.string.food_duplicate_confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = viewModel::onDismissDuplicate) { Text("Annuler") }
+                TextButton(onClick = viewModel::onDismissDuplicate) { Text(stringResource(R.string.action_cancel)) }
             },
         )
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(if (state.isEditing) "Modifier l'aliment" else "Nouvel aliment") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
-                    }
-                },
-                actions = {
-                    if (state.isEditing) {
-                        IconButton(onClick = { showDeleteConfirm = true }) {
-                            Icon(Icons.Filled.Delete, contentDescription = "Supprimer", tint = MaterialTheme.colorScheme.error)
-                        }
-                    }
-                },
-            )
-        },
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(padding)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text("Informations générales", style = MaterialTheme.typography.titleSmall)
+            ScreenHeader(
+                title = stringResource(if (state.isEditing) R.string.food_custom_title_edit else R.string.food_custom_title_new),
+                small = true,
+                navigation = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                    }
+                },
+            ) {
+                if (state.isEditing) {
+                    IconButton(onClick = { showDeleteConfirm = true }) {
+                        Icon(
+                            Icons.Filled.Delete,
+                            contentDescription = stringResource(R.string.food_delete),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+
+            SectionLabel(stringResource(R.string.food_section_general), Modifier.padding(top = 8.dp))
             OutlinedTextField(
                 value = state.name,
                 onValueChange = viewModel::onNameChange,
-                label = { Text("Nom *") },
+                label = { Text(stringResource(R.string.food_field_name)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
+                shape = KalosShape.control,
             )
             OutlinedTextField(
                 value = state.brand,
                 onValueChange = viewModel::onBrandChange,
-                label = { Text("Marque (optionnel)") },
+                label = { Text(stringResource(R.string.food_field_brand)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
+                shape = KalosShape.control,
             )
 
-            HorizontalDivider()
-            Text("Valeurs nutritionnelles pour 100g/100ml", style = MaterialTheme.typography.titleSmall)
-
+            SectionLabel(stringResource(R.string.food_section_values), Modifier.padding(top = 8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                NumField("Calories (kcal) *", state.kcal, viewModel::onKcalChange, Modifier.weight(1f))
-                NumField("Protéines (g) *", state.protein, viewModel::onProteinChange, Modifier.weight(1f))
+                NumField(stringResource(R.string.food_field_kcal), state.kcal, viewModel::onKcalChange, Modifier.weight(1f))
+                NumField(stringResource(R.string.food_field_protein), state.protein, viewModel::onProteinChange, Modifier.weight(1f))
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                NumField("Glucides (g) *", state.carbs, viewModel::onCarbsChange, Modifier.weight(1f))
-                NumField("Lipides (g) *", state.fat, viewModel::onFatChange, Modifier.weight(1f))
+                NumField(stringResource(R.string.food_field_carbs), state.carbs, viewModel::onCarbsChange, Modifier.weight(1f))
+                NumField(stringResource(R.string.food_field_fat), state.fat, viewModel::onFatChange, Modifier.weight(1f))
             }
-            NumField("Fibres (g)", state.fiber, viewModel::onFiberChange)
+            NumField(stringResource(R.string.food_field_fiber), state.fiber, viewModel::onFiberChange)
 
-            HorizontalDivider()
-            Text("Portion de référence", style = MaterialTheme.typography.titleSmall)
+            SectionLabel(stringResource(R.string.food_section_serving), Modifier.padding(top = 8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                NumField("Quantité", state.serving, viewModel::onServingChange, Modifier.weight(1f))
+                NumField(stringResource(R.string.food_quantity), state.serving, viewModel::onServingChange, Modifier.weight(1f))
                 OutlinedTextField(
                     value = state.unit,
                     onValueChange = {},
-                    label = { Text("Unité") },
+                    label = { Text(stringResource(R.string.food_field_unit)) },
                     enabled = false,
                     modifier = Modifier.weight(1f),
                     singleLine = true,
+                    shape = KalosShape.control,
                 )
             }
 
-            HorizontalDivider()
-            Text("Compatibilité alimentaire", style = MaterialTheme.typography.titleSmall)
+            SectionLabel(stringResource(R.string.food_section_diet), Modifier.padding(top = 8.dp))
             Text(
-                "Optionnel — permet au filtre de préférences de classer correctement cet aliment.",
+                stringResource(R.string.food_diet_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            DietaryCheckRow("Contient du porc", state.containsPork, viewModel::onContainsPorkChange)
-            DietaryCheckRow("Contient de l'alcool", state.containsAlcohol, viewModel::onContainsAlcoholChange)
-            DietaryCheckRow("Convient aux végétariens", state.isVegetarian, viewModel::onIsVegetarianChange)
-            DietaryCheckRow("Convient aux végans", state.isVegan, viewModel::onIsVeganChange)
-
-            Spacer(Modifier.height(8.dp))
-            Button(
-                onClick = viewModel::save,
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                enabled = !state.isSaving,
-            ) {
-                if (state.isSaving) CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                else Text("Enregistrer")
+            Column {
+                DietaryCheckRow(stringResource(R.string.food_diet_pork), state.containsPork, viewModel::onContainsPorkChange)
+                DietaryCheckRow(stringResource(R.string.food_diet_alcohol), state.containsAlcohol, viewModel::onContainsAlcoholChange)
+                DietaryCheckRow(stringResource(R.string.food_diet_vegetarian), state.isVegetarian, viewModel::onIsVegetarianChange)
+                DietaryCheckRow(stringResource(R.string.food_diet_vegan), state.isVegan, viewModel::onIsVeganChange)
             }
+
+            KalosButton(
+                stringResource(R.string.action_save),
+                onClick = viewModel::save,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                enabled = !state.isSaving,
+            )
         }
     }
 }
@@ -186,14 +191,17 @@ private fun NumField(label: String, value: String, onChange: (String) -> Unit, m
     )
 }
 
+/** Toute la ligne bascule la case : cible de 48 dp, lue comme une case à cocher. */
 @Composable
 private fun DietaryCheckRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .toggleable(value = checked, role = Role.Checkbox, onValueChange = onCheckedChange),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-        Checkbox(checked = checked, onCheckedChange = onCheckedChange)
+        Checkbox(checked = checked, onCheckedChange = null)
     }
 }

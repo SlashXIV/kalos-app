@@ -18,7 +18,10 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.kalos.app.R
+import com.kalos.app.core.ui.theme.KalosTheme
 import com.kalos.app.core.domain.model.ExerciseTrackingMode
 import com.kalos.app.core.domain.model.WorkoutSet
 import com.kalos.app.core.ui.util.formatSecsAsDuration
@@ -68,7 +71,7 @@ fun EditWorkoutSetDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Série ${set.setNumber}") },
+        title = { Text(stringResource(R.string.training_set_number, set.setNumber)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (showReps) {
@@ -82,9 +85,10 @@ fun EditWorkoutSetDialog(
                             if (fs.isFocused)
                                 repsValue = repsValue.copy(selection = TextRange(0, repsValue.text.length))
                         },
-                        label = { Text("Répétitions") },
+                        label = { Text(stringResource(R.string.training_reps_label)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
+                        textStyle = KalosTheme.type.metric,
                     )
                 }
                 if (showWeight) {
@@ -95,9 +99,10 @@ fun EditWorkoutSetDialog(
                             if (fs.isFocused)
                                 weightValue = weightValue.copy(selection = TextRange(0, weightValue.text.length))
                         },
-                        label = { Text("Poids (kg)") },
+                        label = { Text(stringResource(R.string.training_weight_label)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
+                        textStyle = KalosTheme.type.metric,
                     )
                 }
                 if (showDuration) {
@@ -111,10 +116,11 @@ fun EditWorkoutSetDialog(
                             if (fs.isFocused)
                                 durationValue = durationValue.copy(selection = TextRange(0, durationValue.text.length))
                         },
-                        label = { Text("Durée (mm:ss)") },
+                        label = { Text(stringResource(R.string.training_duration_label)) },
                         placeholder = { Text("0:30") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
+                        textStyle = KalosTheme.type.metric,
                     )
                 }
             }
@@ -127,10 +133,10 @@ fun EditWorkoutSetDialog(
                 val durationSecs = if (showDuration) parseDurationToSecs(durationValue.text) ?: set.durationSecs
                                    else 0
                 onConfirm(reps, weight, durationSecs)
-            }) { Text("Confirmer") }
+            }) { Text(stringResource(R.string.training_confirm)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Annuler") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         },
     )
 }

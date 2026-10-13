@@ -1,67 +1,103 @@
 package com.kalos.app.feature.workout.program
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.kalos.app.R
 import com.kalos.app.core.domain.model.TrainingProgram
 import com.kalos.app.core.ui.component.EmptyState
+import com.kalos.app.core.ui.component.InstrumentLabel
+import com.kalos.app.core.ui.component.KalosButton
+import com.kalos.app.core.ui.component.KalosCard
+import com.kalos.app.core.ui.component.ScreenHeader
+import com.kalos.app.core.ui.theme.KalosShape
+import com.kalos.app.core.ui.theme.KalosTheme
+import com.kalos.app.feature.workout.TRAINING_FAB_CLEARANCE
 import com.kalos.app.navigation.Screen
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProgramsScreen(
     navController: NavController,
     viewModel: ProgramViewModel = hiltViewModel(),
 ) {
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Programmes") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour")
-                    }
-                }
-            )
-        },
+        containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate(Screen.ProgramEditor.create()) }) {
-                Icon(Icons.Filled.Add, "Nouveau programme")
+            FloatingActionButton(onClick = { navController.navigate(Screen.ProgramEditor.create()) }, shape = KalosShape.card) {
+                Icon(Icons.Filled.Add, stringResource(R.string.training_new_program))
             }
         },
     ) { padding ->
-        ProgramsContent(
-            navController = navController,
-            viewModel = viewModel,
-            modifier = Modifier.padding(padding),
-        )
+        Column(Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
+            ScreenHeader(
+                title = stringResource(R.string.training_tab_programs),
+                small = true,
+                modifier = Modifier.padding(horizontal = 16.dp),
+                navigation = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
+                    }
+                },
+            )
+            ProgramsContent(
+                navController = navController,
+                viewModel = viewModel,
+                bottomPadding = padding.calculateBottomPadding() + TRAINING_FAB_CLEARANCE,
+            )
+        }
     }
 }
 
 @Composable
 fun ProgramsTabContent(
     navController: NavController,
+    bottomPadding: Dp,
     viewModel: ProgramViewModel = hiltViewModel(),
 ) {
-    ProgramsContent(navController = navController, viewModel = viewModel)
+    ProgramsContent(navController = navController, viewModel = viewModel, bottomPadding = bottomPadding)
 }
 
 @Composable
 private fun ProgramsContent(
     navController: NavController,
     viewModel: ProgramViewModel,
+    bottomPadding: Dp,
     modifier: Modifier = Modifier,
 ) {
     val programs by viewModel.programs.collectAsStateWithLifecycle()
@@ -70,16 +106,16 @@ private fun ProgramsContent(
     programToDelete?.let { program ->
         AlertDialog(
             onDismissRequest = { programToDelete = null },
-            title = { Text("Supprimer le programme") },
-            text = { Text("Voulez-vous vraiment supprimer « ${program.name} » ? Cette action est irréversible.") },
+            title = { Text(stringResource(R.string.training_delete_program_title)) },
+            text = { Text(stringResource(R.string.training_delete_confirm_body, program.name)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.delete(program.id)
                     programToDelete = null
-                }) { Text("Supprimer", color = MaterialTheme.colorScheme.error) }
+                }) { Text(stringResource(R.string.training_delete), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(onClick = { programToDelete = null }) { Text("Annuler") }
+                TextButton(onClick = { programToDelete = null }) { Text(stringResource(R.string.action_cancel)) }
             },
         )
     }
@@ -87,16 +123,14 @@ private fun ProgramsContent(
     if (programs.isEmpty()) {
         Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             EmptyState(
-                title = "Aucun programme",
-                subtitle = "Les programmes d'entraînement apparaîtront ici",
+                title = stringResource(R.string.training_empty_programs),
+                subtitle = stringResource(R.string.training_empty_programs_hint),
                 icon = Icons.AutoMirrored.Filled.MenuBook,
             )
         }
     } else {
         LazyColumn(
-            // bottom = 88dp keeps the last card's "Activer" button clear of the FAB
-            // (56dp FAB + 16dp margin + breathing room).
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 88.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = bottomPadding),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = modifier.fillMaxSize(),
         ) {
@@ -108,8 +142,8 @@ private fun ProgramsContent(
                     onEdit = if (program.isCustom) {
                         { navController.navigate(Screen.ProgramEditor.edit(program.id)) }
                     } else null,
-                    // Any inactive program (seeded or custom) can be removed — lets users
-                    // clean up legacy seeded shells (PPL, Upper/Lower) shipped before v3.12.
+                    // Tout programme inactif (fourni ou perso) peut être supprimé : nettoie les
+                    // anciens programmes vides livrés avant la 3.12.
                     onDelete = if (!program.isActive) {
                         { programToDelete = program }
                     } else null,
@@ -119,7 +153,6 @@ private fun ProgramsContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProgramCard(
     program: TrainingProgram,
@@ -128,85 +161,61 @@ private fun ProgramCard(
     onEdit: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null,
 ) {
-    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top,
-            ) {
-                Column(Modifier.weight(1f)) {
-                    Text(program.name, style = MaterialTheme.typography.titleMedium)
-                    if (program.description.isNotBlank()) {
-                        Text(
-                            program.description,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                        )
-                    }
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    KalosCard(contentPadding = PaddingValues(start = 14.dp, end = 4.dp, top = 12.dp, bottom = 14.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                if (program.isActive) {
+                    InstrumentLabel(stringResource(R.string.training_program_active), color = MaterialTheme.colorScheme.primary)
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (program.isActive) {
-                        Badge { Text("Actif") }
-                    }
-                    if (onEdit != null) {
-                        IconButton(onClick = onEdit) {
-                            Icon(
-                                Icons.Filled.Edit,
-                                "Modifier",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(18.dp),
-                            )
-                        }
-                    }
-                    if (onDelete != null) {
-                        IconButton(onClick = onDelete) {
-                            Icon(
-                                Icons.Filled.Delete,
-                                "Supprimer",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                modifier = Modifier.size(18.dp),
-                            )
-                        }
-                    }
-                }
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                AssistChip(onClick = {}, label = { Text("${program.durationWeeks} sem.") })
-                AssistChip(onClick = {}, label = { Text("${program.daysPerWeek} j/sem") })
-                AssistChip(onClick = {}, label = {
-                    Text(
-                        when (val n = program.workouts.size) {
-                            0 -> "Aucune séance liée"
-                            1 -> "1 séance liée"
-                            else -> "$n séances liées"
-                        }
-                    )
-                })
-            }
-            val hasLinkedWorkouts = program.workouts.isNotEmpty()
-            if (!hasLinkedWorkouts) {
+                Text(program.name, style = MaterialTheme.typography.titleMedium)
                 Text(
-                    "Aucune séance liée — activer ce programme n'aurait aucun effet. " +
-                        "Liez des séances depuis l'éditeur de séance (« Rattacher à un programme »).",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    pluralStringResource(R.plurals.training_program_rhythm, program.durationWeeks, program.durationWeeks, program.daysPerWeek) + " · " +
+                        linkedWorkoutsText(program.workouts.size),
+                    style = KalosTheme.type.metricSmall,
+                    color = muted,
                 )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                TextButton(onClick = onDetail) { Text("Détails") }
-                if (!program.isActive) {
-                    Spacer(Modifier.width(8.dp))
-                    // Disabled when empty: the CTA must not promise an activation that
-                    // would produce an empty program.
-                    Button(onClick = onActivate, enabled = hasLinkedWorkouts) { Text("Activer") }
+                if (program.description.isNotBlank()) {
+                    Text(program.description, style = MaterialTheme.typography.bodySmall, color = muted, maxLines = 2)
                 }
+            }
+            if (onEdit != null) {
+                IconButton(onClick = onEdit) {
+                    Icon(Icons.Filled.Edit, stringResource(R.string.training_edit_named, program.name), tint = muted, modifier = Modifier.size(18.dp))
+                }
+            }
+            if (onDelete != null) {
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Outlined.Delete, stringResource(R.string.training_delete_named, program.name), tint = muted, modifier = Modifier.size(18.dp))
+                }
+            }
+        }
+        val hasLinkedWorkouts = program.workouts.isNotEmpty()
+        if (!hasLinkedWorkouts) {
+            Text(
+                stringResource(R.string.training_program_no_workouts_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = muted,
+                modifier = Modifier.padding(end = 10.dp),
+            )
+        }
+        Row(Modifier.padding(end = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            KalosButton(stringResource(R.string.training_details), onClick = onDetail, ghost = true, modifier = Modifier.weight(1f))
+            if (!program.isActive) {
+                // Désactivé sans séance liée : le bouton ne promet pas un programme vide.
+                KalosButton(
+                    stringResource(R.string.training_activate),
+                    onClick = onActivate,
+                    enabled = hasLinkedWorkouts,
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
     }
 }
+
+/** « Aucune séance liée » / « 1 séance liée » / « 3 séances liées » (en français, 0 prend le singulier). */
+@Composable
+internal fun linkedWorkoutsText(n: Int): String =
+    if (n == 0) stringResource(R.string.training_no_linked_workouts)
+    else pluralStringResource(R.plurals.training_linked_workouts, n, n)

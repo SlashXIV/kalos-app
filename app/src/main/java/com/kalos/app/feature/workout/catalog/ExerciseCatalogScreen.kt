@@ -1,26 +1,51 @@
 package com.kalos.app.feature.workout.catalog
 
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.kalos.app.R
 import com.kalos.app.core.ui.component.EmptyState
 import com.kalos.app.core.ui.component.ExerciseListItem
 import com.kalos.app.core.ui.component.KalosSearchBar
+import com.kalos.app.core.ui.component.ScreenHeader
+import com.kalos.app.core.ui.theme.KalosShape
 import com.kalos.app.navigation.Screen
 
-@OptIn(ExperimentalMaterial3Api::class)
+// Valeurs de filtre = valeurs stockées dans le catalogue (comparées telles quelles par le ViewModel).
+private val MUSCLE_FILTERS = listOf("Pectoraux", "Grand dorsal", "Épaules", "Biceps", "Triceps", "Quadriceps", "Ischio-jambiers", "Fessiers", "Abdominaux", "Mollets", "Cardio", "Trapèzes", "Érecteurs")
+private val TYPE_FILTERS = listOf("Musculation", "Poids du corps", "Cardio", "HIIT", "Mobilité")
+
 @Composable
 fun ExerciseCatalogScreen(
     navController: NavController,
@@ -28,8 +53,6 @@ fun ExerciseCatalogScreen(
     viewModel: ExerciseCatalogViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val muscleFilters = listOf("Pectoraux","Grand dorsal","Épaules","Biceps","Triceps","Quadriceps","Ischio-jambiers","Fessiers","Abdominaux","Mollets","Cardio","Trapèzes","Érecteurs")
-    val typeFilters = listOf("Musculation","Poids du corps","Cardio","HIIT","Mobilité")
 
     // Detect builder context from back stack — works for both new (templateId=-1) and edit
     val inBuilderContext = remember {
@@ -61,96 +84,45 @@ fun ExerciseCatalogScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(if (inBuilderContext) "Ajouter un exercice" else "Catalogue d'exercices")
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = 16.dp),
         ) {
+            ScreenHeader(
+                title = stringResource(if (inBuilderContext) R.string.training_add_exercise else R.string.training_catalog),
+                small = true,
+                navigation = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                    }
+                },
+            )
             Spacer(Modifier.height(8.dp))
             KalosSearchBar(
                 query = state.query,
                 onQueryChange = viewModel::onQueryChange,
-                placeholder = "Rechercher un exercice…",
+                placeholder = stringResource(R.string.training_search_exercise),
             )
             Spacer(Modifier.height(8.dp))
 
-            // Favoris + muscle filter chips
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                FilterChip(
-                    selected = state.onlyFavorites,
-                    onClick = viewModel::onFavoritesToggle,
-                    label = { Text("Favoris", style = MaterialTheme.typography.labelSmall) },
-                    leadingIcon = if (state.onlyFavorites) {
-                        { Icon(Icons.Filled.Favorite, contentDescription = null, modifier = androidx.compose.ui.Modifier.size(FilterChipDefaults.IconSize)) }
-                    } else null,
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    ),
-                    border = FilterChipDefaults.filterChipBorder(
-                        enabled = true,
-                        selected = state.onlyFavorites,
-                        selectedBorderColor = MaterialTheme.colorScheme.primary,
-                        borderColor = MaterialTheme.colorScheme.outline,
-                    ),
-                )
-                muscleFilters.forEach { muscle ->
-                    FilterChip(
-                        selected = state.selectedMuscle == muscle,
-                        onClick = { viewModel.onMuscleChange(muscle) },
-                        label = { Text(muscle, style = MaterialTheme.typography.labelSmall) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            enabled = true,
-                            selected = state.selectedMuscle == muscle,
-                            selectedBorderColor = MaterialTheme.colorScheme.primary,
-                            borderColor = MaterialTheme.colorScheme.outline,
-                        ),
-                    )
+                CatalogChip(stringResource(R.string.training_favorites), state.onlyFavorites, viewModel::onFavoritesToggle, favorite = true)
+                MUSCLE_FILTERS.forEach { muscle ->
+                    CatalogChip(muscle, state.selectedMuscle == muscle, { viewModel.onMuscleChange(muscle) })
                 }
             }
-            // Type filter chips
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                typeFilters.forEach { type ->
-                    FilterChip(
-                        selected = state.selectedType == type,
-                        onClick = { viewModel.onTypeChange(type) },
-                        label = { Text(type, style = MaterialTheme.typography.labelSmall) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            enabled = true,
-                            selected = state.selectedType == type,
-                            selectedBorderColor = MaterialTheme.colorScheme.primary,
-                            borderColor = MaterialTheme.colorScheme.outline,
-                        ),
-                    )
+                TYPE_FILTERS.forEach { type ->
+                    CatalogChip(type, state.selectedType == type, { viewModel.onTypeChange(type) })
                 }
             }
             Spacer(Modifier.height(8.dp))
@@ -161,15 +133,14 @@ fun ExerciseCatalogScreen(
 
             if (visibleExercises.isEmpty()) {
                 EmptyState(
-                    title = if (excludedExerciseIds.isNotEmpty() && state.exercises.isNotEmpty()) {
-                        "Tous les exercices correspondants sont déjà dans la séance"
-                    } else {
-                        "Aucun exercice trouvé"
-                    },
-                    subtitle = "Modifiez vos critères de recherche",
+                    title = stringResource(
+                        if (excludedExerciseIds.isNotEmpty() && state.exercises.isNotEmpty()) R.string.training_catalog_all_added
+                        else R.string.training_catalog_empty,
+                    ),
+                    subtitle = stringResource(R.string.training_catalog_empty_hint),
                 )
             } else {
-                LazyColumn {
+                LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
                     items(visibleExercises, key = { it.id }) { exercise ->
                         ExerciseListItem(
                             exercise = exercise,
@@ -192,10 +163,33 @@ fun ExerciseCatalogScreen(
                                 { viewModel.toggleFavorite(exercise) }
                             } else null,
                         )
-                        HorizontalDivider()
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun CatalogChip(text: String, selected: Boolean, onClick: () -> Unit, favorite: Boolean = false) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(text, style = MaterialTheme.typography.labelMedium) },
+        shape = KalosShape.chip,
+        leadingIcon = if (favorite && selected) {
+            { Icon(Icons.Filled.Favorite, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) }
+        } else null,
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = MaterialTheme.colorScheme.onSurface,
+            selectedLabelColor = MaterialTheme.colorScheme.surface,
+            selectedLeadingIconColor = MaterialTheme.colorScheme.surface,
+        ),
+        border = FilterChipDefaults.filterChipBorder(
+            enabled = true,
+            selected = selected,
+            borderColor = MaterialTheme.colorScheme.outlineVariant,
+        ),
+    )
 }

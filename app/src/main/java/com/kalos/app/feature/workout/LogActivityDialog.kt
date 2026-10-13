@@ -6,7 +6,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.kalos.app.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -40,10 +43,6 @@ class LogActivityViewModel @Inject constructor(
     }
 }
 
-private val SUGGESTIONS = listOf(
-    "Escalade", "Randonnée", "Natation", "Course à pied",
-    "Vélo", "Football", "Yoga", "Boxe", "Tennis", "Ski",
-)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -76,10 +75,10 @@ fun LogActivityDialog(
                         date = Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()
                     }
                     showDatePicker = false
-                }) { Text("OK") }
+                }) { Text(stringResource(R.string.action_validate)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Annuler") }
+                TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.action_cancel)) }
             },
         ) {
             DatePicker(state = pickerState)
@@ -88,7 +87,7 @@ fun LogActivityDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Enregistrer une activité") },
+        title = { Text(stringResource(R.string.training_log_activity)) },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -97,13 +96,13 @@ fun LogActivityDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Activité") },
-                    placeholder = { Text("Escalade, randonnée…") },
+                    label = { Text(stringResource(R.string.training_activity)) },
+                    placeholder = { Text(stringResource(R.string.training_activity_hint)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    SUGGESTIONS.forEach { s ->
+                    stringArrayResource(R.array.training_activity_suggestions).forEach { s ->
                         SuggestionChip(
                             onClick = { name = s },
                             label = { Text(s, style = MaterialTheme.typography.labelSmall) },
@@ -114,26 +113,26 @@ fun LogActivityDialog(
                     KalosNumberField(
                         value = hours,
                         onValueChange = { hours = it.filter(Char::isDigit).take(2) },
-                        label = { Text("Heures") },
+                        label = { Text(stringResource(R.string.training_hours)) },
                         modifier = Modifier.weight(1f),
                     )
                     KalosNumberField(
                         value = minutes,
                         onValueChange = { minutes = it.filter(Char::isDigit).take(2) },
-                        label = { Text("Minutes") },
+                        label = { Text(stringResource(R.string.training_minutes)) },
                         modifier = Modifier.weight(1f),
                     )
                 }
-                OutlinedButton(
+                com.kalos.app.core.ui.component.KalosButton(
+                    stringResource(R.string.training_date_value, formatActivityDate(date)),
                     onClick = { showDatePicker = true },
+                    ghost = true,
                     modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text("Date : ${formatActivityDate(date)}")
-                }
+                )
                 OutlinedTextField(
                     value = note,
                     onValueChange = { note = it },
-                    label = { Text("Note (optionnel)") },
+                    label = { Text(stringResource(R.string.training_note_optional)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -146,19 +145,20 @@ fun LogActivityDialog(
                     viewModel.logActivity(name, durationSecs, date.toString(), note)
                     onSaved()
                 },
-            ) { Text("Enregistrer") }
+            ) { Text(stringResource(R.string.action_save)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Annuler") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         },
     )
 }
 
+@Composable
 private fun formatActivityDate(date: LocalDate): String {
     val today = LocalDate.now()
     return when (date) {
-        today -> "Aujourd'hui"
-        today.minusDays(1) -> "Hier"
+        today -> stringResource(R.string.training_today_cap)
+        today.minusDays(1) -> stringResource(R.string.training_yesterday_cap)
         else -> date.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.FRENCH))
     }
 }

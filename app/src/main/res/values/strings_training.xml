@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Textes de la famille Sport (séances, programmes, historique, catalogue). -->
+<resources>
+    <!-- Écran Sport -->
+    <string name="training_title">Sport</string>
+    <string name="training_tab_workouts">Séances</string>
+    <string name="training_tab_programs">Programmes</string>
+    <string name="training_tab_history">Historique</string>
+    <string name="training_log_activity">Enregistrer une activité</string>
+    <string name="training_catalog">Catalogue d’exercices</string>
+    <string name="training_new_workout">Nouvelle séance</string>
+    <string name="training_new_program">Nouveau programme</string>
+    <string name="training_activity_saved">Activité enregistrée</string>
+    <string name="training_abandon_title">Abandonner la séance ?</string>
+    <string name="training_abandon_body">Les séries saisies dans cette séance seront définitivement perdues.</string>
+    <string name="training_abandon_confirm">Abandonner</string>
+    <string name="training_free_workout">Séance libre</string>
+    <string name="training_banner_active">Séance en cours · %1$s</string>
+    <string name="training_banner_stale">Séance interrompue · %1$s</string>
+    <plurals name="training_banner_detail">
+        <item quantity="one">%1$d exercice · %2$s</item>
+        <item quantity="other">%1$d exercices · %2$s</item>
+    </plurals>
+    <string name="training_resume">Reprendre</string>
+    <string name="training_empty_workouts">Aucune séance</string>
+    <string name="training_empty_workouts_hint">Créez votre première séance d’entraînement en touchant +</string>
+    <string name="training_delete_workout_title">Supprimer la séance</string>
+    <string name="training_delete_confirm_body">Voulez-vous vraiment supprimer « %1$s » ? Cette action est irréversible.</string>
+    <string name="training_delete">Supprimer</string>
+    <string name="training_delete_named">Supprimer %1$s</string>
+    <string name="training_edit_named">Modifier %1$s</string>
+    <string name="training_start">Démarrer</string>
+    <string name="training_edit">Modifier</string>
+    <string name="training_details">Détails</string>
+    <string name="training_details_named">Détails : %1$s</string>
+    <string name="training_activate">Activer</string>
+    <string name="training_add">Ajouter</string>
+    <string name="training_none">Aucun</string>
+    <string name="training_description">Description</string>
+    <string name="training_copied">Copié</string>
+    <string name="training_copy_history">Copier l’historique</string>
+
+    <!-- Activité libre -->
+    <string name="training_activity">Activité</string>
+    <string name="training_activity_hint">Escalade, randonnée…</string>
+    <string name="training_hours">Heures</string>
+    <string name="training_minutes">Minutes</string>
+    <string name="training_date_value">Date : %1$s</string>
+    <string name="training_note_optional">Note (facultative)</string>
+    <string-array name="training_activity_suggestions">
+        <item>Escalade</item>
+        <item>Randonnée</item>
+        <item>Natation</item>
+        <item>Course à pied</item>
+        <item>Vélo</item>
+        <item>Football</item>
+        <item>Yoga</item>
+        <item>Boxe</item>
+        <item>Tennis</item>
+        <item>Ski</item>
+    </string-array>
+
+    <!-- Programmes -->
+    <string name="training_program">Programme</string>
+    <string name="training_program_active">Actif</string>
+    <plurals name="training_program_rhythm">
+        <item quantity="one">%1$d sem. · %2$d j/sem.</item>
+        <item quantity="other">%1$d sem. · %2$d j/sem.</item>
+    </plurals>
+    <string name="training_no_linked_workouts">Aucune séance liée</string>
+    <plurals name="training_linked_workouts">
+        <item quantity="one">%1$d séance liée</item>
+        <item quantity="other">%1$d séances liées</item>
+    </plurals>
+    <string name="training_program_no_workouts_hint">Aucune séance liée : activer ce programme n’aurait aucun effet. Liez des séances depuis l’éditeur de séance (« Rattacher à un programme »).</string>
+    <string name="training_empty_programs">Aucun programme</string>
+    <string name="training_empty_programs_hint">Les programmes d’entraînement apparaîtront ici</string>
+    <string name="training_delete_program_title">Supprimer le programme</string>
+    <string name="training_delete_program_body">Cette action est irréversible. Le programme sera définitivement supprimé.</string>
+    <string name="training_edit_program">Modifier le programme</string>
+    <string name="training_program_name">Nom du programme *</string>
+    <string name="training_duration">Durée</string>
+    <string name="training_duration_less">Une semaine de moins</string>
+    <string name="training_duration_more">Une semaine de plus</string>
+    <plurals name="training_weeks">
+        <item quantity="one">%1$d semaine</item>
+        <item quantity="other">%1$d semaines</item>
+    </plurals>
+    <string name="training_program_days">Séances par jour</string>
+    <string name="training_rest_day">Repos</string>
+    <string name="training_pick_workout">Choisir une séance</string>
+    <string name="training_program_week">Programme hebdomadaire</string>
+    <string name="training_program_no_schedule">Aucune séance planifiée.</string>
+    <string name="training_week_number">Semaine %1$d</string>
+    <plurals name="training_exercise_short">
+        <item quantity="one">%1$d ex.</item>
+        <item quantity="other">%1$d ex.</item>
+    </plurals>
+    <string name="training_reminders">Rappels</string>
+    <string name="training_reminders_enable">Activer les rappels</string>
+    <string name="training_reminder_day_of">Le jour même</string>
+    <string name="training_reminder_day_of_hint">Notification le matin des jours de séance</string>
+    <string name="training_reminder_day_before">La veille</string>
+    <string name="training_reminder_day_before_hint">Rappel la veille d’une séance planifiée</string>
+
+    <!-- Éditeur de séance -->
+    <string name="training_edit_workout">Modifier la séance</string>
+    <string name="training_workout_name">Nom de la séance *</string>
+    <string name="training_exercises_count">Exercices (%1$d)</string>
+    <string name="training_builder_empty">Aucun exercice ajouté</string>
+    <string name="training_builder_empty_hint">Touchez « Ajouter » pour parcourir le catalogue</string>
+    <string name="training_sets_label">Séries</string>
+    <string name="training_reps_label">Répétitions</string>
+    <string name="training_weight_label">Poids (kg)</string>
+    <string name="training_duration_label">Durée (mm:ss)</string>
+    <string name="training_confirm">Confirmer</string>
+    <string name="training_sets_reps">%1$d × %2$d rép.</string>
+    <string name="training_move_up">Monter %1$s</string>
+    <string name="training_move_down">Descendre %1$s</string>
+    <string name="training_link_program">Rattacher à un programme</string>
+    <string name="training_link_program_empty">Aucun programme disponible : créez-en un dans l’onglet Programmes</string>
+    <string name="training_pick_day">Choisir le jour</string>
+    <string name="training_day_of_week">Jour de la semaine</string>
+
+    <!-- Catalogue -->
+    <string name="training_add_exercise">Ajouter un exercice</string>
+    <string name="training_search_exercise">Rechercher un exercice…</string>
+    <string name="training_favorites">Favoris</string>
+    <string name="training_favorite_add">Ajouter %1$s aux favoris</string>
+    <string name="training_favorite_remove">Retirer %1$s des favoris</string>
+    <string name="training_catalog_all_added">Les exercices trouvés sont déjà tous dans la séance</string>
+    <string name="training_catalog_empty">Aucun exercice trouvé</string>
+    <string name="training_catalog_empty_hint">Modifiez vos critères de recherche</string>
+    <string name="training_exercise">Exercice</string>
+    <string name="training_add_to_workout">Ajouter à la séance</string>
+    <string name="training_equipment">Matériel : %1$s</string>
+    <string name="training_secondary_muscles">Muscles secondaires : %1$s</string>
+    <string name="training_instructions">Instructions</string>
+    <string name="training_progression">Progression</string>
+    <string name="training_progression_single">1 séance enregistrée : le graphique s’affichera à partir de 2 séances.</string>
+    <string name="training_same_muscle">Même groupe musculaire</string>
+    <string name="training_already_added">Déjà ajouté</string>
+    <string name="training_no_result">Aucun résultat pour « %1$s »</string>
+
+    <!-- Séance en cours -->
+    <string name="training_in_progress">Séance en cours</string>
+    <string name="training_elapsed">En cours · %1$s</string>
+    <string name="training_finish">Terminer</string>
+    <string name="training_finish_title">Terminer la séance ?</string>
+    <string name="training_finish_body">Les séries enregistrées seront sauvegardées dans votre historique.</string>
+    <string name="training_continue">Continuer</string>
+    <string name="training_no_exercises">Aucun exercice dans cette séance.</string>
+    <string name="training_replace_title">Remplacer l’exercice ?</string>
+    <string name="training_replace_body">Les séries déjà saisies pour « %1$s » seront perdues.</string>
+    <string name="training_replace">Remplacer</string>
+    <string name="training_replaces">Remplace : %1$s</string>
+    <string name="training_skip_exercise">Passer</string>
+    <string name="training_exercise_skipped">Exercice passé</string>
+    <string name="training_off_program">Hors programme</string>
+    <string name="training_resume_body">Une séance non terminée a été trouvée (%1$s), démarrée %2$s.</string>
+    <string name="training_resume_stale">Cette séance date de plus de 24 h. Elle est peut-être obsolète.</string>
+    <string name="training_ref_pr">Record %1$s kg</string>
+    <string name="training_ref_last">Dernière séance %1$s kg</string>
+    <string name="training_ref_last_sets">Dernière fois : %1$s</string>
+    <string name="training_col_number">N°</string>
+    <string name="training_col_reps">Rép.</string>
+    <string name="training_col_duration">Durée</string>
+    <string name="training_unit_kg">kg</string>
+    <string name="training_unit_min">min</string>
+    <string name="training_unit_h">h</string>
+    <string name="training_field_weight">Série %1$d, poids en kilogrammes</string>
+    <string name="training_field_reps">Série %1$d, répétitions</string>
+    <string name="training_field_duration">Série %1$d, durée en minutes et secondes</string>
+    <string name="training_set_number">Série %1$d</string>
+    <string name="training_remove_set">Retirer la série %1$d</string>
+    <string name="training_add_set">Ajouter une série</string>
+    <string name="training_rest">Repos</string>
+    <string name="training_rest_spoken">Repos, %1$d min %2$d s restantes</string>
+    <string name="training_skip_rest">Passer</string>
+
+    <!-- Récapitulatif, historique, détail -->
+    <string name="training_summary_eyebrow">Séance terminée</string>
+    <string name="training_exercises_detail">Détail des exercices</string>
+    <string name="training_exercises">Exercices</string>
+    <string name="training_no_completed_set">Aucune série terminée</string>
+    <string name="training_back_to_workouts">Retour aux séances</string>
+    <string name="training_stat_duration">Durée</string>
+    <string name="training_stat_volume">Volume</string>
+    <string name="training_stat_sets">Séries</string>
+    <string name="training_kg_spoken">%1$s kilogrammes</string>
+    <string name="training_kg_value">%1$s kg</string>
+    <plurals name="training_sets_count">
+        <item quantity="one">%1$d série</item>
+        <item quantity="other">%1$d séries</item>
+    </plurals>
+    <plurals name="training_exercise_count_only">
+        <item quantity="one">%1$d exercice</item>
+        <item quantity="other">%1$d exercices</item>
+    </plurals>
+    <plurals name="training_sets_scale_spoken">
+        <item quantity="one">Séries, %1$d validée sur %2$d prévues</item>
+        <item quantity="other">Séries, %1$d validées sur %2$d prévues</item>
+    </plurals>
+    <string name="training_set_line_spoken">Série %1$d, %2$s</string>
+    <string name="training_edit_set">Corriger la série</string>
+    <string name="training_duration_m">%1$d min</string>
+    <string name="training_duration_hm">%1$d h %2$s</string>
+    <string name="training_reps_only">%1$d rép.</string>
+    <string name="training_today">aujourd’hui</string>
+    <string name="training_yesterday">hier</string>
+    <string name="training_today_cap">Aujourd’hui</string>
+    <string name="training_yesterday_cap">Hier</string>
+    <string name="training_log_detail">Détail de séance</string>
+    <string name="training_log_not_found">Séance introuvable</string>
+    <string name="training_status_skipped">Passé</string>
+    <string name="training_status_replaced">Remplacé</string>
+    <string name="training_instead_of">à la place de : %1$s</string>
+    <string name="training_volume_line">Volume : %1$s kg</string>
+    <string name="training_empty_history">Aucune séance enregistrée</string>
+    <string name="training_empty_history_hint">Terminez votre première séance pour voir votre historique</string>
+    <string name="training_weekly_volume">Volume hebdomadaire</string>
+    <plurals name="training_weekly_total">
+        <item quantity="one">Total sur %1$d semaine : %2$s kg</item>
+        <item quantity="other">Total sur %1$d semaines : %2$s kg</item>
+    </plurals>
+</resources>

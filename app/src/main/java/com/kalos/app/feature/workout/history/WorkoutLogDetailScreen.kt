@@ -1,25 +1,39 @@
 package com.kalos.app.feature.workout.history
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.kalos.app.R
 import com.kalos.app.core.domain.model.ExerciseStatus
 import com.kalos.app.core.domain.model.ExerciseTrackingMode
 import com.kalos.app.core.domain.model.LogExercise
@@ -27,17 +41,25 @@ import com.kalos.app.core.domain.model.WorkoutLog
 import com.kalos.app.core.domain.model.WorkoutSet
 import com.kalos.app.core.domain.repository.WorkoutRepository
 import com.kalos.app.core.ui.component.EditWorkoutSetDialog
-import com.kalos.app.core.ui.util.formatSecsAsDuration
+import com.kalos.app.core.ui.component.InstrumentLabel
+import com.kalos.app.core.ui.component.KalosCard
+import com.kalos.app.core.ui.component.ScreenHeader
+import com.kalos.app.core.ui.component.SectionLabel
+import com.kalos.app.core.ui.theme.KalosTheme
+import com.kalos.app.core.ui.util.formatGroupedInt
+import com.kalos.app.feature.workout.CompletedSetLine
+import com.kalos.app.feature.workout.ExerciseSetsScale
+import com.kalos.app.feature.workout.SessionStats
+import com.kalos.app.feature.workout.formatKg
+import com.kalos.app.feature.workout.logDateLong
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 // ─── ViewModel ───────────────────────────────────────────────────────────────
 
@@ -132,7 +154,6 @@ class WorkoutLogDetailViewModel @Inject constructor(
 
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkoutLogDetailScreen(
     navController: NavController,
@@ -150,43 +171,56 @@ fun WorkoutLogDetailScreen(
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(state.log?.let { formatLogDateTitle(it.date) } ?: "Détail de séance")
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour")
-                    }
-                },
-            )
-        },
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
-        when {
-            state.isLoading -> Box(
-                Modifier.fillMaxSize().padding(padding),
-                contentAlignment = Alignment.Center,
-            ) { CircularProgressIndicator() }
-
-            state.log == null -> Box(
-                Modifier.fillMaxSize().padding(padding),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    "Séance introuvable",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+        val log = state.log
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = 16.dp, end = 16.dp,
+                top = padding.calculateTopPadding(),
+                bottom = padding.calculateBottomPadding() + 32.dp,
+            ),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            item(key = "header") {
+                ScreenHeader(
+                    title = log?.templateName?.ifBlank { null } ?: stringResource(R.string.training_free_workout),
+                    eyebrow = log?.let { logDateLong(it.date) } ?: stringResource(R.string.training_log_detail),
+                    small = true,
+                    navigation = {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
+                        }
+                    },
                 )
             }
-
-            else -> LogDetailContent(
-                log = state.log!!,
-                maxWeights = state.maxWeights,
-                onEditSet = viewModel::openEditDialog,
-                modifier = Modifier.padding(padding),
-            )
+            when {
+                state.isLoading -> item {
+                    Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+                }
+                log == null -> item {
+                    Text(
+                        stringResource(R.string.training_log_not_found),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                else -> {
+                    item(key = "stats") { SessionStats(log, Modifier.padding(vertical = 8.dp)) }
+                    if (log.exercises.isNotEmpty()) {
+                        item(key = "label") { SectionLabel(stringResource(R.string.training_exercises)) }
+                        items(log.exercises, key = { it.id }) { le ->
+                            ExerciseDetailCard(
+                                logExercise = le,
+                                maxWeight = state.maxWeights[le.exercise.id],
+                                onEditSet = { set -> viewModel.openEditDialog(set, le.exercise.id, le.exercise.trackingMode) },
+                            )
+                        }
+                    }
+                }
+            }
         }
         state.pendingEdit?.let { pending ->
             EditWorkoutSetDialog(
@@ -209,291 +243,64 @@ fun WorkoutLogDetailScreen(
 // ─── Content ─────────────────────────────────────────────────────────────────
 
 @Composable
-private fun LogDetailContent(
-    log: WorkoutLog,
-    maxWeights: Map<Long, Float?>,
-    onEditSet: (WorkoutSet, Long, ExerciseTrackingMode) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        item { SessionHeaderCard(log) }
-
-        if (log.exercises.isNotEmpty()) {
-            item {
-                Text(
-                    "Exercices",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp),
-                )
-            }
-            items(log.exercises, key = { it.id }) { le ->
-                ExerciseDetailCard(
-                    logExercise = le,
-                    maxWeight = maxWeights[le.exercise.id],
-                    onEditSet = { set -> onEditSet(set, le.exercise.id, le.exercise.trackingMode) },
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun SessionHeaderCard(log: WorkoutLog) {
-    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(
-                log.templateName.ifBlank { "Séance libre" },
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-            )
-            Text(
-                formatLogDateLong(log.date),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-            // FlowRow: on narrow screens a 4th stat wraps as a whole unit instead of
-            // breaking mid-text ("615" / "kg" stacked).
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                if (log.durationSecs > 0) {
-                    DetailStat(Icons.Filled.Timer, formatDuration(log.durationSecs))
-                }
-                val plural = { n: Int, s: String -> "$n $s${if (n > 1) "s" else ""}" }
-                DetailStat(Icons.Filled.FitnessCenter, plural(log.exercises.size, "exercice"))
-                val completedSets = log.exercises.sumOf { le -> le.sets.count { it.isCompleted } }
-                if (completedSets > 0) {
-                    DetailStat(Icons.Filled.CheckCircle, plural(completedSets, "série"))
-                }
-                if (log.totalVolumeKg > 0f) {
-                    DetailStat(Icons.Filled.MonitorWeight, "%.0f kg".format(log.totalVolumeKg))
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun ExerciseDetailCard(
     logExercise: LogExercise,
     maxWeight: Float?,
     onEditSet: (WorkoutSet) -> Unit = {},
 ) {
     val completedSets = logExercise.sets.filter { it.isCompleted }
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
 
-    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top,
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    Text(logExercise.exercise.name, style = MaterialTheme.typography.titleSmall)
-                    if (logExercise.exercise.primaryMuscle.isNotBlank()) {
-                        Text(
-                            logExercise.exercise.primaryMuscle,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
+    KalosCard {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(logExercise.exercise.name, style = MaterialTheme.typography.titleMedium)
+                if (logExercise.exercise.primaryMuscle.isNotBlank()) {
+                    InstrumentLabel(logExercise.exercise.primaryMuscle)
                 }
-                if (maxWeight != null && maxWeight > 0f) {
+            }
+            if (maxWeight != null && maxWeight > 0f) {
+                Text(
+                    stringResource(R.string.training_ref_pr, formatKg(maxWeight)),
+                    style = KalosTheme.type.metricSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
+
+        // Statut : seulement hors du cas « prévu ». Toujours un libellé, jamais la couleur seule.
+        when (logExercise.status) {
+            ExerciseStatus.SKIPPED -> InstrumentLabel(stringResource(R.string.training_status_skipped))
+            ExerciseStatus.REPLACED -> Column {
+                InstrumentLabel(stringResource(R.string.training_status_replaced), color = MaterialTheme.colorScheme.primary)
+                if (logExercise.replacedExerciseName.isNotBlank()) {
                     Text(
-                        "PR : ${"%.1f".format(maxWeight)} kg",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.primary,
+                        stringResource(R.string.training_instead_of, logExercise.replacedExerciseName),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted,
                     )
                 }
             }
+            ExerciseStatus.ADDED -> InstrumentLabel(stringResource(R.string.training_off_program), color = MaterialTheme.colorScheme.primary)
+            else -> {}
+        }
 
-            // Status badge — only shown for non-PLANNED statuses
-            if (logExercise.status != ExerciseStatus.PLANNED) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    when (logExercise.status) {
-                        ExerciseStatus.SKIPPED -> StatusBadge(
-                            "Passé",
-                            MaterialTheme.colorScheme.surfaceVariant,
-                            MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        ExerciseStatus.REPLACED -> {
-                            StatusBadge(
-                                "Remplacé",
-                                MaterialTheme.colorScheme.tertiaryContainer,
-                                MaterialTheme.colorScheme.onTertiaryContainer,
-                            )
-                            if (logExercise.replacedExerciseName.isNotBlank()) {
-                                Text(
-                                    "à la place de : ${logExercise.replacedExerciseName}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                        ExerciseStatus.ADDED -> StatusBadge(
-                            "Hors programme",
-                            MaterialTheme.colorScheme.primaryContainer,
-                            MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
-                        else -> {}
-                    }
-                }
+        if (logExercise.status == ExerciseStatus.SKIPPED) return@KalosCard
+        ExerciseSetsScale(logExercise)
+        if (completedSets.isEmpty()) {
+            Text(stringResource(R.string.training_no_completed_set), style = MaterialTheme.typography.bodySmall, color = muted)
+        } else {
+            completedSets.forEachIndexed { i, set ->
+                CompletedSetLine(i + 1, set, logExercise.exercise.trackingMode) { onEditSet(set) }
             }
-
-            if (logExercise.status == ExerciseStatus.SKIPPED) {
-                // No sets to display for a skipped exercise
-            } else if (completedSets.isEmpty()) {
+            if (logExercise.totalVolume > 0f) {
                 Text(
-                    "Aucune série complétée",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    stringResource(R.string.training_volume_line, formatGroupedInt(logExercise.totalVolume.roundToInt())),
+                    style = KalosTheme.type.metricSmall,
+                    color = muted,
+                    modifier = Modifier.align(Alignment.End),
                 )
-            } else {
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                completedSets.forEachIndexed { i, set ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onEditSet(set) }
-                            .padding(vertical = 2.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            "Série ${i + 1}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            Text(
-                                formatSet(set, logExercise.exercise.trackingMode),
-                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                            )
-                            Icon(
-                                Icons.Filled.Edit,
-                                contentDescription = "Modifier",
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                            )
-                        }
-                    }
-                }
-                if (logExercise.totalVolume > 0f) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
-                        horizontalArrangement = Arrangement.End,
-                    ) {
-                        Text(
-                            "Volume : ${"%.0f".format(logExercise.totalVolume)} kg",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
             }
         }
-    }
-}
-
-@Composable
-private fun StatusBadge(text: String, containerColor: Color, contentColor: Color) {
-    Surface(color = containerColor, shape = MaterialTheme.shapes.extraSmall) {
-        Text(
-            text,
-            style = MaterialTheme.typography.labelSmall,
-            color = contentColor,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-        )
-    }
-}
-
-@Composable
-private fun DetailStat(icon: ImageVector, text: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Icon(icon, null, modifier = Modifier.size(15.dp), tint = MaterialTheme.colorScheme.primary)
-        Text(text, style = MaterialTheme.typography.bodySmall)
-    }
-}
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-private fun formatDuration(secs: Long): String {
-    val h = secs / 3600
-    val m = (secs % 3600) / 60
-    return if (h > 0) "${h}h%02d".format(m) else "${m}min"
-}
-
-private fun formatSet(set: WorkoutSet, mode: ExerciseTrackingMode): String = when (mode) {
-    ExerciseTrackingMode.REPS_WEIGHT -> when {
-        set.reps > 0 && set.weightKg > 0f -> "${set.reps} × ${"%.1f".format(set.weightKg)} kg"
-        set.reps > 0 -> "${set.reps} rép."
-        set.weightKg > 0f -> "${"%.1f".format(set.weightKg)} kg"
-        else -> "—"
-    }
-    ExerciseTrackingMode.DURATION ->
-        formatSecsAsDuration(set.durationSecs).ifEmpty { "—" }
-    ExerciseTrackingMode.DURATION_WEIGHT -> {
-        val dur = formatSecsAsDuration(set.durationSecs).ifEmpty { "—" }
-        if (set.weightKg > 0f) "$dur @ ${"%.1f".format(set.weightKg)} kg" else dur
-    }
-}
-
-/** Screen title with correct French elision: "Séance d'hier", not "Séance du hier". */
-private fun formatLogDateTitle(dateStr: String): String {
-    val d = LocalDate.parse(dateStr)
-    val today = LocalDate.now()
-    return when (d) {
-        today -> "Séance d'aujourd'hui"
-        today.minusDays(1) -> "Séance d'hier"
-        else -> {
-            val pattern = if (d.year == today.year) "d MMM" else "d MMM yyyy"
-            "Séance du ${d.format(DateTimeFormatter.ofPattern(pattern, Locale.FRENCH))}"
-        }
-    }
-}
-
-fun formatLogDateShort(dateStr: String): String {
-    val d = LocalDate.parse(dateStr)
-    val today = LocalDate.now()
-    return when (d) {
-        today -> "aujourd'hui"
-        today.minusDays(1) -> "hier"
-        else -> {
-            val pattern = if (d.year == today.year) "d MMM" else "d MMM yyyy"
-            d.format(DateTimeFormatter.ofPattern(pattern, Locale.FRENCH))
-        }
-    }
-}
-
-fun formatLogDateLong(dateStr: String): String {
-    val d = LocalDate.parse(dateStr)
-    val today = LocalDate.now()
-    return when (d) {
-        today -> "Aujourd'hui"
-        today.minusDays(1) -> "Hier"
-        else -> d.format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.FRENCH))
-            .replaceFirstChar { it.uppercase() }
     }
 }

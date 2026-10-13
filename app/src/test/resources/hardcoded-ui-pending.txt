@@ -1,21 +1,5 @@
 # Fichiers à migrer vers strings.xml pendant la refonte 4.0.0. La liste ne fait que rétrécir.
-com/kalos/app/core/ui/component/EditWorkoutSetDialog.kt
-com/kalos/app/core/ui/component/ExerciseListItem.kt
-com/kalos/app/core/ui/component/WorkoutCard.kt
 com/kalos/app/feature/onboarding/GoalSetupScreen.kt
 com/kalos/app/feature/onboarding/OnboardingResultScreen.kt
 com/kalos/app/feature/onboarding/ProfileSetupScreen.kt
 com/kalos/app/feature/onboarding/WelcomeScreen.kt
-com/kalos/app/feature/workout/LogActivityDialog.kt
-com/kalos/app/feature/workout/WorkoutScreen.kt
-com/kalos/app/feature/workout/active/ActiveWorkoutScreen.kt
-com/kalos/app/feature/workout/active/ExercisePickerSheet.kt
-com/kalos/app/feature/workout/active/WorkoutSummaryScreen.kt
-com/kalos/app/feature/workout/builder/WorkoutBuilderScreen.kt
-com/kalos/app/feature/workout/catalog/ExerciseCatalogScreen.kt
-com/kalos/app/feature/workout/catalog/ExerciseDetailScreen.kt
-com/kalos/app/feature/workout/history/WorkoutHistoryScreen.kt
-com/kalos/app/feature/workout/history/WorkoutLogDetailScreen.kt
-com/kalos/app/feature/workout/program/ProgramDetailScreen.kt
-com/kalos/app/feature/workout/program/ProgramEditorScreen.kt
-com/kalos/app/feature/workout/program/ProgramsScreen.kt

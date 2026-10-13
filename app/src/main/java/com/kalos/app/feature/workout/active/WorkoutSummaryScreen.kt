@@ -1,29 +1,49 @@
 package com.kalos.app.feature.workout.active
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.kalos.app.R
 import com.kalos.app.core.domain.model.ExerciseTrackingMode
 import com.kalos.app.core.domain.model.WorkoutLog
 import com.kalos.app.core.domain.model.WorkoutSet
 import com.kalos.app.core.domain.repository.WorkoutRepository
 import com.kalos.app.core.ui.component.EditWorkoutSetDialog
-import com.kalos.app.core.ui.util.formatSecsAsDuration
+import com.kalos.app.core.ui.component.KalosButton
+import com.kalos.app.core.ui.component.KalosCard
+import com.kalos.app.core.ui.component.ScreenHeader
+import com.kalos.app.core.ui.component.SectionLabel
+import com.kalos.app.feature.workout.CompletedSetLine
+import com.kalos.app.feature.workout.ExerciseSetsScale
+import com.kalos.app.feature.workout.SessionStats
 import com.kalos.app.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -101,7 +121,6 @@ class WorkoutSummaryViewModel @Inject constructor(
     fun onErrorShown() = _uiState.update { it.copy(errorMessage = null) }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun WorkoutSummaryScreen(
     navController: NavController,
@@ -130,91 +149,55 @@ fun WorkoutSummaryScreen(
         )
     }
 
+    val backToWorkouts = { navController.popBackStack(Screen.Workout.route, false); Unit }
+
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Résumé de séance") },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        navController.popBackStack(Screen.Workout.route, false)
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour")
-                    }
-                }
-            )
-        },
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
-        if (log == null) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-            return@Scaffold
-        }
-        val l = log
         LazyColumn(
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = padding.calculateTopPadding() + 8.dp, bottom = 80.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(
+                start = 16.dp, end = 16.dp,
+                top = padding.calculateTopPadding(),
+                bottom = padding.calculateBottomPadding() + 32.dp,
+            ),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item {
-                ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(l.templateName.ifBlank { "Séance libre" },
-                            style = MaterialTheme.typography.titleLarge)
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(20.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            SummaryStat(Icons.Filled.Timer, formatDuration(l.durationSecs))
-                            SummaryStat(Icons.Filled.FitnessCenter, "${l.exercises.size} exercices")
-                            if (l.totalVolumeKg > 0) {
-                                SummaryStat(Icons.Filled.MonitorWeight, "%.0f kg".format(l.totalVolumeKg))
-                            }
+            item(key = "header") {
+                ScreenHeader(
+                    title = log?.templateName?.ifBlank { null } ?: stringResource(R.string.training_free_workout),
+                    eyebrow = stringResource(R.string.training_summary_eyebrow),
+                    navigation = {
+                        IconButton(onClick = backToWorkouts) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
                         }
-                    }
-                }
+                    },
+                )
+            }
+            if (log == null) {
+                item { Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } }
+                return@LazyColumn
             }
 
-            if (l.exercises.isNotEmpty()) {
-                item {
-                    Text("Détail des exercices", style = MaterialTheme.typography.titleSmall)
-                }
-                items(l.exercises) { le ->
+            item(key = "stats") { SessionStats(log, Modifier.padding(vertical = 8.dp)) }
+
+            if (log.exercises.isNotEmpty()) {
+                item(key = "label") { SectionLabel(stringResource(R.string.training_exercises_detail)) }
+                items(log.exercises, key = { it.id }) { le ->
                     val completedSets = le.sets.filter { it.isCompleted }
-                    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-                        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(le.exercise.name, style = MaterialTheme.typography.titleSmall)
-                            if (completedSets.isEmpty()) {
-                                Text("Aucune série complétée",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            } else {
-                                completedSets.forEachIndexed { i, s ->
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable { viewModel.openEditDialog(s, le.exercise.id, le.exercise.trackingMode) }
-                                            .padding(vertical = 1.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Text("Série ${i + 1} :",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                        ) {
-                                            Text(formatSetSummary(s, le.exercise.trackingMode),
-                                                style = MaterialTheme.typography.bodySmall)
-                                            Icon(
-                                                Icons.Filled.Edit,
-                                                contentDescription = "Modifier",
-                                                modifier = Modifier.size(14.dp),
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                                            )
-                                        }
-                                    }
+                    KalosCard {
+                        Text(le.exercise.name, style = MaterialTheme.typography.titleMedium)
+                        ExerciseSetsScale(le)
+                        if (completedSets.isEmpty()) {
+                            Text(
+                                stringResource(R.string.training_no_completed_set),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        } else {
+                            completedSets.forEachIndexed { i, s ->
+                                CompletedSetLine(i + 1, s, le.exercise.trackingMode) {
+                                    viewModel.openEditDialog(s, le.exercise.id, le.exercise.trackingMode)
                                 }
                             }
                         }
@@ -222,39 +205,13 @@ fun WorkoutSummaryScreen(
                 }
             }
 
-            item {
-                Spacer(Modifier.height(8.dp))
-                Button(
-                    onClick = { navController.popBackStack(Screen.Workout.route, false) },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                ) { Text("Retour aux séances") }
+            item(key = "back") {
+                KalosButton(
+                    stringResource(R.string.training_back_to_workouts),
+                    onClick = backToWorkouts,
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                )
             }
         }
     }
-}
-
-@Composable
-private fun SummaryStat(icon: ImageVector, text: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Icon(icon, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
-        Text(text, style = MaterialTheme.typography.bodyMedium)
-    }
-}
-
-private fun formatDuration(secs: Long): String {
-    val h = secs / 3600
-    val m = (secs % 3600) / 60
-    return if (h > 0) "${h}h%02d".format(m) else "${m}min"
-}
-
-private fun formatSetSummary(s: WorkoutSet, mode: ExerciseTrackingMode): String = when (mode) {
-    ExerciseTrackingMode.REPS_WEIGHT ->
-        "${s.reps} × ${s.weightKg} kg"
-    ExerciseTrackingMode.DURATION ->
-        formatSecsAsDuration(s.durationSecs).ifEmpty { "—" }
-    ExerciseTrackingMode.DURATION_WEIGHT ->
-        "${formatSecsAsDuration(s.durationSecs).ifEmpty { "—" }} @ ${s.weightKg} kg"
 }

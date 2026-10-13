@@ -1,109 +1,39 @@
 package com.kalos.app.core.ui.theme
 
 import android.app.Activity
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.kalos.app.core.ui.motion.LocalMotionLevel
+import com.kalos.app.core.ui.motion.LocalVibrationsEnabled
+import com.kalos.app.core.ui.motion.Motion
+import com.kalos.app.core.ui.motion.MotionLevel
 
-private val DarkColorScheme = darkColorScheme(
-    primary = md_theme_dark_primary,
-    onPrimary = md_theme_dark_onPrimary,
-    primaryContainer = md_theme_dark_primaryContainer,
-    onPrimaryContainer = md_theme_dark_onPrimaryContainer,
-    secondary = md_theme_dark_secondary,
-    onSecondary = md_theme_dark_onSecondary,
-    secondaryContainer = md_theme_dark_secondaryContainer,
-    onSecondaryContainer = md_theme_dark_onSecondaryContainer,
-    tertiary = md_theme_dark_tertiary,
-    onTertiary = md_theme_dark_onTertiary,
-    background = md_theme_dark_background,
-    onBackground = md_theme_dark_onBackground,
-    surface = md_theme_dark_surface,
-    onSurface = md_theme_dark_onSurface,
-    surfaceVariant = md_theme_dark_surfaceVariant,
-    onSurfaceVariant = md_theme_dark_onSurfaceVariant,
-    surfaceTint = md_theme_dark_surfaceTint,
-    surfaceDim = md_theme_dark_surfaceDim,
-    surfaceBright = md_theme_dark_surfaceBright,
-    surfaceContainerLowest = md_theme_dark_surfaceContainerLowest,
-    surfaceContainerLow = md_theme_dark_surfaceContainerLow,
-    surfaceContainer = md_theme_dark_surfaceContainer,
-    surfaceContainerHigh = md_theme_dark_surfaceContainerHigh,
-    surfaceContainerHighest = md_theme_dark_surfaceContainerHighest,
-    outline = md_theme_dark_outline,
-    error = md_theme_dark_error,
-    onError = md_theme_dark_onError,
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = md_theme_light_primary,
-    onPrimary = md_theme_light_onPrimary,
-    primaryContainer = md_theme_light_primaryContainer,
-    onPrimaryContainer = md_theme_light_onPrimaryContainer,
-    secondary = md_theme_light_secondary,
-    onSecondary = md_theme_light_onSecondary,
-    secondaryContainer = md_theme_light_secondaryContainer,
-    onSecondaryContainer = md_theme_light_onSecondaryContainer,
-    tertiary = md_theme_light_tertiary,
-    onTertiary = md_theme_light_onTertiary,
-    background = md_theme_light_background,
-    onBackground = md_theme_light_onBackground,
-    surface = md_theme_light_surface,
-    onSurface = md_theme_light_onSurface,
-    surfaceVariant = md_theme_light_surfaceVariant,
-    onSurfaceVariant = md_theme_light_onSurfaceVariant,
-    surfaceTint = md_theme_light_surfaceTint,
-    surfaceDim = md_theme_light_surfaceDim,
-    surfaceBright = md_theme_light_surfaceBright,
-    surfaceContainerLowest = md_theme_light_surfaceContainerLowest,
-    surfaceContainerLow = md_theme_light_surfaceContainerLow,
-    surfaceContainer = md_theme_light_surfaceContainer,
-    surfaceContainerHigh = md_theme_light_surfaceContainerHigh,
-    surfaceContainerHighest = md_theme_light_surfaceContainerHighest,
-    outline = md_theme_light_outline,
-    error = md_theme_light_error,
-    onError = md_theme_light_onError,
-)
-
-/** Whether the resolved theme is dark (drives system-bar icon contrast & window background). */
-fun ThemeMode.isDark(systemInDark: Boolean): Boolean = when (this) {
-    ThemeMode.SYSTEM -> systemInDark
-    ThemeMode.LIGHT, ThemeMode.PASTEL -> false
-    ThemeMode.DARK, ThemeMode.BERRY, ThemeMode.AURORA, ThemeMode.MONOCHROME,
-    ThemeMode.AQUA, ThemeMode.OCEAN, ThemeMode.SUNSET -> true
-}
-
-/** Resolves the Material 3 colour scheme for a theme (SYSTEM follows the device setting). */
-fun colorSchemeFor(mode: ThemeMode, systemInDark: Boolean): ColorScheme = when (mode) {
-    ThemeMode.SYSTEM -> if (systemInDark) DarkColorScheme else LightColorScheme
-    ThemeMode.LIGHT -> LightColorScheme
-    ThemeMode.DARK -> DarkColorScheme
-    ThemeMode.PASTEL -> PastelScheme
-    ThemeMode.BERRY -> BerryScheme
-    ThemeMode.AURORA -> AuroraScheme
-    ThemeMode.MONOCHROME -> MonochromeScheme
-    ThemeMode.AQUA -> AquaScheme
-    ThemeMode.OCEAN -> OceanScheme
-    ThemeMode.SUNSET -> SunsetScheme
-}
-
+/**
+ * Thème de Kalos. Pas de couleurs dynamiques (Material You) : les contrastes sont choisis et
+ * vérifiés par test, pas hérités du fond d'écran. Changer de palette ou de luminosité FOND les
+ * couleurs quand le mouvement est permis.
+ */
 @Composable
 fun KalosTheme(
-    mode: ThemeMode = ThemeMode.SYSTEM,
+    palette: KalosPalette = Palettes.default,
+    darkTheme: Boolean,
+    motion: MotionLevel = MotionLevel.FULL,
+    vibrations: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val systemInDark = isSystemInDarkTheme()
-    val darkTheme = mode.isDark(systemInDark)
-    val colorScheme = colorSchemeFor(mode, systemInDark)
+    val scheme = animateScheme(if (darkTheme) palette.dark else palette.light, animate = motion.animates)
 
-    // Keep the status/navigation bar icon contrast aligned with the resolved theme,
-    // not the device setting (edge-to-edge draws behind the bars).
+    // Contraste des icônes des barres système aligné sur le thème résolu (bord à bord).
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -114,10 +44,52 @@ fun KalosTheme(
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = KalosTypography,
-        shapes = KalosShapes,
-        content = content,
+    CompositionLocalProvider(
+        LocalNutrientColors provides if (darkTheme) NutrientColors.Dark else NutrientColors.Light,
+        LocalKalosType provides DefaultKalosType,
+        LocalMotionLevel provides motion,
+        LocalVibrationsEnabled provides vibrations,
+    ) {
+        MaterialTheme(colorScheme = scheme, typography = KalosMaterialTypography, shapes = KalosShapes, content = content)
+    }
+}
+
+object KalosTheme {
+    val nutrients: NutrientColors
+        @Composable @ReadOnlyComposable get() = LocalNutrientColors.current
+    val type: KalosType
+        @Composable @ReadOnlyComposable get() = LocalKalosType.current
+}
+
+@Composable
+private fun animateScheme(target: ColorScheme, animate: Boolean): ColorScheme {
+    @Composable
+    fun Color.animated(label: String): Color {
+        if (!animate) return this
+        val value by animateColorAsState(this, tween(Motion.TRANSITION_MS, easing = Motion.Transition), label = label)
+        return value
+    }
+    return target.copy(
+        primary = target.primary.animated("primary"),
+        onPrimary = target.onPrimary.animated("onPrimary"),
+        primaryContainer = target.primaryContainer.animated("primaryContainer"),
+        onPrimaryContainer = target.onPrimaryContainer.animated("onPrimaryContainer"),
+        secondary = target.secondary.animated("secondary"),
+        onSecondary = target.onSecondary.animated("onSecondary"),
+        secondaryContainer = target.secondaryContainer.animated("secondaryContainer"),
+        onSecondaryContainer = target.onSecondaryContainer.animated("onSecondaryContainer"),
+        tertiary = target.tertiary.animated("tertiary"),
+        background = target.background.animated("background"),
+        onBackground = target.onBackground.animated("onBackground"),
+        surface = target.surface.animated("surface"),
+        onSurface = target.onSurface.animated("onSurface"),
+        surfaceVariant = target.surfaceVariant.animated("surfaceVariant"),
+        onSurfaceVariant = target.onSurfaceVariant.animated("onSurfaceVariant"),
+        surfaceContainerLow = target.surfaceContainerLow.animated("surfaceContainerLow"),
+        surfaceContainer = target.surfaceContainer.animated("surfaceContainer"),
+        surfaceContainerHigh = target.surfaceContainerHigh.animated("surfaceContainerHigh"),
+        surfaceContainerHighest = target.surfaceContainerHighest.animated("surfaceContainerHighest"),
+        outline = target.outline.animated("outline"),
+        outlineVariant = target.outlineVariant.animated("outlineVariant"),
     )
 }

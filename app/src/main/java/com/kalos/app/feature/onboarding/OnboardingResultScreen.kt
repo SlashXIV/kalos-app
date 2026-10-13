@@ -1,5 +1,6 @@
 package com.kalos.app.feature.onboarding
 
+import com.kalos.app.core.ui.theme.KalosTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -10,7 +11,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.core.ui.component.MacroTrioRow
-import com.kalos.app.core.ui.theme.ColorCalories
 import com.kalos.app.navigation.Screen
 import kotlin.math.roundToInt
 
@@ -43,8 +43,8 @@ fun OnboardingResultScreen(
                 }
                 HorizontalDivider()
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Objectif calorique", style = MaterialTheme.typography.titleMedium, color = ColorCalories)
-                    Text("${state.calculatedKcal} kcal", style = MaterialTheme.typography.titleMedium, color = ColorCalories)
+                    Text("Objectif calorique", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text("${state.calculatedKcal} kcal", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                 }
             }
         }

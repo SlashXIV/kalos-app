@@ -20,9 +20,11 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kalos.app.core.data.ThemePreferenceStore
 import com.kalos.app.core.notification.NotificationHelper
+import androidx.compose.foundation.isSystemInDarkTheme
+import com.kalos.app.core.ui.motion.rememberMotionLevel
 import com.kalos.app.core.ui.theme.KalosTheme
-import com.kalos.app.core.ui.theme.ThemeMode
-import com.kalos.app.core.ui.theme.colorSchemeFor
+import com.kalos.app.core.ui.theme.Palettes
+import com.kalos.app.core.ui.theme.isDark
 import com.kalos.app.navigation.KalosNavGraph
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -44,8 +46,13 @@ class MainActivity : ComponentActivity() {
         window.setBackgroundDrawable(ColorDrawable(resolveWindowBackground().toArgb()))
         pendingDestination = intent?.getStringExtra(NotificationHelper.EXTRA_DESTINATION)
         setContent {
-            val themeMode by themePreferenceStore.mode.collectAsStateWithLifecycle()
-            KalosTheme(mode = themeMode) {
+            val appearance by themePreferenceStore.settings.collectAsStateWithLifecycle()
+            KalosTheme(
+                palette = Palettes.byId(appearance.paletteId),
+                darkTheme = appearance.brightness.isDark(isSystemInDarkTheme()),
+                motion = rememberMotionLevel(appearance.motion),
+                vibrations = appearance.vibrations,
+            ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -61,13 +68,11 @@ class MainActivity : ComponentActivity() {
 
     /** Reads the stored theme synchronously (before Hilt injection) to pick the window background. */
     private fun resolveWindowBackground(): Color {
-        val prefs = getSharedPreferences("kalos_theme", MODE_PRIVATE)
-        val mode = runCatching {
-            ThemeMode.valueOf(prefs.getString("mode", ThemeMode.SYSTEM.name)!!)
-        }.getOrDefault(ThemeMode.SYSTEM)
+        val settings = ThemePreferenceStore.read(getSharedPreferences(ThemePreferenceStore.PREFS, MODE_PRIVATE))
         val systemDark =
             (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-        return colorSchemeFor(mode, systemDark).background
+        val palette = Palettes.byId(settings.paletteId)
+        return (if (settings.brightness.isDark(systemDark)) palette.dark else palette.light).background
     }
 
     // singleTop: a notification tap while the app is running arrives here instead of a new instance.

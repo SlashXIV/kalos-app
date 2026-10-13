@@ -1,5 +1,6 @@
 package com.kalos.app.feature.insights
 
+import com.kalos.app.core.ui.theme.KalosTheme
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -21,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.kalos.app.core.ui.theme.ColorOverTarget
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -159,7 +159,7 @@ private fun NutritionCard(n: NutritionInsight) {
                 label = "Calories / j (moy.)",
                 value = "${n.avgKcal}",
                 sub = if (n.goalKcal > 0) "/ ${n.goalKcal} kcal" else "kcal",
-                valueColor = if (n.isKcalOver) ColorOverTarget else MaterialTheme.colorScheme.primary,
+                valueColor = if (n.isKcalOver) KalosTheme.nutrients.overTarget else MaterialTheme.colorScheme.primary,
             )
             StatBlock(
                 label = "Protéines / j (moy.)",
@@ -178,7 +178,7 @@ private fun NutritionCard(n: NutritionInsight) {
                 values = n.kcalPerDay,
                 goal = n.goalKcal.toFloat(),
                 barColor = MaterialTheme.colorScheme.primary,
-                overColor = ColorOverTarget,
+                overColor = KalosTheme.nutrients.overTarget,
                 gridColor = MaterialTheme.colorScheme.surfaceVariant,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -319,7 +319,7 @@ private fun BarChart(
 @Composable
 private fun verdictColor(v: WeightVerdict): Color = when (v) {
     WeightVerdict.ON_TRACK -> MaterialTheme.colorScheme.primary
-    WeightVerdict.STALLED -> ColorOverTarget
+    WeightVerdict.STALLED -> KalosTheme.nutrients.overTarget
     WeightVerdict.OPPOSITE -> MaterialTheme.colorScheme.error
     WeightVerdict.NEUTRAL -> MaterialTheme.colorScheme.onSurface
 }

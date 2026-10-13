@@ -1,5 +1,6 @@
 package com.kalos.app.core.ui.component
 
+import com.kalos.app.core.ui.theme.KalosTheme
 import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -17,10 +18,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.kalos.app.core.ui.theme.ColorCarbs
-import com.kalos.app.core.ui.theme.ColorFat
-import com.kalos.app.core.ui.theme.ColorOverTarget
-import com.kalos.app.core.ui.theme.ColorProtein
 import kotlin.math.roundToInt
 
 @Composable
@@ -57,7 +54,7 @@ fun MacroRow(
                 buildAnnotatedString {
                     withStyle(
                         SpanStyle(
-                            color = if (isOver) ColorOverTarget else color,
+                            color = if (isOver) KalosTheme.nutrients.overTarget else color,
                             fontWeight = FontWeight.SemiBold,
                         )
                     ) {
@@ -99,8 +96,8 @@ fun MacroTrioRow(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        MacroRow("Protéines", proteinConsumed, proteinGoal, ColorProtein)
-        MacroRow("Glucides", carbsConsumed, carbsGoal, ColorCarbs)
-        MacroRow("Lipides", fatConsumed, fatGoal, ColorFat)
+        MacroRow("Protéines", proteinConsumed, proteinGoal, KalosTheme.nutrients.protein)
+        MacroRow("Glucides", carbsConsumed, carbsGoal, KalosTheme.nutrients.carbs)
+        MacroRow("Lipides", fatConsumed, fatGoal, KalosTheme.nutrients.fat)
     }
 }

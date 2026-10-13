@@ -1,5 +1,6 @@
 package com.kalos.app.core.ui.component
 
+import com.kalos.app.core.ui.theme.KalosTheme
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
@@ -16,7 +17,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.kalos.app.core.ui.theme.ColorOverTarget
 import kotlin.math.roundToInt
 
 @Composable
@@ -27,6 +27,7 @@ fun CalorieProgressRing(
     size: Dp = 180.dp,
     strokeWidth: Dp = 20.dp,
 ) {
+    val overColor = KalosTheme.nutrients.overTarget
     val progress = if (goal > 0) (consumed / goal).coerceIn(0f, 1f) else 0f
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
@@ -62,7 +63,7 @@ fun CalorieProgressRing(
             if (animatedProgress > 0f) {
                 if (isOver) {
                     drawArc(
-                        color = ColorOverTarget,
+                        color = overColor,
                         startAngle = -90f,
                         sweepAngle = 360f * animatedProgress,
                         useCenter = false,
@@ -100,7 +101,7 @@ fun CalorieProgressRing(
                 Text(
                     text = "+${consumed.roundToInt() - goal} kcal",
                     style = MaterialTheme.typography.labelSmall,
-                    color = ColorOverTarget,
+                    color = overColor,
                 )
             } else {
                 Text(

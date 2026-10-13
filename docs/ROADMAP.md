@@ -1,10 +1,64 @@
 # Roadmap
 
-> Last updated: v3.17.0 — 3 July 2026
+> Last updated: v4.0.0 (en cours) — 13 October 2026
 >
 > The June 2026 UX review cycle (18 findings, 3 waves: v3.10.1 / v3.11.0 / v3.12.0) is fully closed. No pending UX backlog.
 
 Priorities are based on user impact relative to implementation effort. The list is intentionally short — only changes worth doing next.
+
+---
+
+## Refonte graphique « Graduation » — octobre 2026
+
+Sortir Kalos de son allure « Material par défaut » avec la méthode mise au point sur Dromos (métaphore unique, planche validée avant le code, système maison, palettes en registre testées, mouvement à niveaux, moments, accessibilité et performance mesurées), sans reprendre sa direction artistique.
+
+**Planche validée le 13 octobre 2026** : https://claude.ai/code/artifact/83c6ed52-5897-44bf-aba9-105799ed396c
+
+**Métaphore unique : la graduation.** Tout ce que Kalos compte se mesure (kcal, grammes, ml, kg, charges, secondes) : règles graduées, aiguille qui se pose avec un amorti, cadran gradué à la place de l'anneau, repas en tickets de pesée, objectif = une zone, graduations qui s'allument quand il est atteint.
+
+| Jalon | Version | Statut | Preuve |
+|---|---|---|---|
+| R1 — Fondations | v4.0.0 | Partial | Lot F1-F2 : 10 tests JVM ajoutés (contrastes et daltonisme des 3 palettes, registre, migration des thèmes 3.x, niveau de mouvement, textes en dur) |
+| R2 — Moments | v4.1.0 | Planned | |
+| R3 — Vitrine (README, kit portfolio) | — | Planned | |
+
+### R1 — Fondations (v4.0.0) — High
+
+- **Polices embarquées (OFL)** — Done. Big Shoulders Display (affiche), Hanken Grotesk (texte), Martian Mono condensée (chiffres à chasse fixe). Licences dans `assets/licenses/`.
+- **Styles nommés par usage** — Done. `KalosType` : `poster`, `posterSmall`, `metricHuge`, `metricLarge`, `metric`, `metricSmall`, `label`, `action`.
+- **Formes en jetons** — Done. `KalosShape` : `chip` 4, `control` 6, `card` 10, `sheet` 14 dp.
+- **Couleurs des nutriments hors Material** — Done. `NutrientColors` (protéines, glucides, lipides, eau, objectif atteint, au-dessus), identiques dans toutes les palettes.
+- **Palettes en registre + test** — Done. Jade (par défaut), Encre, Océan, en clair et en sombre ; neutres communs. Pastel, Berry, Aurora, Aqua, Sunset retirés (repli sur Jade en gardant la luminosité). `PaletteContrastTest`.
+- **Mouvement** — Done. `Motion` (pesée, entrée, transition), `MotionLevel` FULL / REDUCED / NONE, réglage « Ambiance » (Expressive / Sobre) ; « Supprimer les animations » relu à chaque retour dans l'appli. `Haptics` centralisée, coupée par le réglage « Vibrations ».
+- **Textes dans strings.xml** — Partial. `HardcodedUiTextTest` + liste d'attente `hardcoded-ui-pending.txt` qui doit être vide en 4.0.0.
+- **Composants maison** — Partial. `FitText`, `RisingText`, `CountUp`, `RollingDigits`, `GraduatedScale`, `GraduatedDial`, `Graduation`.
+- **Tous les écrans dans le nouveau langage, clair et sombre** — Planned. Aujourd'hui (ex-Nutrition, corrige la route `home` non déclarée), nutrition, sport, calendrier, bilan, profil, réglages, onboarding.
+- **Graphiques refaits (méthode dataviz)** — Planned. Curseur au doigt et réglable par TalkBack ; retrait de Vico (jamais utilisé).
+- **Accessibilité et performance mesurées** — Planned. TalkBack (arbre uiautomator), police 200 %, écran étroit, paysage ; défilement des listes, minuteur de repos, scanner.
+
+**Critère d'acceptation.** Aucun écran ne « fait Material par défaut » ; Sobre et « Supprimer les animations » coupent tout mouvement décoratif ; tests JVM verts ; aucun nouvel avertissement lint.
+
+### R2 — Moments (v4.1.0) — High
+
+Aliment ajouté (l'aiguille avance), objectif du jour atteint (les graduations s'allument, une fois par jour), série validée et repos (cadran qui se vide, vibration en fin de repos), séance terminée (récapitulatif). Interruptibles d'un toucher, haptique centralisée, annonces TalkBack au début et à la fin seulement.
+
+### Journal des décisions (refonte)
+
+| Décision | Raison |
+|---|---|
+| Métaphore unique « la graduation » | la cohérence d'une métaphore, pas la quantité d'effets, fait l'identité |
+| Trois palettes (Jade, Encre, Océan) en registre + test | lisibilité vérifiée à chaque build ; Prune écartée, trop proche du rose des lipides |
+| Pas de couleurs dynamiques (Material You) | contrastes choisis et testés, pas hérités du fond d'écran |
+| Français seul, textes dans strings.xml | remplace la décision « i18n long terme » du 4 juillet ; préalable à toute autre langue |
+| Polices embarquées (OFL), variables | hors-ligne ; une graisse = un réglage d'axe |
+| Réglage « Ambiance » + respect de « Supprimer les animations » | le mouvement ne doit jamais coûter la lisibilité ni le confort |
+| Contrôle des textes en dur par test JVM plutôt que tâche Gradle | Kalos n'a qu'un module : pas de `buildSrc` à maintenir, et le détecteur est testé |
+| Avertissements lint antérieurs figés dans `lint-baseline.xml` | tout nouvel avertissement se voit ; les 90 mises à jour de dépendances restent une décision à part |
+
+### Hors refonte, relevé au passage
+
+- `CalculateMacroGoalsUseCaseTest.protein is 2g per kg body weight` échoue sur master : le test attend 2 g/kg alors que le calcul utilise un ratio par objectif depuis le lot « macro transparency ». Test à mettre à jour (décision de Gabriel, calcul métier). — Blocked
+- `versionName = "1.0.0"` / `versionCode = 1` ne suivent pas le CHANGELOG. Alignement proposé à la release 4.0.0. — Blocked (accord attendu)
 
 ---
 

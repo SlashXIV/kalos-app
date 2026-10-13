@@ -22,7 +22,12 @@ import androidx.navigation.NavController
 import com.kalos.app.core.data.DietaryPreferencesStore
 import com.kalos.app.core.data.ThemePreferenceStore
 import com.kalos.app.core.domain.model.DietaryFilter
-import com.kalos.app.core.ui.theme.ThemeMode
+import androidx.compose.ui.res.stringResource
+import com.kalos.app.R
+import com.kalos.app.core.ui.theme.AppearanceSettings
+import com.kalos.app.core.ui.theme.Brightness
+import com.kalos.app.core.ui.theme.MotionPreference
+import com.kalos.app.core.ui.theme.Palettes
 import com.kalos.app.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
@@ -37,8 +42,11 @@ class SettingsViewModel @Inject constructor(
     val filters: StateFlow<Set<DietaryFilter>> = prefsStore.filtersFlow
     fun toggle(filter: DietaryFilter, enabled: Boolean) = prefsStore.setFilter(filter, enabled)
 
-    val themeMode: StateFlow<ThemeMode> = themeStore.mode
-    fun setThemeMode(mode: ThemeMode) = themeStore.setMode(mode)
+    val appearance: StateFlow<AppearanceSettings> = themeStore.settings
+    fun setPalette(id: String) = themeStore.setPalette(id)
+    fun setBrightness(brightness: Brightness) = themeStore.setBrightness(brightness)
+    fun setMotion(motion: MotionPreference) = themeStore.setMotion(motion)
+    fun setVibrations(enabled: Boolean) = themeStore.setVibrations(enabled)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,7 +58,7 @@ fun SettingsScreen(
     importViewModel: ImportViewModel = hiltViewModel(),
 ) {
     val activeFilters by viewModel.filters.collectAsStateWithLifecycle()
-    val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
+    val appearance by viewModel.appearance.collectAsStateWithLifecycle()
     val exportState by exportViewModel.state.collectAsStateWithLifecycle()
     val importState by importViewModel.state.collectAsStateWithLifecycle()
 
@@ -141,8 +149,8 @@ fun SettingsScreen(
             // ── Appearance ───────────────────────────────────────────────────
             SettingsItem(
                 icon = Icons.Filled.Palette,
-                title = "Apparence",
-                subtitle = "Thème : ${themeMode.label}",
+                title = stringResource(R.string.appearance_title),
+                subtitle = stringResource(R.string.appearance_subtitle, stringResource(Palettes.byId(appearance.paletteId).nameRes)),
                 onClick = { navController.navigate(Screen.Appearance.route) },
             )
 

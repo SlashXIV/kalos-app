@@ -26,7 +26,7 @@ class DatabaseSeeder @Inject constructor(
     private val json = Json { ignoreUnknownKeys = true }
 
     private fun readAsset(name: String): String =
-        context.assets.open(name).bufferedReader().readText().trimStart('﻿')
+        context.assets.open(name).bufferedReader().readText().trimStart('\uFEFF')
 
     // Bump this whenever seed_exercises.json gains new entries, nameNormalized needs backfilling,
     // or trackingMode/name values change.

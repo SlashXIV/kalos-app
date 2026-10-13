@@ -80,6 +80,9 @@ android {
 
     buildFeatures { compose = true }
 
+    // Avertissements antérieurs à la refonte 4.0 figés ici : tout nouvel avertissement doit se voir.
+    lint { baseline = file("lint-baseline.xml") }
+
     packaging {
         resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }
     }

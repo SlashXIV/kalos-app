@@ -179,7 +179,7 @@ private class BarcodeAnalyzer(private val onBarcode: (String) -> Unit) : ImageAn
     )
     private var handled = false
 
-    @OptIn(ExperimentalGetImage::class)
+    @androidx.annotation.OptIn(ExperimentalGetImage::class)
     override fun analyze(imageProxy: ImageProxy) {
         if (handled) {
             imageProxy.close()

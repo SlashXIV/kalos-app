@@ -2,6 +2,26 @@
 
 ---
 
+## v4.0.0 — en cours (refonte « Graduation »)
+
+### Added — fondations du thème et du mouvement
+
+- **Polices embarquées** (licence OFL, hors-ligne) : Big Shoulders Display pour les titres, Hanken Grotesk pour le texte, Martian Mono pour les chiffres (chasse fixe : kcal, grammes et chronos ne « dansent » plus).
+- **Trois palettes** en clair et en sombre : Jade (par défaut), Encre, Océan. La luminosité (Système / Clair / Sombre) se choisit à part.
+- **Couleurs des nutriments** identiques dans toutes les palettes et distinctes pour les daltoniens (protéines violet, glucides ambre, lipides rose, eau cyan).
+- **Réglage « Ambiance »** (Expressive / Sobre) et **réglage « Vibrations »** dans Apparence. Le réglage Android « Supprimer les animations » est toujours respecté.
+- Tests : contrastes WCAG et daltonisme (protan, deutan) de chaque palette, registre des palettes, migration des anciens thèmes, niveau de mouvement, textes d'interface codés en dur.
+
+### Changed — thèmes 3.x
+
+- Pastel, Berry, Aurora, Aqua et Sunset sont retirés ; Monochrome devient Encre, Océan est redessiné. Le thème choisi est converti automatiquement au premier lancement : une palette retirée devient Jade en gardant sa luminosité.
+
+### Fixed
+
+- Lint : annotation `@OptIn` de CameraX dans le scanner, BOM littéral dans le chargement des données de démarrage.
+
+---
+
 ## v3.26.2 — 6 July 2026
 
 ### Fixed — feuille de quantité qui ne se rouvrait plus

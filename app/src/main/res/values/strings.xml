@@ -58,4 +58,32 @@
     <string name="empty_state_default">Rien ici pour l\'instant</string>
     <string name="loading">Chargement…</string>
     <string name="error_generic">Une erreur est survenue</string>
+    <!-- Commun -->
+    <string name="action_back">Retour</string>
+    <!-- Formule TalkBack d’une mesure : « Protéines, 82 sur 140 grammes » -->
+    <string name="measure_sentence">%1$s, %2$s sur %3$s %4$s</string>
+    <string name="unit_grams_spoken">grammes</string>
+    <string name="unit_kcal_spoken">kilocalories</string>
+    <string name="unit_litres_spoken">litres</string>
+    <string name="state_over_target">au-dessus de l’objectif</string>
+    <string name="state_goal_reached">objectif atteint</string>
+
+    <!-- Apparence -->
+    <string name="appearance_title">Apparence</string>
+    <string name="appearance_subtitle">Palette : %1$s</string>
+    <string name="appearance_palette">Palette</string>
+    <string name="palette_jade">Jade</string>
+    <string name="palette_encre">Encre</string>
+    <string name="palette_ocean">Océan</string>
+    <string name="appearance_brightness">Luminosité</string>
+    <string name="appearance_brightness_system">Système</string>
+    <string name="appearance_brightness_light">Clair</string>
+    <string name="appearance_brightness_dark">Sombre</string>
+    <string name="appearance_motion">Ambiance</string>
+    <string name="appearance_motion_expressive">Expressive</string>
+    <string name="appearance_motion_calm">Sobre</string>
+    <string name="appearance_motion_expressive_desc">L’aiguille se pose, les titres montent, les graduations s’allument quand l’objectif est atteint.</string>
+    <string name="appearance_motion_calm_desc">Mouvement réduit au strict utile : valeurs affichées directement, transitions brèves.</string>
+    <string name="appearance_vibrations">Vibrations</string>
+    <string name="appearance_vibrations_desc">Aliment ajouté, série validée, fin du repos.</string>
 </resources>

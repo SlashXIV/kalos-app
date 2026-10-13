@@ -1,10 +1,10 @@
 package com.kalos.app.core.ui.util
 
+import com.kalos.app.core.ui.theme.KalosTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.kalos.app.core.domain.model.Food
-import com.kalos.app.core.ui.theme.ColorOverTarget
 
 /**
  * "Fullness per calorie" signal for volume eating: how filling a food is relative to its
@@ -49,5 +49,5 @@ fun foodSatietyLevel(food: Food): SatietyLevel {
 fun SatietyLevel.color(): Color = when (this) {
     SatietyLevel.HIGH -> MaterialTheme.colorScheme.primary
     SatietyLevel.MODERATE -> MaterialTheme.colorScheme.onSurfaceVariant
-    SatietyLevel.LOW -> ColorOverTarget
+    SatietyLevel.LOW -> KalosTheme.nutrients.overTarget
 }

@@ -2,6 +2,7 @@ package com.kalos.app.feature.calendar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kalos.app.core.domain.model.NutritionGoal
 import com.kalos.app.core.domain.model.TrainingProgram
 import com.kalos.app.core.domain.model.WorkoutLog
 import com.kalos.app.core.domain.repository.MealRepository
@@ -101,7 +102,8 @@ class CalendarViewModel @Inject constructor(
         val daysWithData = summaries.count { (it.totalKcal ?: 0f) > 0f }
         val avgKcal = if (daysWithData == 0) 0f
                       else summaries.sumOf { (it.totalKcal ?: 0f).toDouble() }.toFloat() / daysWithData
-        val kcalGoal = goal?.kcal?.toFloat() ?: 0f
+        // Même repli que l'écran Aujourd'hui : l'objectif par défaut tant qu'aucun n'est enregistré.
+        val kcalGoal = (goal ?: NutritionGoal()).kcal.toFloat()
         val now = LocalDate.now()
         val workoutsPerWeek = (3 downTo 0).map { weekOffset ->
             val weekEnd = now.minusDays((weekOffset * 7).toLong())

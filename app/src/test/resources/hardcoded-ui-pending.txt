@@ -3,10 +3,7 @@ com/kalos/app/core/notification/NotificationHelper.kt
 com/kalos/app/core/ui/component/EditWorkoutSetDialog.kt
 com/kalos/app/core/ui/component/ExerciseListItem.kt
 com/kalos/app/core/ui/component/KalosSearchBar.kt
-com/kalos/app/core/ui/component/MacroProgressBar.kt
-com/kalos/app/core/ui/component/MacroProgressRing.kt
 com/kalos/app/core/ui/component/WorkoutCard.kt
-com/kalos/app/core/ui/motion/Entrances.kt
 com/kalos/app/feature/calendar/CalendarScreen.kt
 com/kalos/app/feature/insights/InsightsScreen.kt
 com/kalos/app/feature/nutrition/custom/CustomFoodScreen.kt

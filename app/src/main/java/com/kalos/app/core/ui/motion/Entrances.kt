@@ -59,7 +59,7 @@ fun Modifier.pressScale(interaction: MutableInteractionSource): Modifier = compo
     val scale by animateFloatAsState(
         targetValue = if (pressed && decorative) 0.97f else 1f,
         animationSpec = spring(dampingRatio = 0.55f, stiffness = 600f),
-        label = "pression",
+        label = "pression", // texte-technique : nom d'animation, jamais affiché
     )
     graphicsLayer { scaleX = scale; scaleY = scale }
 }

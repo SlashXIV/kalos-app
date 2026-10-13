@@ -1,4 +1,20 @@
-# Kalos — Fitness & Nutrition Tracker
+<p align="center">
+  <img src="design/icon/kalos-icon.svg" width="112" alt="Icône de Kalos">
+</p>
+
+<h1 align="center">Kalos</h1>
+
+<p align="center"><b>L'assiette et les séances, pesées au même endroit.</b><br>
+Calories et macros · séances et programmes · sans compte ni cloud</p>
+
+<p align="center">
+  <img src="design/screenshots/aujourdhui.webp" width="200" alt="Aujourd'hui : jauge des calories, règles des macros et de l'eau, premier repas">
+  <img src="design/screenshots/historique.webp" width="200" alt="Sport : volume hebdomadaire et historique des séances">
+  <img src="design/screenshots/calendrier.webp" width="200" alt="Calendrier : calories du jour et séances du mois, fréquence d'entraînement">
+  <img src="design/screenshots/bilan.webp" width="200" alt="Bilan sur 7 jours : calories dans la cible, protéines, poids">
+</p>
+
+---
 
 A complete offline-first Android fitness and nutrition tracking app built with Kotlin + Jetpack Compose.
 

@@ -17,7 +17,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Centralised haptics + « Vibrations » setting | Done | `Haptics.tick()` / `confirm()`; used by the moments (v4.1.0) |
 | House components | Done | Graduated dial and scales, measure tickets, screen headers, instrument labels, value chips, filter chips, graduated nav bar, charts with adjustable cursor |
 | All UI text in `strings.xml` (French) | Done | `HardcodedUiTextTest` guards against hardcoded text |
-| Launcher icon and splash | Done | K on a graduated rule |
+| Launcher icon and splash | Done | K on a graduated rule inside a three-arc macro ring; vector source `design/icon/kalos-icon.svg`, themed (monochrome) icon (v4.0.1) |
 | Removal of the unused onboarding screens | Done | Never wired to navigation (dead code); profile is filled from Profile › Edit profile. Database seeding still runs once on first launch |
 
 ---

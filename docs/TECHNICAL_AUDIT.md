@@ -524,3 +524,9 @@ Périmètre : couche d'interface uniquement. Aucun changement de calcul métier,
 - Graphiques de progression et de volume (Sport) seulement restylés : à refaire avec `MeSeriesChart` (Medium).
 - Unités TalkBack au pluriel pour une quantité de 1 ; bouton Enregistrer sans indicateur de chargement (aliment perso, objectifs) ; mise en forme « Aujourd'hui / Hier » dupliquée à cinq endroits ; `formatElapsedSince` encore en dur.
 - Le téléphone de test porte encore une version signée avec la clé de debug (installée avant la 3.26.1) : pour suivre les releases GitHub, export JSON → désinstallation → installation de `Kalos.apk` → import.
+
+## Icône vectorielle et README — 13 October 2026 (v4.0.1)
+
+- L'icône n'est plus un PNG : `design/icon/kalos-icon.svg` est la source, `ic_launcher_background` (fond + anneau des macros), `ic_launcher_foreground` (K + règle), `ic_launcher_monochrome` et `ic_splash_logo` en dérivent (couleurs dans `values/colors.xml`, préfixe `icon_`). Toute retouche se fait d'abord dans le SVG.
+- Mipmaps PNG supprimés : avec minSdk 26, `mipmap-anydpi-v26` couvre toutes les versions.
+- Captures du README : profil de démonstration injecté dans la base de l'émulateur (build debug, `run-as`) ; rien dans le code.

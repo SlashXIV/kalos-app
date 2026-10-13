@@ -2,6 +2,22 @@
 
 ---
 
+## v4.0.1 — 13 October 2026
+
+Icône redessinée dans la grammaire commune aux applis de l'auteur (Brut, Dromos, Topo) et README illustré. Aucun calcul métier ni schéma de données modifié.
+
+### Changed — icône vectorielle « anneau des macros »
+
+- **Source unique** `design/icon/kalos-icon.svg` : le K dessiné à la main (même hauteur que les lettres des applis sœurs), la règle graduée verte en trait d'accent, et autour un **anneau des macros** en trois arcs (protéines violet, glucides ambre, lipides rose, couleurs de l'appli).
+- Icône adaptative entièrement vectorielle (fond avec l'anneau, premier plan K + règle) et **icône à thème** Android 13+ (monochrome) ; l'écran de lancement reprend l'icône complète.
+- Retrait du PNG 512 px et des mipmaps PNG hérités, inutiles depuis Android 8 (minSdk 26).
+
+### Added — README illustré
+
+- En-tête centré avec l'icône, accroche et quatre captures (Aujourd'hui, historique Sport, calendrier, bilan) prises sur émulateur avec un profil de démonstration (`design/screenshots/`).
+
+---
+
 ## v4.0.0 — 13 October 2026
 
 Refonte graphique « Graduation » : Kalos quitte l'allure Material par défaut. Tout ce que l'appli compte se mesure (kcal, grammes, millilitres, kilos, secondes) ; son langage visuel devient celui de l'instrument de mesure : règles graduées, aiguille qui se pose, cadran à la place de l'anneau, repas en tickets de pesée. Planche validée avant le code. Aucun calcul métier ni schéma de données modifié.

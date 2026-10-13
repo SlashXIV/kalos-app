@@ -84,6 +84,12 @@ class CalendarViewModel @Inject constructor(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
+    /** kcal par jour du mois affiché, pour les jauges de la grille (état d'interface seul). */
+    val monthKcal: StateFlow<Map<String, Float>> = _month.flatMapLatest { m ->
+        mealRepository.getDailySummaries(m.atDay(1).toString(), m.atEndOfMonth().toString())
+    }.map { rows -> rows.associate { it.date to (it.totalKcal ?: 0f) } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
     private val today = LocalDate.now().toString()
     private val sevenDaysAgo = LocalDate.now().minusDays(6).toString()
 

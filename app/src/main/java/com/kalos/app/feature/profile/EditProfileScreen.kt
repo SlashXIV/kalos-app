@@ -11,6 +11,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import com.kalos.app.R
+import com.kalos.app.core.ui.component.FitText
+import com.kalos.app.core.ui.component.ScreenHeader
+import com.kalos.app.core.ui.component.SectionLabel
+import com.kalos.app.core.ui.theme.KalosShape
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -114,103 +123,102 @@ fun EditProfileScreen(
         if (state.savedSuccessfully) navController.popBackStack()
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Modifier le profil") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = viewModel::save, enabled = !state.isSaving) {
-                        Icon(Icons.Filled.Check, "Enregistrer")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(padding)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            ScreenHeader(
+                title = stringResource(R.string.me_profile_nav_edit),
+                small = true,
+                navigation = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                    }
+                },
+            ) {
+                IconButton(onClick = viewModel::save, enabled = !state.isSaving) {
+                    Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.action_save))
+                }
+            }
+
             OutlinedTextField(
                 value = state.name, onValueChange = viewModel::onNameChange,
-                label = { Text("Prénom") },
+                label = { Text(stringResource(R.string.me_edit_first_name)) },
                 modifier = Modifier.fillMaxWidth(), singleLine = true,
             )
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                ProfileNumField("Âge", state.age, viewModel::onAgeChange, Modifier.weight(1f))
-                ProfileNumField("Taille (cm)", state.heightCm, viewModel::onHeightChange, Modifier.weight(1f))
+                ProfileNumField(stringResource(R.string.me_edit_age), state.age, viewModel::onAgeChange, Modifier.weight(1f))
+                ProfileNumField(stringResource(R.string.me_edit_height), state.heightCm, viewModel::onHeightChange, Modifier.weight(1f))
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                ProfileNumField("Poids (kg)", state.weightKg, viewModel::onWeightChange, Modifier.weight(1f))
-                ProfileNumField("Objectif (kg)", state.targetWeightKg, viewModel::onTargetWeightChange, Modifier.weight(1f))
+                ProfileNumField(stringResource(R.string.me_weight_field), state.weightKg, viewModel::onWeightChange, Modifier.weight(1f))
+                ProfileNumField(stringResource(R.string.me_edit_target_weight), state.targetWeightKg, viewModel::onTargetWeightChange, Modifier.weight(1f))
             }
 
-            Text("Sexe", style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            SectionLabel(stringResource(R.string.me_edit_sex), Modifier.padding(top = 8.dp))
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                listOf(Sex.MALE to "Homme", Sex.FEMALE to "Femme").forEachIndexed { i, (sex, label) ->
+                listOf(Sex.MALE to R.string.me_sex_male, Sex.FEMALE to R.string.me_sex_female).forEachIndexed { i, (sex, label) ->
                     SegmentedButton(
                         selected = state.sex == sex,
                         onClick = { viewModel.onSexChange(sex) },
-                        shape = SegmentedButtonDefaults.itemShape(i, 2),
-                        label = { Text(label) },
-                        colors = SegmentedButtonDefaults.colors(
-                            activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                            activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            activeBorderColor = MaterialTheme.colorScheme.primary,
-                        ),
+                        shape = SegmentedButtonDefaults.itemShape(i, 2, KalosShape.control),
+                        icon = {},
+                        modifier = Modifier.heightIn(min = 48.dp),
+                        label = { FitText(stringResource(label)) },
                     )
                 }
             }
 
-            Text("Niveau d'activité", style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
-            ActivityLevel.entries.forEach { level ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    RadioButton(
+            SectionLabel(stringResource(R.string.me_edit_activity), Modifier.padding(top = 8.dp))
+            Column(Modifier.selectableGroup()) {
+                ActivityLevel.entries.forEach { level ->
+                    ChoiceRow(
                         selected = state.activityLevel == level,
-                        onClick = { viewModel.onActivityChange(level) },
+                        title = level.label,
+                        subtitle = level.description,
+                        onSelect = { viewModel.onActivityChange(level) },
                     )
-                    Spacer(Modifier.width(8.dp))
-                    Column {
-                        Text(level.label, style = MaterialTheme.typography.bodyMedium)
-                        Text(
-                            level.description,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
                 }
             }
 
-            Text("Objectif", style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
-            FitnessGoal.values().forEach { goal ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    RadioButton(
+            SectionLabel(stringResource(R.string.me_edit_goal), Modifier.padding(top = 8.dp))
+            Column(Modifier.selectableGroup()) {
+                FitnessGoal.entries.forEach { goal ->
+                    ChoiceRow(
                         selected = state.goal == goal,
-                        onClick = { viewModel.onGoalChange(goal) },
+                        title = goal.label,
+                        onSelect = { viewModel.onGoalChange(goal) },
                     )
-                    Spacer(Modifier.width(8.dp))
-                    Text(goal.label, style = MaterialTheme.typography.bodyMedium)
                 }
             }
+        }
+    }
+}
 
-            Spacer(Modifier.height(8.dp))
+/** Choix exclusif : toute la ligne est la cible (≥ 48 dp), lue comme bouton radio. */
+@Composable
+private fun ChoiceRow(selected: Boolean, title: String, subtitle: String? = null, onSelect: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onSelect)
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        RadioButton(selected = selected, onClick = null)
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            if (subtitle != null) {
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
     }
 }

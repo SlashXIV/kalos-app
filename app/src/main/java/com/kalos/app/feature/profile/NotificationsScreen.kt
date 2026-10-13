@@ -11,7 +11,21 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import com.kalos.app.R
+import com.kalos.app.core.ui.component.InstrumentLabel
+import com.kalos.app.core.ui.component.KalosCard
+import com.kalos.app.core.ui.component.ScreenHeader
+import com.kalos.app.core.ui.component.SectionLabel
+import com.kalos.app.core.ui.component.ValueChip
+import com.kalos.app.core.ui.theme.KalosTheme
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -106,7 +120,6 @@ class NotificationsViewModel @Inject constructor(
     fun setSmartHour(hour: Int) { smartScheduler.setHour(hour); _state.update { it.copy(smartHour = hour) } }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationsScreen(
     navController: NavController,
@@ -119,176 +132,131 @@ fun NotificationsScreen(
         var sliderHour by remember { mutableFloatStateOf(state.notifHour.toFloat()) }
         AlertDialog(
             onDismissRequest = { showHourDialog = false },
-            title = { Text("Heure des rappels programme") },
+            title = { Text(stringResource(R.string.me_notif_program_hour_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Text(
-                            "${sliderHour.toInt()}h00",
-                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                        )
-                    }
-                    Slider(
-                        value = sliderHour,
-                        onValueChange = { sliderHour = it },
-                        valueRange = 6f..22f,
-                        steps = 15,
-                        colors = SliderDefaults.colors(
-                            thumbColor = MaterialTheme.colorScheme.primary,
-                            activeTrackColor = MaterialTheme.colorScheme.primary,
-                            inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
-                            inactiveTickColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        ),
-                    )
                     Text(
-                        "S'applique à toutes les séances planifiées",
-                        style = MaterialTheme.typography.labelSmall,
+                        stringResource(R.string.me_hour_value, sliderHour.toInt()),
+                        style = KalosTheme.type.metricLarge,
+                        modifier = Modifier.align(Alignment.CenterHorizontally).clearAndSetSemantics { },
+                    )
+                    HourSlider(sliderHour, onChange = { sliderHour = it })
+                    Text(
+                        stringResource(R.string.me_notif_program_hour_hint),
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.setNotifHour(sliderHour.toInt()); showHourDialog = false }) {
-                    Text("Valider")
+                    Text(stringResource(R.string.action_validate))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showHourDialog = false }) { Text("Annuler") }
+                TextButton(onClick = { showHourDialog = false }) { Text(stringResource(R.string.action_cancel)) }
             },
         )
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Notifications") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour")
-                    }
-                },
-            )
-        },
-    ) { padding ->
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // ── Smart reminders ──────────────────────────────────────────────
-            Text(
-                "Rappels intelligents",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            ScreenHeader(
+                title = stringResource(R.string.me_settings_notifications),
+                small = true,
+                navigation = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                    }
+                },
             )
+
+            SectionLabel(stringResource(R.string.me_notif_smart), Modifier.padding(top = 4.dp))
             Text(
-                "Rappels quotidiens basés sur vos habitudes — nutrition, sport, hydratation.",
+                stringResource(R.string.me_notif_smart_sub),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-
             SmartRemindersCard(state = state, viewModel = viewModel)
 
-            HorizontalDivider()
-
-            // ── Programme reminders ──────────────────────────────────────────
+            SectionLabel(stringResource(R.string.me_notif_training), Modifier.padding(top = 8.dp))
             Text(
-                "Rappels d'entraînement",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                "Notifications liées à vos programmes de sport planifiés.",
+                stringResource(R.string.me_notif_training_sub),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            // Hour picker
-            ElevatedCard(
-                onClick = { showHourDialog = true },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+            KalosCard(contentPadding = PaddingValues(vertical = 4.dp)) {
+                val hour = stringResource(R.string.me_hour_value, state.notifHour)
                 Row(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp)
+                        .clickable { showHourDialog = true }
+                        .padding(horizontal = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
-                    Icon(Icons.Filled.Schedule, null, tint = MaterialTheme.colorScheme.primary)
-                    Column(Modifier.weight(1f)) {
-                        Text("Heure d'envoi", style = MaterialTheme.typography.bodyLarge)
-                        Text(
-                            "${state.notifHour}h00",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    Icon(
-                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    Icon(Icons.Filled.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.me_notif_send_hour), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                    Text(hour, style = KalosTheme.type.metric)
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-            }
-
-            // Programs list
-            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                    if (state.programs.isEmpty()) {
-                        Text(
-                            "Aucun programme créé",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(16.dp),
-                        )
-                    } else {
-                        state.programs.forEachIndexed { index, entry ->
-                            ProgramReminderRow(
-                                entry = entry,
-                                onToggle = { viewModel.setProgramEnabled(entry.id, it) },
-                                onDetail = { navController.navigate(Screen.ProgramDetail.route(entry.id)) },
-                            )
-                            if (index < state.programs.lastIndex) {
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    color = MaterialTheme.colorScheme.surfaceVariant,
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
-                ),
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Row(
-                    modifier = Modifier.padding(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.Top,
-                ) {
-                    Icon(
-                        Icons.Filled.Info,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp).padding(top = 2.dp),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                if (state.programs.isEmpty()) {
                     Text(
-                        "Pour configurer le rappel jour J ou la veille d'une séance, " +
-                            "ouvrez la fiche du programme concerné.",
-                        style = MaterialTheme.typography.labelSmall,
+                        stringResource(R.string.me_notif_no_program),
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(14.dp),
                     )
+                } else {
+                    state.programs.forEach { entry ->
+                        ProgramReminderRow(
+                            entry = entry,
+                            onToggle = { viewModel.setProgramEnabled(entry.id, it) },
+                            onDetail = { navController.navigate(Screen.ProgramDetail.route(entry.id)) },
+                        )
+                    }
                 }
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
+                Icon(
+                    Icons.Filled.Info,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp).padding(top = 2.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    stringResource(R.string.me_notif_program_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }
+}
+
+/** Curseur d'heure (6 h à 22 h) ; TalkBack lit l'heure, pas un pourcentage. */
+@Composable
+private fun HourSlider(value: Float, onChange: (Float) -> Unit, modifier: Modifier = Modifier) {
+    val spoken = pluralStringResource(R.plurals.me_hour_spoken, value.toInt(), value.toInt())
+    Slider(
+        value = value,
+        onValueChange = onChange,
+        valueRange = 6f..22f,
+        steps = 15,
+        modifier = modifier.fillMaxWidth().semantics { stateDescription = spoken },
+    )
 }
 
 @Composable
@@ -298,189 +266,97 @@ private fun ProgramReminderRow(
     onDetail: () -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+        modifier = Modifier.fillMaxWidth().padding(end = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    entry.name,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                )
-                if (entry.isActive) {
-                    Surface(
-                        shape = MaterialTheme.shapes.extraSmall,
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                    ) {
-                        Text(
-                            "Actif",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                        )
-                    }
-                }
-            }
-        }
-        TextButton(
-            onClick = onDetail,
-            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .heightIn(min = 56.dp)
+                .toggleable(value = entry.reminderEnabled, role = Role.Switch, onValueChange = onToggle)
+                .padding(start = 14.dp, end = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text("Détail", style = MaterialTheme.typography.labelSmall)
+            Text(entry.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f, fill = false))
+            if (entry.isActive) InstrumentLabel(stringResource(R.string.me_notif_active), color = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.weight(1f))
+            Switch(checked = entry.reminderEnabled, onCheckedChange = null)
         }
-        Switch(
-            checked = entry.reminderEnabled,
-            onCheckedChange = onToggle,
-            colors = SwitchDefaults.colors(
-                checkedTrackColor = MaterialTheme.colorScheme.primary,
-                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-            ),
-        )
+        IconButton(onClick = onDetail) {
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = stringResource(R.string.me_notif_program_detail, entry.name),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
 @Composable
 private fun SmartRemindersCard(state: NotificationsUiState, viewModel: NotificationsViewModel) {
-    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            // Master switch
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
+    KalosCard(contentPadding = PaddingValues(vertical = 4.dp)) {
+        SwitchRow(
+            title = stringResource(R.string.me_notif_discipline),
+            subtitle = stringResource(R.string.me_notif_discipline_sub),
+            checked = state.smartEnabled,
+            onCheckedChange = viewModel::setSmartEnabled,
+            strong = true,
+        )
+
+        if (state.smartEnabled) {
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            SwitchRow(
+                title = stringResource(R.string.me_notif_nutrition),
+                subtitle = stringResource(R.string.me_notif_nutrition_sub),
+                checked = state.smartNutrition,
+                onCheckedChange = viewModel::setSmartNutrition,
+            )
+            SwitchRow(
+                title = stringResource(R.string.me_notif_activity),
+                subtitle = stringResource(R.string.me_notif_activity_sub),
+                checked = state.smartWorkout,
+                onCheckedChange = viewModel::setSmartWorkout,
+            )
+            if (state.smartWorkout) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(horizontal = 14.dp),
                 ) {
-                    Icon(
-                        Icons.Filled.NotificationsActive,
-                        contentDescription = null,
-                        tint = if (state.smartEnabled) MaterialTheme.colorScheme.primary
-                               else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(22.dp),
-                    )
-                    Column {
-                        Text(
-                            "Rappels de discipline",
-                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
-                        )
-                        Text(
-                            "Nutrition, sport, hydratation",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    listOf(2, 3, 5).forEach { days ->
+                        ValueChip(
+                            text = stringResource(R.string.me_notif_days_short, days),
+                            onClick = { viewModel.setInactivityDays(days) },
+                            selected = state.inactivityDays == days,
+                            contentDescription = pluralStringResource(R.plurals.me_notif_days_spoken, days, days),
                         )
                     }
-                }
-                Switch(
-                    checked = state.smartEnabled,
-                    onCheckedChange = viewModel::setSmartEnabled,
-                    colors = SwitchDefaults.colors(
-                        checkedTrackColor = MaterialTheme.colorScheme.primary,
-                        checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                    ),
-                )
-            }
-
-            if (state.smartEnabled) {
-                Spacer(Modifier.height(12.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                Spacer(Modifier.height(12.dp))
-
-                SmartToggleRow(
-                    title = "Nutrition",
-                    subtitle = "Si aucun repas enregistré aujourd'hui",
-                    checked = state.smartNutrition,
-                    onCheckedChange = viewModel::setSmartNutrition,
-                )
-                Spacer(Modifier.height(10.dp))
-
-                SmartToggleRow(
-                    title = "Activité physique",
-                    subtitle = "Si inactif depuis trop longtemps",
-                    checked = state.smartWorkout,
-                    onCheckedChange = viewModel::setSmartWorkout,
-                )
-
-                if (state.smartWorkout) {
-                    Spacer(Modifier.height(6.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.padding(start = 4.dp),
-                    ) {
-                        listOf(2, 3, 5).forEach { days ->
-                            FilterChip(
-                                selected = state.inactivityDays == days,
-                                onClick = { viewModel.setInactivityDays(days) },
-                                label = { Text("$days j", style = MaterialTheme.typography.labelSmall) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                ),
-                                border = FilterChipDefaults.filterChipBorder(
-                                    enabled = true,
-                                    selected = state.inactivityDays == days,
-                                    selectedBorderColor = MaterialTheme.colorScheme.primary,
-                                    borderColor = MaterialTheme.colorScheme.outline,
-                                ),
-                            )
-                        }
-                        Text(
-                            "sans séance",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.align(Alignment.CenterVertically),
-                        )
-                    }
-                }
-                Spacer(Modifier.height(10.dp))
-
-                SmartToggleRow(
-                    title = "Hydratation",
-                    subtitle = "Si < 50 % de l'objectif eau atteint",
-                    checked = state.smartHydration,
-                    onCheckedChange = viewModel::setSmartHydration,
-                )
-
-                Spacer(Modifier.height(12.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                Spacer(Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text("Heure d'envoi", style = MaterialTheme.typography.bodyMedium)
                     Text(
-                        "${state.smartHour}h00",
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.primary,
+                        stringResource(R.string.me_notif_without_session),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.clearAndSetSemantics { },
                     )
                 }
-                Slider(
-                    value = state.smartHour.toFloat(),
-                    onValueChange = { viewModel.setSmartHour(it.toInt()) },
-                    valueRange = 6f..22f,
-                    steps = 15,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = SliderDefaults.colors(
-                        thumbColor = MaterialTheme.colorScheme.primary,
-                        activeTrackColor = MaterialTheme.colorScheme.primary,
-                        inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
-                        inactiveTickColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    ),
-                )
+            }
+            SwitchRow(
+                title = stringResource(R.string.me_notif_hydration),
+                subtitle = stringResource(R.string.me_notif_hydration_sub),
+                checked = state.smartHydration,
+                onCheckedChange = viewModel::setSmartHydration,
+            )
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Column(Modifier.padding(horizontal = 14.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(Modifier.fillMaxWidth().clearAndSetSemantics { }, verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.me_notif_send_hour), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                    Text(stringResource(R.string.me_hour_value, state.smartHour), style = KalosTheme.type.metric)
+                }
+                HourSlider(state.smartHour.toFloat(), onChange = { viewModel.setSmartHour(it.toInt()) })
                 Text(
-                    "Envoyés une fois par jour à l'heure choisie",
-                    style = MaterialTheme.typography.labelSmall,
+                    stringResource(R.string.me_notif_once_daily),
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -488,29 +364,28 @@ private fun SmartRemindersCard(state: NotificationsUiState, viewModel: Notificat
     }
 }
 
+/** Interrupteur : toute la ligne bascule (rôle Switch), cible ≥ 56 dp. */
 @Composable
-private fun SmartToggleRow(
+private fun SwitchRow(
     title: String,
     subtitle: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    strong: Boolean = false,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
+            .padding(horizontal = 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-            Text(title, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
+        Column(Modifier.weight(1f)) {
+            Text(title, style = if (strong) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge)
             Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedTrackColor = MaterialTheme.colorScheme.primary,
-                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-            ),
-        )
+        Switch(checked = checked, onCheckedChange = null)
     }
 }

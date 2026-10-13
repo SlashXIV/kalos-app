@@ -17,10 +17,8 @@ import com.kalos.app.R
 object NotificationHelper {
 
     const val CHANNEL_ID = "kalos_workout_reminders"
-    private const val CHANNEL_NAME = "Rappels d'entraînement"
 
     const val SMART_CHANNEL_ID = "kalos_smart_reminders"
-    private const val SMART_CHANNEL_NAME = "Rappels intelligents"
 
     /** Intent extra read by MainActivity to deep-link a notification tap to a screen. */
     const val EXTRA_DESTINATION = "kalos_destination"
@@ -45,10 +43,10 @@ object NotificationHelper {
     fun createChannel(context: Context) {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            CHANNEL_NAME,
+            context.getString(R.string.me_notif_training),
             NotificationManager.IMPORTANCE_DEFAULT,
         ).apply {
-            description = "Rappels pour les séances planifiées"
+            description = context.getString(R.string.me_notif_channel_workout_desc)
         }
         context.getSystemService(NotificationManager::class.java)
             .createNotificationChannel(channel)
@@ -57,10 +55,10 @@ object NotificationHelper {
     fun createSmartChannel(context: Context) {
         val channel = NotificationChannel(
             SMART_CHANNEL_ID,
-            SMART_CHANNEL_NAME,
+            context.getString(R.string.me_notif_smart),
             NotificationManager.IMPORTANCE_DEFAULT,
         ).apply {
-            description = "Rappels de discipline nutrition, sport et hydratation"
+            description = context.getString(R.string.me_notif_channel_smart_desc)
         }
         context.getSystemService(NotificationManager::class.java)
             .createNotificationChannel(channel)

@@ -11,7 +11,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import com.kalos.app.R
+import com.kalos.app.core.ui.component.KalosButton
+import com.kalos.app.core.ui.component.KalosCard
+import com.kalos.app.core.ui.component.ScreenHeader
+import com.kalos.app.core.ui.component.SectionLabel
+import com.kalos.app.core.ui.component.Swatch
+import com.kalos.app.core.ui.theme.KalosTheme
+import com.kalos.app.core.ui.util.formatGroupedInt
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -135,7 +146,6 @@ class EditGoalsViewModel @Inject constructor(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditGoalsScreen(
     navController: NavController,
@@ -146,214 +156,146 @@ fun EditGoalsScreen(
         if (state.savedSuccessfully) navController.popBackStack()
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Objectifs nutritionnels") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = viewModel::save, enabled = !state.isSaving) {
-                        Icon(Icons.Filled.Check, "Enregistrer")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(padding)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // Auto-calculate button
-            if (state.hasProfile) {
-                FilledTonalButton(
-                    onClick = viewModel::autoCalculate,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.filledTonalButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    ),
-                ) {
-                    Icon(Icons.Filled.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text("Calculer depuis mon profil")
-                }
-            }
-
-            // Breakdown card — shown after auto-calc
-            if (state.showBreakdown) {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
-                    ),
-                    shape = MaterialTheme.shapes.medium,
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        // — Calorie target breakdown —
-                        Text(
-                            "Détail du calcul",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                        BreakdownRow("Métabolisme de base (BMR)", "${state.bmr.roundToInt()} kcal")
-                        BreakdownRow("Activité · ${state.activityLabel}", "${state.tdee.roundToInt()} kcal")
-                        val deltaStr = if (state.goalDelta >= 0) "+${state.goalDelta}" else "${state.goalDelta}"
-                        BreakdownRow("Ajustement · ${state.goalLabel}", "$deltaStr kcal")
-                        HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            Text(
-                                "Objectif calculé",
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                            Text(
-                                "${state.bTargetKcal} kcal",
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-
-                        // — Macro distribution breakdown —
-                        HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-                        Text(
-                            "Répartition automatique des macros",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                        val wKg = state.bWeightKg
-                        MacroBreakdownRow(
-                            label = "Protéines",
-                            formula = "${"%.1f".format(state.bProteinPerKg)}g/kg × ${wKg.toInt()}kg",
-                            grams = state.bProteinG,
-                            kcal = state.bProteinG * 4,
-                            kcalPerG = 4,
-                        )
-                        MacroBreakdownRow(
-                            label = "Lipides",
-                            formula = "${"%.1f".format(state.bFatPerKg)}g/kg × ${wKg.toInt()}kg",
-                            grams = state.bFatG,
-                            kcal = state.bFatG * 9,
-                            kcalPerG = 9,
-                        )
-                        val carbsKcal = state.bTargetKcal - state.bProteinG * 4 - state.bFatG * 9
-                        MacroBreakdownRow(
-                            label = "Glucides",
-                            formula = "reste = $carbsKcal kcal",
-                            grams = state.bCarbsG,
-                            kcal = carbsKcal,
-                            kcalPerG = 4,
-                        )
-
-                        Text(
-                            "Vous pouvez ajuster librement les valeurs ci-dessous.",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+            ScreenHeader(
+                title = stringResource(R.string.me_profile_goals),
+                small = true,
+                navigation = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
+                },
+            ) {
+                IconButton(onClick = viewModel::save, enabled = !state.isSaving) {
+                    Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.action_save))
                 }
             }
 
-            HorizontalDivider()
-            Text(
-                "Objectif calorique quotidien",
-                style = MaterialTheme.typography.titleSmall,
-            )
-            GoalField("Calories (kcal)", state.kcal, viewModel::onKcalChange)
+            if (state.hasProfile) {
+                KalosButton(
+                    stringResource(R.string.me_goals_auto),
+                    onClick = viewModel::autoCalculate,
+                    ghost = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
 
-            HorizontalDivider()
-            Text("Macronutriments", style = MaterialTheme.typography.titleSmall)
+            // Détail affiché après le calcul automatique (valeurs du ViewModel, aucun calcul ici
+            // hormis la part des glucides, déjà dérivée ainsi auparavant).
+            if (state.showBreakdown) {
+                val kcal = stringResource(R.string.kcal_label)
+                KalosCard {
+                    SectionLabel(stringResource(R.string.me_goals_breakdown))
+                    BreakdownRow(stringResource(R.string.me_goals_bmr), formatGroupedInt(state.bmr.roundToInt()), kcal)
+                    BreakdownRow(stringResource(R.string.me_goals_activity, state.activityLabel), formatGroupedInt(state.tdee.roundToInt()), kcal)
+                    val deltaStr = if (state.goalDelta >= 0) "+${formatGroupedInt(state.goalDelta)}" else formatGroupedInt(state.goalDelta)
+                    BreakdownRow(stringResource(R.string.me_goals_adjust, state.goalLabel), deltaStr, kcal)
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    BreakdownRow(stringResource(R.string.me_goals_computed), formatGroupedInt(state.bTargetKcal), kcal, strong = true)
+
+                    SectionLabel(stringResource(R.string.me_goals_macros_auto), Modifier.padding(top = 6.dp))
+                    val wKg = state.bWeightKg.toInt()
+                    val nutrients = KalosTheme.nutrients
+                    MacroBreakdownRow(
+                        label = stringResource(R.string.nutrition_protein),
+                        formula = stringResource(R.string.me_goals_formula_per_kg, "%.1f".format(state.bProteinPerKg), wKg),
+                        grams = state.bProteinG,
+                        kcal = state.bProteinG * 4,
+                        color = nutrients.protein,
+                    )
+                    MacroBreakdownRow(
+                        label = stringResource(R.string.nutrition_fat),
+                        formula = stringResource(R.string.me_goals_formula_per_kg, "%.1f".format(state.bFatPerKg), wKg),
+                        grams = state.bFatG,
+                        kcal = state.bFatG * 9,
+                        color = nutrients.fat,
+                    )
+                    val carbsKcal = state.bTargetKcal - state.bProteinG * 4 - state.bFatG * 9
+                    MacroBreakdownRow(
+                        label = stringResource(R.string.nutrition_carbs),
+                        formula = stringResource(R.string.me_goals_formula_rest, formatGroupedInt(carbsKcal)),
+                        grams = state.bCarbsG,
+                        kcal = carbsKcal,
+                        color = nutrients.carbs,
+                    )
+                    Text(
+                        stringResource(R.string.me_goals_adjust_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            SectionLabel(stringResource(R.string.me_goals_daily_kcal), Modifier.padding(top = 8.dp))
+            GoalField(stringResource(R.string.me_goals_kcal_field), state.kcal, viewModel::onKcalChange)
+
+            SectionLabel(stringResource(R.string.me_goals_macros), Modifier.padding(top = 8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                GoalField("Protéines (g)", state.protein, viewModel::onProteinChange, Modifier.weight(1f))
-                GoalField("Glucides (g)", state.carbs, viewModel::onCarbsChange, Modifier.weight(1f))
+                GoalField(stringResource(R.string.me_goals_protein_field), state.protein, viewModel::onProteinChange, Modifier.weight(1f))
+                GoalField(stringResource(R.string.me_goals_carbs_field), state.carbs, viewModel::onCarbsChange, Modifier.weight(1f))
             }
-            GoalField("Lipides (g)", state.fat, viewModel::onFatChange)
+            GoalField(stringResource(R.string.me_goals_fat_field), state.fat, viewModel::onFatChange)
 
-            // Always-visible energy equivalences reminder
-            EnergyEquivalencesRow()
-
-            Spacer(Modifier.height(4.dp))
-            Button(
-                onClick = viewModel::save,
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                enabled = !state.isSaving,
-            ) {
-                if (state.isSaving) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                else Text("Enregistrer")
-            }
-        }
-    }
-}
-
-@Composable
-private fun EnergyEquivalencesRow() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            "1g protéine = 4 kcal  ·  1g glucide = 4 kcal  ·  1g lipide = 9 kcal",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-        )
-    }
-}
-
-@Composable
-private fun MacroBreakdownRow(
-    label: String,
-    formula: String,
-    grams: Int,
-    kcal: Int,
-    kcalPerG: Int,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
             Text(
-                label,
-                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                formula,
-                style = MaterialTheme.typography.labelSmall,
+                stringResource(R.string.me_goals_equivalences),
+                style = KalosTheme.type.metricSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            )
+
+            KalosButton(
+                stringResource(R.string.action_save),
+                onClick = viewModel::save,
+                enabled = !state.isSaving,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
+    }
+}
+
+@Composable
+private fun MacroBreakdownRow(label: String, formula: String, grams: Int, kcal: Int, color: Color) {
+    val sentence = stringResource(R.string.meal_item_spoken, label, formatGroupedInt(grams), formatGroupedInt(kcal)) + ", " + formula
+    Row(
+        modifier = Modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = sentence },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Swatch(color)
+        Column(Modifier.weight(1f)) {
+            Text(label, style = MaterialTheme.typography.titleSmall)
+            Text(formula, style = KalosTheme.type.metricSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
         Text(
-            "${grams}g  →  ${kcal} kcal",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface,
+            stringResource(R.string.me_goals_macro_value, formatGroupedInt(grams), formatGroupedInt(kcal)),
+            style = KalosTheme.type.metricSmall,
         )
     }
 }
 
 @Composable
-private fun BreakdownRow(label: String, value: String) {
+private fun BreakdownRow(label: String, value: String, unit: String, strong: Boolean = false) {
+    val sentence = stringResource(R.string.me_value_spoken, label, value, stringResource(R.string.unit_kcal_spoken))
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = sentence },
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-        Text(value, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurface)
+        Text(
+            label,
+            style = if (strong) MaterialTheme.typography.titleSmall else MaterialTheme.typography.bodyMedium,
+            color = if (strong) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+        Text("$value $unit", style = if (strong) KalosTheme.type.metric else KalosTheme.type.metricSmall)
     }
 }
 

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Famille calendrier, bilan, profil (refonte « Graduation », v4.0.0). -->
+<resources>
+    <!-- Communs -->
+    <string name="me_value_spoken">%1$s, %2$s %3$s</string>
+    <plurals name="me_kcal_spoken">
+        <item quantity="one">%1$s kilocalorie</item>
+        <item quantity="other">%1$s kilocalories</item>
+    </plurals>
+    <string name="me_pct_of_goal">%1$d %% de l’objectif</string>
+    <string name="me_unit_kg_spoken">kilogrammes</string>
+    <string name="me_unit_cm_spoken">centimètres</string>
+    <string name="me_unit_ml_spoken">millilitres</string>
+    <string name="me_unit_kg_per_week">kg / sem.</string>
+    <string name="me_unit_kg_per_week_spoken">kilogrammes par semaine</string>
+    <string name="me_minutes">%1$d min</string>
+    <string name="me_ratio">%1$d / %2$d</string>
+    <string name="me_today_short">Auj.</string>
+    <string name="me_sex_male">Homme</string>
+    <string name="me_sex_female">Femme</string>
+    <plurals name="me_sessions">
+        <item quantity="one">%d séance</item>
+        <item quantity="other">%d séances</item>
+    </plurals>
+    <plurals name="me_sessions_word">
+        <item quantity="one">séance</item>
+        <item quantity="other">séances</item>
+    </plurals>
+    <plurals name="me_sessions_of_target">
+        <item quantity="one">%1$d sur %2$d séance</item>
+        <item quantity="other">%1$d sur %2$d séances</item>
+    </plurals>
+    <plurals name="me_weeks_ago">
+        <item quantity="one">Il y a %d semaine</item>
+        <item quantity="other">Il y a %d semaines</item>
+    </plurals>
+    <string name="me_week_current">Cette semaine</string>
+    <string name="me_week_current_short">Cette sem.</string>
+    <string name="me_week_short">S-%1$d</string>
+
+    <!-- Calendrier -->
+    <string name="me_cal_month_prev">Mois précédent</string>
+    <string name="me_cal_month_next">Mois suivant</string>
+    <string name="me_cal_month_current">Revenir au mois en cours</string>
+    <string name="me_cal_today_day">Aujourd’hui, %1$s</string>
+    <string name="me_cal_workout_done">séance faite</string>
+    <string name="me_cal_workout_planned">séance planifiée</string>
+    <string name="me_cal_legend_kcal">Calories du jour, jusqu’à l’objectif</string>
+    <string name="me_cal_legend_done">Séance faite</string>
+    <string name="me_cal_legend_planned">Séance planifiée</string>
+    <string name="me_cal_detail_empty">Rien d’enregistré ce jour-là.</string>
+    <string name="me_cal_section_done">Séances réalisées</string>
+    <string name="me_cal_section_planned">Séance planifiée</string>
+    <string name="me_cal_free_session">Séance libre</string>
+    <string name="me_cal_planned_in_program">%1$s — %2$s</string>
+    <string name="me_cal_view_nutrition">Voir la nutrition</string>
+    <string name="me_cal_overview">Aperçu</string>
+    <string name="me_cal_freq_title">Fréquence d’entraînement</string>
+    <string name="me_cal_freq_sub">Séances réalisées sur les 4 dernières semaines</string>
+    <string name="me_cal_avg_title">Moyenne calorique</string>
+    <string name="me_cal_avg_label">Moyenne par jour</string>
+    <string name="me_cal_avg_sub">7 derniers jours (jours enregistrés uniquement)</string>
+
+    <!-- Bilan -->
+    <string name="me_insights_title">Bilan</string>
+    <string name="me_period_week">7 jours</string>
+    <string name="me_period_month">30 jours</string>
+    <string name="me_insights_keep">À retenir</string>
+    <string name="me_insights_nutrition">Nutrition</string>
+    <string name="me_insights_weight">Poids</string>
+    <string name="me_insights_training">Entraînement</string>
+    <string name="me_insights_no_meals">Aucun repas enregistré sur la période.</string>
+    <string name="me_insights_avg_kcal">Calories par jour (moy.)</string>
+    <string name="me_insights_avg_protein">Protéines par jour (moy.)</string>
+    <plurals name="me_insights_days_on_target">
+        <item quantity="one">Calories dans la cible : %1$d sur %2$d jour</item>
+        <item quantity="other">Calories dans la cible : %1$d sur %2$d jours</item>
+    </plurals>
+    <plurals name="me_insights_days_protein">
+        <item quantity="one">Protéines atteintes : %1$d sur %2$d jour</item>
+        <item quantity="other">Protéines atteintes : %1$d sur %2$d jours</item>
+    </plurals>
+    <plurals name="me_insights_kcal_chart">
+        <item quantity="one">Calories par jour, %d jour enregistré. Glisser ou régler pour lire chaque jour.</item>
+        <item quantity="other">Calories par jour, %d jours enregistrés. Glisser ou régler pour lire chaque jour.</item>
+    </plurals>
+    <string name="me_insights_band">Zone d’objectif (90 à 105 %)</string>
+    <plurals name="me_insights_over_days">
+        <item quantity="one">%d jour au-dessus de l’objectif</item>
+        <item quantity="other">%d jours au-dessus de l’objectif</item>
+    </plurals>
+    <string name="me_insights_weight_need">Au moins deux pesées sur la période sont nécessaires pour voir la tendance.</string>
+    <string name="me_insights_variation">Variation</string>
+    <string name="me_insights_pace">Rythme</string>
+    <string name="me_verdict_on_track">En ligne avec ton objectif.</string>
+    <string name="me_verdict_stalled">Stagnation sur la période.</string>
+    <string name="me_verdict_opposite">Direction opposée à ton objectif.</string>
+    <string name="me_verdict_neutral">Écart par rapport à ton maintien.</string>
+    <string name="me_insights_this_week">Cette semaine</string>
+    <string name="me_insights_in_period">Sur la période</string>
+    <string name="me_insights_sessions_chart">Séances par semaine (4 dernières)</string>
+
+    <!-- Poids -->
+    <string name="me_weight_title">Suivi du poids</string>
+    <string name="me_weight_last">Dernière pesée</string>
+    <string name="me_weight_none">Aucune pesée enregistrée</string>
+    <string name="me_weight_chart">30 derniers jours</string>
+    <plurals name="me_weight_chart_summary">
+        <item quantity="one">Évolution du poids sur 30 jours, %d pesée</item>
+        <item quantity="other">Évolution du poids sur 30 jours, %d pesées</item>
+    </plurals>
+    <string name="me_weight_delta_spoken">écart %1$s kilogrammes</string>
+    <string name="me_weight_saving">Enregistrement…</string>
+    <string name="me_weight_update">Mettre à jour le poids</string>
+    <string name="me_weight_log">Enregistrer le poids</string>
+    <string name="me_weight_history">Historique récent</string>
+    <string name="me_weight_field">Poids (kg)</string>
+
+    <!-- Profil -->
+    <string name="me_profile_my_profile">Mon profil</string>
+    <plurals name="me_profile_age">
+        <item quantity="one">%d an</item>
+        <item quantity="other">%d ans</item>
+    </plurals>
+    <string name="me_profile_physical">Données physiques</string>
+    <string name="me_profile_weight">Poids</string>
+    <string name="me_profile_height">Taille</string>
+    <string name="me_profile_target">Objectif</string>
+    <string name="me_profile_tdee">TDEE estimé : %1$s kcal/j — %2$s</string>
+    <string name="me_profile_reference_note">Le poids ci-dessus est la référence du calcul — il peut différer de votre dernière pesée.</string>
+    <string name="me_profile_use_last_weight">Utiliser ma dernière pesée (%1$s)</string>
+    <string name="me_profile_no_profile">Aucun profil configuré. Touchez « Modifier le profil » pour commencer.</string>
+    <string name="me_profile_goals">Objectifs nutritionnels</string>
+    <string name="me_profile_no_goal">Aucun objectif défini.</string>
+    <string name="me_profile_body_weight">Poids corporel</string>
+    <string name="me_profile_nav_insights">Bilan hebdomadaire</string>
+    <string name="me_profile_nav_edit">Modifier le profil</string>
+    <string name="me_profile_nav_goals">Modifier les objectifs</string>
+
+    <!-- Modifier le profil -->
+    <string name="me_edit_first_name">Prénom</string>
+    <string name="me_edit_age">Âge</string>
+    <string name="me_edit_height">Taille (cm)</string>
+    <string name="me_edit_target_weight">Objectif (kg)</string>
+    <string name="me_edit_sex">Sexe</string>
+    <string name="me_edit_activity">Niveau d’activité</string>
+    <string name="me_edit_goal">Objectif</string>
+
+    <!-- Objectifs -->
+    <string name="me_goals_auto">Calculer depuis mon profil</string>
+    <string name="me_goals_breakdown">Détail du calcul</string>
+    <string name="me_goals_bmr">Métabolisme de base (BMR)</string>
+    <string name="me_goals_activity">Activité · %1$s</string>
+    <string name="me_goals_adjust">Ajustement · %1$s</string>
+    <string name="me_goals_computed">Objectif calculé</string>
+    <string name="me_goals_macros_auto">Répartition automatique des macros</string>
+    <string name="me_goals_formula_per_kg">%1$s g/kg × %2$d kg</string>
+    <string name="me_goals_formula_rest">reste : %1$s kcal</string>
+    <string name="me_goals_macro_value">%1$s g → %2$s kcal</string>
+    <string name="me_goals_adjust_hint">Vous pouvez ajuster librement les valeurs ci-dessous.</string>
+    <string name="me_goals_daily_kcal">Objectif calorique quotidien</string>
+    <string name="me_goals_kcal_field">Calories (kcal)</string>
+    <string name="me_goals_macros">Macronutriments</string>
+    <string name="me_goals_protein_field">Protéines (g)</string>
+    <string name="me_goals_carbs_field">Glucides (g)</string>
+    <string name="me_goals_fat_field">Lipides (g)</string>
+    <string name="me_goals_equivalences">1 g de protéines = 4 kcal · 1 g de glucides = 4 kcal · 1 g de lipides = 9 kcal</string>
+
+    <!-- Paramètres -->
+    <string name="me_settings_title">Paramètres</string>
+    <string name="me_settings_notifications">Notifications</string>
+    <string name="me_settings_notifications_sub">Rappels intelligents et rappels d’entraînement</string>
+    <string name="me_settings_dietary">Préférences alimentaires</string>
+    <string name="me_settings_halal_note">Pour un mode de vie halal : activez « Sans porc » et « Sans alcool ». L’application ne peut pas certifier la conformité de l’abattage — seuls les ingrédients clairement identifiables sont filtrés.</string>
+    <string name="me_settings_data">Données</string>
+    <string name="me_settings_export">Exporter mes données</string>
+    <string name="me_settings_exporting">Export en cours…</string>
+    <string name="me_settings_export_sub">Sauvegarde JSON locale</string>
+    <string name="me_settings_import">Importer mes données</string>
+    <string name="me_settings_importing">Import en cours…</string>
+    <string name="me_settings_import_sub">Restaurer depuis un fichier de sauvegarde</string>
+    <string name="me_settings_export_ok">Sauvegarde enregistrée avec succès</string>
+    <string name="me_settings_export_error">Export : %1$s</string>
+    <string name="me_settings_import_ok">Données importées avec succès</string>
+    <string name="me_settings_import_error">Import : %1$s</string>
+    <string name="me_settings_import_confirm_title">Confirmer l’import</string>
+    <string name="me_settings_import_confirm_text">Cette action remplacera vos données locales actuelles (profil, journal nutrition, entraînements, hydratation…) par celles du fichier sélectionné.\n\nFichier exporté le %1$s.\n\nLes données actuelles seront perdues. Continuer ?</string>
+    <string name="me_settings_import_action">Importer</string>
+    <string name="me_settings_about">À propos</string>
+    <string name="me_settings_version">Version</string>
+    <string name="me_settings_version_value">Kalos 3.26.2</string>
+
+    <!-- Notifications -->
+    <string name="me_notif_smart">Rappels intelligents</string>
+    <string name="me_notif_smart_sub">Rappels quotidiens basés sur vos habitudes — nutrition, sport, hydratation.</string>
+    <string name="me_notif_training">Rappels d’entraînement</string>
+    <string name="me_notif_training_sub">Notifications liées à vos programmes de sport planifiés.</string>
+    <string name="me_notif_channel_workout_desc">Rappels pour les séances planifiées</string>
+    <string name="me_notif_channel_smart_desc">Rappels de discipline nutrition, sport et hydratation</string>
+    <string name="me_notif_program_hour_title">Heure des rappels de programme</string>
+    <string name="me_notif_program_hour_hint">S’applique à toutes les séances planifiées</string>
+    <string name="me_hour_value">%1$d h 00</string>
+    <plurals name="me_hour_spoken">
+        <item quantity="one">%d heure</item>
+        <item quantity="other">%d heures</item>
+    </plurals>
+    <string name="me_notif_send_hour">Heure d’envoi</string>
+    <string name="me_notif_no_program">Aucun programme créé</string>
+    <string name="me_notif_program_note">Pour configurer le rappel le jour J ou la veille d’une séance, ouvrez la fiche du programme concerné.</string>
+    <string name="me_notif_active">Actif</string>
+    <string name="me_notif_program_detail">Ouvrir le programme %1$s</string>
+    <string name="me_notif_discipline">Rappels de discipline</string>
+    <string name="me_notif_discipline_sub">Nutrition, sport, hydratation</string>
+    <string name="me_notif_nutrition">Nutrition</string>
+    <string name="me_notif_nutrition_sub">Si aucun repas n’est enregistré aujourd’hui</string>
+    <string name="me_notif_activity">Activité physique</string>
+    <string name="me_notif_activity_sub">Si inactif depuis trop longtemps</string>
+    <string name="me_notif_days_short">%1$d j</string>
+    <plurals name="me_notif_days_spoken">
+        <item quantity="one">%d jour sans séance</item>
+        <item quantity="other">%d jours sans séance</item>
+    </plurals>
+    <string name="me_notif_without_session">sans séance</string>
+    <string name="me_notif_hydration">Hydratation</string>
+    <string name="me_notif_hydration_sub">Si moins de 50 % de l’objectif d’eau est atteint</string>
+    <string name="me_notif_once_daily">Envoyés une fois par jour à l’heure choisie</string>
+</resources>

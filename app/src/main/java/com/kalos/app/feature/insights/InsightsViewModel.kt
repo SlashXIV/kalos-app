@@ -36,6 +36,8 @@ data class NutritionInsight(
     val daysOnProteinTarget: Int = 0,
     /** kcal/day for each tracked day, oldest → newest, for the mini bar chart. */
     val kcalPerDay: List<Float> = emptyList(),
+    /** Date (yyyy-MM-dd) of each [kcalPerDay] entry, for the chart cursor reading. */
+    val kcalDates: List<String> = emptyList(),
 )
 
 data class WeightInsight(
@@ -150,6 +152,7 @@ class InsightsViewModel @Inject constructor(
             daysOnKcalTarget = daysOnKcalTarget,
             daysOnProteinTarget = daysOnProteinTarget,
             kcalPerDay = tracked.map { it.totalKcal ?: 0f },
+            kcalDates = tracked.map { it.date },
         )
 
         // ── Weight ─────────────────────────────────────────────────────────────

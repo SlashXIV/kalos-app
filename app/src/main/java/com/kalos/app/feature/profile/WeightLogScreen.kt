@@ -1,22 +1,36 @@
 package com.kalos.app.feature.profile
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -24,8 +38,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.kalos.app.R
 import com.kalos.app.core.domain.repository.WorkoutRepository
+import com.kalos.app.core.ui.component.FitText
+import com.kalos.app.core.ui.component.InstrumentLabel
+import com.kalos.app.core.ui.component.KalosButton
+import com.kalos.app.core.ui.component.KalosCard
 import com.kalos.app.core.ui.component.KalosNumberField
+import com.kalos.app.core.ui.component.MeChartStyle
+import com.kalos.app.core.ui.component.MeSeriesChart
+import com.kalos.app.core.ui.component.ScreenHeader
+import com.kalos.app.core.ui.component.SectionLabel
+import com.kalos.app.core.ui.theme.KalosTheme
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -35,6 +59,8 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.floor
 
 // ─── ViewModel ───────────────────────────────────────────────────────────────
 
@@ -75,7 +101,6 @@ class WeightLogViewModel @Inject constructor(
 
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WeightLogScreen(
     navController: NavController,
@@ -86,9 +111,7 @@ fun WeightLogScreen(
 
     val lastEntry = state.entries.firstOrNull()
     val previousEntry = state.entries.getOrNull(1)
-    val delta = if (lastEntry != null && previousEntry != null) {
-        lastEntry.second - previousEntry.second
-    } else null
+    val delta = if (lastEntry != null && previousEntry != null) lastEntry.second - previousEntry.second else null
 
     val today = LocalDate.now()
     val windowStart = today.minusDays(29)
@@ -110,204 +133,112 @@ fun WeightLogScreen(
         )
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Suivi du poids") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour")
-                    }
-                },
-            )
-        },
-    ) { padding ->
+    val kgUnit = stringResource(R.string.kg)
+    val kgSpoken = stringResource(R.string.me_unit_kg_spoken)
+
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // Summary card
-            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Text("Dernier enregistrement", style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    if (lastEntry != null) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.Bottom,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            Text(
-                                "${"%.1f".format(lastEntry.second)} kg",
-                                style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                            Column(horizontalAlignment = Alignment.End) {
-                                Text(
-                                    formatDate(lastEntry.first),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                                if (delta != null) {
-                                    val sign = if (delta >= 0f) "+" else ""
-                                    Text(
-                                        "$sign${"%.1f".format(delta)} kg",
-                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
+            ScreenHeader(
+                title = stringResource(R.string.me_weight_title),
+                small = true,
+                navigation = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                    }
+                },
+            )
+
+            KalosCard {
+                InstrumentLabel(stringResource(R.string.me_weight_last))
+                if (lastEntry != null) {
+                    val date = formatDate(lastEntry.first)
+                    val sentence = stringResource(R.string.me_value_spoken, date, kg1(lastEntry.second), kgSpoken) +
+                        if (delta != null) ", " + stringResource(R.string.me_weight_delta_spoken, signed(delta)) else ""
+                    Row(
+                        Modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = sentence },
+                        verticalAlignment = Alignment.Bottom,
+                    ) {
+                        Row(Modifier.weight(1f), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            FitText(kg1(lastEntry.second), style = KalosTheme.type.metricHuge)
+                            Text(kgUnit, style = KalosTheme.type.metric, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 6.dp))
+                        }
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(date, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            if (delta != null) {
+                                Text("${signed(delta)} $kgUnit", style = KalosTheme.type.metricSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
-                    } else {
-                        Text(
-                            "Aucune entrée enregistrée",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
                     }
+                } else {
+                    Text(
+                        stringResource(R.string.me_weight_none),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
 
-            // Chart — shown only if at least 2 data points in the 30-day window
+            // Graphique : au moins deux pesées sur les 30 derniers jours.
             if (chartEntries.size >= 2) {
-                ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Évolution — 30 derniers jours",
-                            style = MaterialTheme.typography.titleSmall)
-                        WeightLineChart(
-                            entries = chartEntries,
-                            windowStart = windowStart,
-                            primaryColor = MaterialTheme.colorScheme.primary,
-                            surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant,
-                            onSurfaceVariantColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(140.dp),
-                        )
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            Text(
-                                formatDateShort(windowStart.toString()),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Text(
-                                "Auj.",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
+                KalosCard {
+                    SectionLabel(stringResource(R.string.me_weight_chart))
+                    val weights = chartEntries.map { it.second }
+                    val readings = chartEntries.map { (d, kg) ->
+                        stringResource(R.string.me_value_spoken, shortDate(d), kg1(kg), kgSpoken)
+                    }
+                    MeSeriesChart(
+                        values = weights,
+                        reading = { readings[it] },
+                        summary = pluralStringResource(R.plurals.me_weight_chart_summary, chartEntries.size, chartEntries.size),
+                        style = MeChartStyle.Line,
+                        color = MaterialTheme.colorScheme.primary,
+                        xFractions = chartEntries.map { (d, _) ->
+                            (ChronoUnit.DAYS.between(windowStart, LocalDate.parse(d)) / 29f).coerceIn(0f, 1f)
+                        },
+                        ticks = listOf(floor(weights.min()), ceil(weights.max())).distinct(),
+                        tickLabel = { "%.0f".format(it) },
+                        endLabel = "${kg1(weights.last())} $kgUnit",
+                    )
+                    Row(Modifier.fillMaxWidth().clearAndSetSemantics { }, horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(shortDate(windowStart.toString()), style = KalosTheme.type.metricSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.me_today_short), style = KalosTheme.type.metricSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
 
-            // Log button
-            Button(
+            KalosButton(
+                text = stringResource(
+                    when {
+                        state.isSaving -> R.string.me_weight_saving
+                        state.hasTodayEntry -> R.string.me_weight_update
+                        else -> R.string.me_weight_log
+                    },
+                ),
                 onClick = { showLogDialog = true },
-                modifier = Modifier.fillMaxWidth(),
                 enabled = !state.isSaving,
-            ) {
-                Text(when {
-                    state.isSaving -> "Enregistrement…"
-                    state.hasTodayEntry -> "Mettre à jour le poids"
-                    else -> "Enregistrer le poids"
-                })
-            }
+                modifier = Modifier.fillMaxWidth(),
+            )
 
-            // Recent entries list
             if (state.entries.isNotEmpty()) {
-                Text("Historique récent",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
-                ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                        state.entries.take(10).forEachIndexed { index, entry ->
-                            val prev = state.entries.getOrNull(index + 1)
-                            val d = if (prev != null) entry.second - prev.second else null
-                            WeightEntryRow(date = entry.first, weightKg = entry.second, delta = d)
-                            if (index < minOf(state.entries.lastIndex, 9)) {
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    color = MaterialTheme.colorScheme.surfaceVariant,
-                                )
-                            }
+                SectionLabel(stringResource(R.string.me_weight_history), Modifier.padding(top = 8.dp))
+                KalosCard {
+                    state.entries.take(10).forEachIndexed { index, entry ->
+                        val prev = state.entries.getOrNull(index + 1)
+                        WeightEntryRow(date = entry.first, weightKg = entry.second, delta = prev?.let { entry.second - it.second })
+                        if (index < minOf(state.entries.lastIndex, 9)) {
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         }
                     }
                 }
             }
-        }
-    }
-}
-
-// ─── Chart ───────────────────────────────────────────────────────────────────
-
-@Composable
-private fun WeightLineChart(
-    entries: List<Pair<String, Float>>,
-    windowStart: LocalDate,
-    primaryColor: Color,
-    surfaceVariantColor: Color,
-    onSurfaceVariantColor: Color,
-    modifier: Modifier = Modifier,
-) {
-    val weights = entries.map { it.second }
-    val minW = (weights.min() - 1f).let { kotlin.math.floor(it.toDouble()).toFloat() }
-    val maxW = (weights.max() + 1f).let { kotlin.math.ceil(it.toDouble()).toFloat() }
-    val range = (maxW - minW).coerceAtLeast(1f)
-
-    Canvas(modifier = modifier) {
-        val w = size.width
-        val h = size.height
-        val padV = 8.dp.toPx()
-        val chartH = h - padV * 2
-
-        // Grid line at midpoint
-        val midY = padV + chartH * 0.5f
-        drawLine(
-            color = surfaceVariantColor,
-            start = Offset(0f, midY),
-            end = Offset(w, midY),
-            strokeWidth = 1.dp.toPx(),
-        )
-
-        // Compute point positions
-        val points = entries.map { (dateStr, kg) ->
-            val dayOffset = ChronoUnit.DAYS.between(windowStart, LocalDate.parse(dateStr)).toFloat()
-            val x = (dayOffset / 29f).coerceIn(0f, 1f) * w
-            val y = padV + chartH * (1f - (kg - minW) / range)
-            Offset(x, y)
-        }
-
-        // Line
-        if (points.size >= 2) {
-            val path = Path()
-            path.moveTo(points.first().x, points.first().y)
-            points.drop(1).forEach { path.lineTo(it.x, it.y) }
-            drawPath(
-                path = path,
-                color = primaryColor.copy(alpha = 0.7f),
-                style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round),
-            )
-        }
-
-        // Dots
-        points.forEach { pt ->
-            drawCircle(color = primaryColor, radius = 4.dp.toPx(), center = pt)
-            drawCircle(
-                color = onSurfaceVariantColor.copy(alpha = 0.1f),
-                radius = 4.dp.toPx(),
-                center = pt,
-                style = Stroke(width = 1.dp.toPx()),
-            )
         }
     }
 }
@@ -316,33 +247,24 @@ private fun WeightLineChart(
 
 @Composable
 private fun WeightEntryRow(date: String, weightKg: Float, delta: Float?) {
+    val kg = stringResource(R.string.kg)
+    val label = formatDate(date)
+    val shownDelta = delta?.takeIf { abs(it) >= 0.05f }
+    val sentence = stringResource(R.string.me_value_spoken, label, kg1(weightKg), stringResource(R.string.me_unit_kg_spoken)) +
+        if (shownDelta != null) ", " + stringResource(R.string.me_weight_delta_spoken, signed(shownDelta)) else ""
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .heightIn(min = 40.dp)
+            .clearAndSetSemantics { contentDescription = sentence },
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            formatDate(date),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            if (delta != null && abs(delta) >= 0.05f) {
-                val sign = if (delta >= 0f) "+" else ""
-                Text(
-                    "$sign${"%.1f".format(delta)} kg",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Text(
-                "${"%.1f".format(weightKg)} kg",
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                color = MaterialTheme.colorScheme.onSurface,
-            )
+        Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
+        if (shownDelta != null) {
+            Text("${signed(shownDelta)} $kg", style = KalosTheme.type.metricSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+        Text("${kg1(weightKg)} $kg", style = KalosTheme.type.metric)
     }
 }
 
@@ -353,20 +275,20 @@ private fun WeightInputDialog(
     onConfirm: (Float) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var input by remember { mutableStateOf(currentWeight?.let { "%.1f".format(it) } ?: "") }
+    var input by remember { mutableStateOf(currentWeight?.let { kg1(it) } ?: "") }
     val parsed = input.replace(',', '.').toFloatOrNull()
     val isValid = parsed != null && parsed in 30f..300f
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (isUpdate) "Mettre à jour le poids" else "Enregistrer le poids") },
+        title = { Text(stringResource(if (isUpdate) R.string.me_weight_update else R.string.me_weight_log)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 KalosNumberField(
                     value = input,
                     onValueChange = { input = it },
-                    label = { Text("Poids (kg)") },
-                    suffix = { Text("kg") },
+                    label = { Text(stringResource(R.string.me_weight_field)) },
+                    suffix = { Text(stringResource(R.string.kg)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     isError = input.isNotEmpty() && !isValid,
                     modifier = Modifier.fillMaxWidth(),
@@ -380,28 +302,33 @@ private fun WeightInputDialog(
             }
         },
         confirmButton = {
-            TextButton(
-                onClick = { parsed?.let { onConfirm(it) } },
-                enabled = isValid,
-            ) { Text("Valider") }
+            TextButton(onClick = { parsed?.let { onConfirm(it) } }, enabled = isValid) {
+                Text(stringResource(R.string.action_validate))
+            }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Annuler") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         },
     )
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+private fun kg1(kg: Float): String = "%.1f".format(kg)
+
+private fun signed(v: Float): String = (if (v >= 0f) "+" else "") + kg1(v)
+
+@Composable
 private fun formatDate(dateStr: String): String {
     val d = LocalDate.parse(dateStr)
     val today = LocalDate.now()
     return when (d) {
-        today -> "Aujourd'hui"
-        today.minusDays(1) -> "Hier"
+        today -> stringResource(R.string.today_title)
+        today.minusDays(1) -> stringResource(R.string.yesterday)
         else -> d.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.FRENCH))
     }
 }
 
-private fun formatDateShort(dateStr: String): String =
-    LocalDate.parse(dateStr).format(DateTimeFormatter.ofPattern("d MMM", Locale.FRENCH))
+private fun shortDate(dateStr: String): String =
+    LocalDate.parse(dateStr).format(DateTimeFormatter.ofPattern("EEE d MMM", Locale.FRENCH)).replaceFirstChar { it.uppercase() }
+

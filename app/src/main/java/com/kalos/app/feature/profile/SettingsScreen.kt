@@ -12,8 +12,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import com.kalos.app.core.ui.component.KalosCard
+import com.kalos.app.core.ui.component.ScreenHeader
+import com.kalos.app.core.ui.component.SectionLabel
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -49,7 +55,6 @@ class SettingsViewModel @Inject constructor(
     fun setVibrations(enabled: Boolean) = themeStore.setVibrations(enabled)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     navController: NavController,
@@ -63,6 +68,7 @@ fun SettingsScreen(
     val importState by importViewModel.state.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     val createDocumentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json"),
@@ -74,16 +80,16 @@ fun SettingsScreen(
 
     LaunchedEffect(exportState) {
         when (val s = exportState) {
-            is ExportState.Success -> { snackbarHostState.showSnackbar("Sauvegarde enregistrée avec succès"); exportViewModel.resetState() }
-            is ExportState.Error -> { snackbarHostState.showSnackbar("Export : ${s.message}"); exportViewModel.resetState() }
+            is ExportState.Success -> { snackbarHostState.showSnackbar(context.getString(R.string.me_settings_export_ok)); exportViewModel.resetState() }
+            is ExportState.Error -> { snackbarHostState.showSnackbar(context.getString(R.string.me_settings_export_error, s.message)); exportViewModel.resetState() }
             else -> {}
         }
     }
 
     LaunchedEffect(importState) {
         when (val s = importState) {
-            is ImportState.Success -> { snackbarHostState.showSnackbar("Données importées avec succès"); importViewModel.resetState() }
-            is ImportState.Error -> { snackbarHostState.showSnackbar("Import : ${s.message}"); importViewModel.resetState() }
+            is ImportState.Success -> { snackbarHostState.showSnackbar(context.getString(R.string.me_settings_import_ok)); importViewModel.resetState() }
+            is ImportState.Error -> { snackbarHostState.showSnackbar(context.getString(R.string.me_settings_import_error, s.message)); importViewModel.resetState() }
             else -> {}
         }
     }
@@ -93,163 +99,110 @@ fun SettingsScreen(
         val exportDate = backup.exportedAt.substringBefore("T")
         AlertDialog(
             onDismissRequest = { importViewModel.onCancelImport() },
-            title = { Text("Confirmer l'import") },
-            text = {
-                Text(
-                    "Cette action remplacera vos données locales actuelles " +
-                    "(profil, journal nutrition, entraînements, hydratation…) " +
-                    "par celles du fichier sélectionné.\n\n" +
-                    "Fichier exporté le $exportDate.\n\n" +
-                    "Les données actuelles seront perdues. Continuer ?",
-                )
-            },
+            title = { Text(stringResource(R.string.me_settings_import_confirm_title)) },
+            text = { Text(stringResource(R.string.me_settings_import_confirm_text, exportDate)) },
             confirmButton = {
                 TextButton(onClick = { importViewModel.onConfirmImport(backup) }) {
-                    Text("Importer", color = MaterialTheme.colorScheme.error)
+                    // Rouge : confirmation destructive (les données locales sont remplacées).
+                    Text(stringResource(R.string.me_settings_import_action), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { importViewModel.onCancelImport() }) { Text("Annuler") }
+                TextButton(onClick = { importViewModel.onCancelImport() }) { Text(stringResource(R.string.action_cancel)) }
             },
         )
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Paramètres") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour")
-                    }
-                },
-            )
-        },
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // ── Notifications ────────────────────────────────────────────────
-            // No section header here: it duplicated the item's own title verbatim.
-            SettingsItem(
-                icon = Icons.Filled.Notifications,
-                title = "Notifications",
-                subtitle = "Rappels intelligents et rappels d'entraînement",
-                onClick = { navController.navigate(Screen.Notifications.route) },
-            )
-
-            HorizontalDivider()
-
-            // ── Appearance ───────────────────────────────────────────────────
-            SettingsItem(
-                icon = Icons.Filled.Palette,
-                title = stringResource(R.string.appearance_title),
-                subtitle = stringResource(R.string.appearance_subtitle, stringResource(Palettes.byId(appearance.paletteId).nameRes)),
-                onClick = { navController.navigate(Screen.Appearance.route) },
-            )
-
-            HorizontalDivider()
-
-            // ── Dietary preferences ──────────────────────────────────────────
-            Text(
-                "Préférences alimentaires",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                    DietaryFilter.entries.forEach { filter ->
-                        DietaryFilterRow(
-                            filter = filter,
-                            enabled = filter in activeFilters,
-                            onToggle = { viewModel.toggle(filter, it) },
-                        )
-                        if (filter != DietaryFilter.entries.last()) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                            )
-                        }
+            ScreenHeader(
+                title = stringResource(R.string.me_settings_title),
+                small = true,
+                navigation = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
-                }
-            }
-
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
-                ),
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Row(
-                    modifier = Modifier.padding(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.Top,
-                ) {
-                    Icon(
-                        Icons.Filled.Info,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp).padding(top = 2.dp),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                    Text(
-                        "Pour un mode de vie halal : activez « Sans porc » et « Sans alcool ». " +
-                            "L'application ne peut pas certifier la conformité de l'abattage — " +
-                            "seuls les ingrédients clairement identifiables sont filtrés.",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-
-            HorizontalDivider()
-
-            // ── Data management ──────────────────────────────────────────────
-            Text(
-                "Données",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            SettingsItem(
-                icon = Icons.Filled.FileDownload,
-                title = "Exporter mes données",
-                subtitle = if (exportState is ExportState.Writing) "Export en cours…" else "Sauvegarde JSON locale",
-                enabled = exportState !is ExportState.Writing,
-                onClick = { createDocumentLauncher.launch("kalos-backup-${LocalDate.now()}.json") },
-            )
-
-            SettingsItem(
-                icon = Icons.Filled.FileUpload,
-                title = "Importer mes données",
-                subtitle = when (importState) {
-                    is ImportState.Importing -> "Import en cours…"
-                    else -> "Restaurer depuis un fichier de sauvegarde"
                 },
-                enabled = importState !is ImportState.Importing,
-                onClick = { openDocumentLauncher.launch(arrayOf("application/json", "*/*")) },
             )
 
-            HorizontalDivider()
+            KalosCard(contentPadding = PaddingValues(vertical = 4.dp)) {
+                SettingsItem(
+                    icon = Icons.Filled.Notifications,
+                    title = stringResource(R.string.me_settings_notifications),
+                    subtitle = stringResource(R.string.me_settings_notifications_sub),
+                    onClick = { navController.navigate(Screen.Notifications.route) },
+                )
+                // ── Appearance ───────────────────────────────────────────────────
+                SettingsItem(
+                    icon = Icons.Filled.Palette,
+                    title = stringResource(R.string.appearance_title),
+                    subtitle = stringResource(R.string.appearance_subtitle, stringResource(Palettes.byId(appearance.paletteId).nameRes)),
+                    onClick = { navController.navigate(Screen.Appearance.route) },
+                )
+            }
 
-            Text(
-                "À propos",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            SettingsItem(
-                icon = Icons.Filled.Info,
-                title = "Version",
-                subtitle = "Kalos 3.26.2",
-                enabled = false,
-            )
+            SectionLabel(stringResource(R.string.me_settings_dietary), Modifier.padding(top = 8.dp))
+            KalosCard(contentPadding = PaddingValues(vertical = 4.dp)) {
+                DietaryFilter.entries.forEach { filter ->
+                    DietaryFilterRow(
+                        filter = filter,
+                        enabled = filter in activeFilters,
+                        onToggle = { viewModel.toggle(filter, it) },
+                    )
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
+                Icon(
+                    Icons.Filled.Info,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp).padding(top = 2.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    stringResource(R.string.me_settings_halal_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            SectionLabel(stringResource(R.string.me_settings_data), Modifier.padding(top = 8.dp))
+            KalosCard(contentPadding = PaddingValues(vertical = 4.dp)) {
+                SettingsItem(
+                    icon = Icons.Filled.FileDownload,
+                    title = stringResource(R.string.me_settings_export),
+                    subtitle = stringResource(if (exportState is ExportState.Writing) R.string.me_settings_exporting else R.string.me_settings_export_sub),
+                    enabled = exportState !is ExportState.Writing,
+                    onClick = { createDocumentLauncher.launch("kalos-backup-${LocalDate.now()}.json") },
+                )
+                SettingsItem(
+                    icon = Icons.Filled.FileUpload,
+                    title = stringResource(R.string.me_settings_import),
+                    subtitle = stringResource(if (importState is ImportState.Importing) R.string.me_settings_importing else R.string.me_settings_import_sub),
+                    enabled = importState !is ImportState.Importing,
+                    onClick = { openDocumentLauncher.launch(arrayOf("application/json", "*/*")) },
+                )
+            }
+
+            SectionLabel(stringResource(R.string.me_settings_about), Modifier.padding(top = 8.dp))
+            KalosCard(contentPadding = PaddingValues(vertical = 4.dp)) {
+                SettingsItem(
+                    icon = Icons.Filled.Info,
+                    title = stringResource(R.string.me_settings_version),
+                    subtitle = stringResource(R.string.me_settings_version_value),
+                    enabled = false,
+                )
+            }
         }
     }
 }
@@ -263,33 +216,21 @@ private fun DietaryFilterRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .heightIn(min = 56.dp)
+            .toggleable(value = enabled, role = Role.Switch, onValueChange = onToggle)
+            .padding(horizontal = 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-            Text(
-                filter.label,
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
-            )
-            Text(
-                filter.description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        Column(Modifier.weight(1f)) {
+            Text(filter.label, style = MaterialTheme.typography.bodyLarge)
+            Text(filter.description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Switch(
-            checked = enabled,
-            onCheckedChange = onToggle,
-            colors = SwitchDefaults.colors(
-                checkedTrackColor = MaterialTheme.colorScheme.primary,
-                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-            ),
-        )
+        Switch(checked = enabled, onCheckedChange = null)
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/** Ligne de réglage : icône discrète, titre, sous-titre ; toute la ligne est la cible. */
 @Composable
 private fun SettingsItem(
     icon: ImageVector,
@@ -298,29 +239,22 @@ private fun SettingsItem(
     enabled: Boolean = true,
     onClick: (() -> Unit)? = null,
 ) {
-    ElevatedCard(
-        onClick = { if (enabled) onClick?.invoke() },
-        modifier = Modifier.fillMaxWidth(),
-        enabled = enabled,
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .then(if (onClick != null) Modifier.clickable(enabled = enabled, onClick = onClick) else Modifier)
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Icon(
-                icon, null,
-                tint = if (enabled) MaterialTheme.colorScheme.primary
-                       else MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Column(Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.bodyLarge)
-                Text(
-                    subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        if (onClick != null) {
+            Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

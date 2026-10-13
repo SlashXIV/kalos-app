@@ -1,29 +1,63 @@
 package com.kalos.app.feature.insights
 
-import com.kalos.app.core.ui.theme.KalosTheme
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.MonitorWeight
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.kalos.app.R
+import com.kalos.app.core.ui.component.Dot
+import com.kalos.app.core.ui.component.FitText
+import com.kalos.app.core.ui.component.InstrumentLabel
+import com.kalos.app.core.ui.component.KalosCard
+import com.kalos.app.core.ui.component.MeSeriesChart
+import com.kalos.app.core.ui.component.MeasureRow
+import com.kalos.app.core.ui.component.ScreenHeader
+import com.kalos.app.core.ui.component.SectionLabel
+import com.kalos.app.core.ui.component.Swatch
+import com.kalos.app.core.ui.theme.KalosShape
+import com.kalos.app.core.ui.theme.KalosTheme
+import com.kalos.app.core.ui.util.formatGroupedInt
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class)
+/** Zone d'objectif calorique, la même que pour « jours dans la cible » (InsightsViewModel). */
+private const val ZONE_LOW = 0.90f
+private const val ZONE_HIGH = 1.05f
+
 @Composable
 fun InsightsScreen(
     navController: NavController,
@@ -31,43 +65,51 @@ fun InsightsScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Bilan") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
-                    }
-                },
-            )
-        },
-    ) { padding ->
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // Period selector
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                InsightsPeriod.entries.forEachIndexed { index, period ->
-                    SegmentedButton(
-                        selected = state.period == period,
-                        onClick = { viewModel.setPeriod(period) },
-                        shape = SegmentedButtonDefaults.itemShape(index, InsightsPeriod.entries.size),
-                    ) { Text(period.label) }
-                }
-            }
-
+            ScreenHeader(
+                title = stringResource(R.string.me_insights_title),
+                small = true,
+                navigation = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                    }
+                },
+            )
+            PeriodSelector(state.period, viewModel::setPeriod)
             SummaryCard(headline = state.summaryHeadline, highlights = state.summaryHighlights)
             NutritionCard(state.nutrition)
             WeightCard(state.weight)
             TrainingCard(state.training)
+        }
+    }
+}
 
-            Spacer(Modifier.height(8.dp))
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PeriodSelector(selected: InsightsPeriod, onSelect: (InsightsPeriod) -> Unit) {
+    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+        InsightsPeriod.entries.forEachIndexed { i, period ->
+            SegmentedButton(
+                selected = period == selected,
+                onClick = { onSelect(period) },
+                shape = SegmentedButtonDefaults.itemShape(i, InsightsPeriod.entries.size, KalosShape.control),
+                icon = {},
+                modifier = Modifier.heightIn(min = 48.dp),
+            ) {
+                FitText(
+                    stringResource(if (period == InsightsPeriod.WEEK) R.string.me_period_week else R.string.me_period_month),
+                    style = KalosTheme.type.metricSmall,
+                )
+            }
         }
     }
 }
@@ -76,29 +118,92 @@ fun InsightsScreen(
 @Composable
 private fun SummaryCard(headline: String, highlights: List<SummaryHighlight>) {
     if (headline.isBlank()) return
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-    ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    "À retenir",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f),
-                )
-                Text(
-                    headline,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
+    KalosCard {
+        InstrumentLabel(stringResource(R.string.me_insights_keep))
+        Text(headline, style = MaterialTheme.typography.titleMedium)
+        if (highlights.isNotEmpty()) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                highlights.forEach { h ->
+                    Row(
+                        Modifier
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, KalosShape.chip)
+                            .heightIn(min = 40.dp)
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Text(h.value, style = KalosTheme.type.metric)
+                        Text(h.label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
             }
-            if (highlights.isNotEmpty()) {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    highlights.forEach { HighlightPill(it) }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun NutritionCard(n: NutritionInsight) {
+    KalosCard {
+        SectionLabel(stringResource(R.string.me_insights_nutrition))
+        if (n.daysWithData == 0) {
+            EmptyLine(stringResource(R.string.me_insights_no_meals))
+            return@KalosCard
+        }
+        val kcalUnit = stringResource(R.string.kcal_label)
+        val kcalSpoken = stringResource(R.string.unit_kcal_spoken)
+        val nutrients = KalosTheme.nutrients
+        if (n.goalKcal > 0) {
+            MeasureRow(
+                label = stringResource(R.string.me_insights_avg_kcal),
+                value = n.avgKcal.toFloat(), goal = n.goalKcal.toFloat(),
+                valueText = formatGroupedInt(n.avgKcal), goalText = formatGroupedInt(n.goalKcal),
+                unit = kcalUnit, spokenUnit = kcalSpoken, color = MaterialTheme.colorScheme.onSurface,
+            )
+        } else {
+            StatBlock(stringResource(R.string.me_insights_avg_kcal), formatGroupedInt(n.avgKcal), kcalUnit, spokenUnit = kcalSpoken)
+        }
+        if (n.goalProtein > 0) {
+            MeasureRow(
+                label = stringResource(R.string.me_insights_avg_protein),
+                value = n.avgProtein.toFloat(), goal = n.goalProtein.toFloat(),
+                valueText = formatGroupedInt(n.avgProtein), goalText = formatGroupedInt(n.goalProtein),
+                unit = stringResource(R.string.unit_g), spokenUnit = stringResource(R.string.unit_grams_spoken),
+                color = nutrients.protein,
+                // Dépasser l'objectif de protéines n'est pas un écart à signaler.
+                overLimit = Float.MAX_VALUE,
+            )
+        }
+        Text(
+            pluralStringResource(R.plurals.me_insights_days_on_target, n.daysWithData, n.daysOnKcalTarget, n.daysWithData) +
+                if (n.goalProtein > 0) "\n" + pluralStringResource(R.plurals.me_insights_days_protein, n.daysWithData, n.daysOnProteinTarget, n.daysWithData) else "",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        if (n.kcalPerDay.size >= 2) {
+            val goal = n.goalKcal.toFloat()
+            val readings = n.kcalPerDay.indices.map { i ->
+                val k = n.kcalPerDay[i].roundToInt()
+                buildList {
+                    n.kcalDates.getOrNull(i)?.let { add(shortDate(it)) }
+                    add(pluralStringResource(R.plurals.me_kcal_spoken, k, formatGroupedInt(k)))
+                    if (goal > 0f) add(stringResource(R.string.me_pct_of_goal, (k / goal * 100).roundToInt()))
+                }.joinToString(", ")
+            }
+            val overDays = if (goal > 0f) n.kcalPerDay.count { it > goal * ZONE_HIGH } else 0
+            MeSeriesChart(
+                values = n.kcalPerDay,
+                reading = { readings[it] },
+                summary = pluralStringResource(R.plurals.me_insights_kcal_chart, n.kcalPerDay.size, n.kcalPerDay.size),
+                band = if (goal > 0f) goal * ZONE_LOW..goal * ZONE_HIGH else null,
+                overAbove = if (goal > 0f) goal * ZONE_HIGH else Float.POSITIVE_INFINITY,
+                ticks = if (goal > 0f) listOf(goal) else emptyList(),
+            )
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (goal > 0f) LegendItem(stringResource(R.string.me_insights_band), nutrients.goalReached.copy(alpha = 0.18f))
+                if (overDays > 0) {
+                    LegendItem(pluralStringResource(R.plurals.me_insights_over_days, overDays, overDays), nutrients.overTarget)
                 }
             }
         }
@@ -106,165 +211,98 @@ private fun SummaryCard(headline: String, highlights: List<SummaryHighlight>) {
 }
 
 @Composable
-private fun HighlightPill(h: SummaryHighlight) {
-    Surface(
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.12f),
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Text(
-                h.value,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-            Text(
-                h.label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
-            )
-        }
-    }
-}
-
-@Composable
-private fun SectionCard(
-    icon: ImageVector,
-    title: String,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                Text(title, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold))
-            }
-            content()
-        }
-    }
-}
-
-@Composable
-private fun NutritionCard(n: NutritionInsight) {
-    SectionCard(Icons.Filled.Restaurant, "Nutrition") {
-        if (n.daysWithData == 0) {
-            EmptyLine("Aucun repas logué sur la période.")
-            return@SectionCard
-        }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            StatBlock(
-                label = "Calories / j (moy.)",
-                value = "${n.avgKcal}",
-                sub = if (n.goalKcal > 0) "/ ${n.goalKcal} kcal" else "kcal",
-                valueColor = if (n.isKcalOver) KalosTheme.nutrients.overTarget else MaterialTheme.colorScheme.primary,
-            )
-            StatBlock(
-                label = "Protéines / j (moy.)",
-                value = "${n.avgProtein}",
-                sub = if (n.goalProtein > 0) "/ ${n.goalProtein} g" else "g",
-                valueColor = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        Text(
-            "Calories dans la cible : ${n.daysOnKcalTarget}/${n.daysWithData} jours · Protéines atteintes : ${n.daysOnProteinTarget}/${n.daysWithData} jours",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        if (n.kcalPerDay.size >= 2) {
-            BarChart(
-                values = n.kcalPerDay,
-                goal = n.goalKcal.toFloat(),
-                barColor = MaterialTheme.colorScheme.primary,
-                overColor = KalosTheme.nutrients.overTarget,
-                gridColor = MaterialTheme.colorScheme.surfaceVariant,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp),
-            )
-        }
-    }
-}
-
-@Composable
 private fun WeightCard(w: WeightInsight) {
-    SectionCard(Icons.Filled.MonitorWeight, "Poids") {
+    KalosCard {
+        SectionLabel(stringResource(R.string.me_insights_weight))
         if (!w.hasEnoughData) {
-            EmptyLine("Au moins deux pesées sur la période sont nécessaires pour voir la tendance.")
-            return@SectionCard
+            EmptyLine(stringResource(R.string.me_insights_weight_need))
+            return@KalosCard
         }
-        val sign = if (w.deltaKg >= 0f) "+" else ""
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        val kg = stringResource(R.string.kg)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            StatBlock(stringResource(R.string.me_insights_variation), signed(w.deltaKg), kg, Modifier.weight(1f), stringResource(R.string.me_unit_kg_spoken))
             StatBlock(
-                label = "Variation",
-                value = "$sign${"%.1f".format(w.deltaKg)}",
-                sub = "kg",
-                valueColor = verdictColor(w.verdict),
-            )
-            StatBlock(
-                label = "Rythme",
-                value = "${if (w.perWeekKg >= 0f) "+" else ""}${"%.1f".format(w.perWeekKg)}",
-                sub = "kg / sem.",
-                valueColor = MaterialTheme.colorScheme.onSurface,
+                stringResource(R.string.me_insights_pace), signed(w.perWeekKg),
+                stringResource(R.string.me_unit_kg_per_week), Modifier.weight(1f), stringResource(R.string.me_unit_kg_per_week_spoken),
             )
         }
-        Text(
-            verdictLabel(w.verdict),
-            style = MaterialTheme.typography.bodySmall,
-            color = verdictColor(w.verdict),
-        )
+        val (label, color) = verdict(w.verdict)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Dot(color)
+            Text(label, style = MaterialTheme.typography.bodyMedium)
+        }
     }
 }
 
 @Composable
 private fun TrainingCard(t: TrainingInsight) {
-    SectionCard(Icons.Filled.FitnessCenter, "Entraînement") {
-        val thisWeek = if (t.weeklyTarget != null) "${t.sessionsThisWeek}/${t.weeklyTarget}" else "${t.sessionsThisWeek}"
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+    KalosCard {
+        SectionLabel(stringResource(R.string.me_insights_training))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            val target = t.weeklyTarget
+            if (target != null) {
+                val value = stringResource(R.string.me_ratio, t.sessionsThisWeek, target)
+                StatBlock(
+                    stringResource(R.string.me_insights_this_week), value,
+                    pluralStringResource(R.plurals.me_sessions_word, target),
+                    spoken = stringResource(R.string.me_insights_this_week) + ", " +
+                        pluralStringResource(R.plurals.me_sessions_of_target, target, t.sessionsThisWeek, target),
+                    modifier = Modifier.weight(1f),
+                )
+            } else {
+                StatBlock(
+                    stringResource(R.string.me_insights_this_week), t.sessionsThisWeek.toString(),
+                    pluralStringResource(R.plurals.me_sessions_word, t.sessionsThisWeek), modifier = Modifier.weight(1f),
+                )
+            }
             StatBlock(
-                label = "Cette semaine",
-                value = thisWeek,
-                sub = "séances",
-                valueColor = if (t.weeklyTarget != null && t.sessionsThisWeek >= t.weeklyTarget)
-                    MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-            )
-            StatBlock(
-                label = "Sur la période",
-                value = "${t.sessionsInPeriod}",
-                sub = "séances",
-                valueColor = MaterialTheme.colorScheme.onSurface,
+                stringResource(R.string.me_insights_in_period), t.sessionsInPeriod.toString(),
+                pluralStringResource(R.plurals.me_sessions_word, t.sessionsInPeriod), modifier = Modifier.weight(1f),
             )
         }
         if (t.sessionsPerWeek.any { it > 0 }) {
-            Text(
-                "Séances / semaine (4 dernières)",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            BarChart(
+            val readings = t.sessionsPerWeek.indices.map { i ->
+                val ago = t.sessionsPerWeek.lastIndex - i
+                val week = if (ago == 0) stringResource(R.string.me_week_current) else pluralStringResource(R.plurals.me_weeks_ago, ago, ago)
+                week + ", " + pluralStringResource(R.plurals.me_sessions, t.sessionsPerWeek[i], t.sessionsPerWeek[i])
+            }
+            val title = stringResource(R.string.me_insights_sessions_chart)
+            InstrumentLabel(title)
+            MeSeriesChart(
                 values = t.sessionsPerWeek.map { it.toFloat() },
-                goal = t.weeklyTarget?.toFloat() ?: 0f,
-                barColor = MaterialTheme.colorScheme.primary,
-                overColor = MaterialTheme.colorScheme.primary,
-                gridColor = MaterialTheme.colorScheme.surfaceVariant,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp),
+                reading = { readings[it] },
+                summary = title,
+                ticks = listOfNotNull(t.weeklyTarget?.toFloat()),
+                height = 96.dp,
             )
         }
     }
 }
 
+/** Chiffre clé : libellé, valeur en chiffres tabulaires, unité ; une phrase pour TalkBack. */
 @Composable
-private fun StatBlock(label: String, value: String, sub: String, valueColor: Color) {
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+private fun StatBlock(
+    label: String,
+    value: String,
+    unit: String,
+    modifier: Modifier = Modifier,
+    spokenUnit: String = unit,
+    spoken: String = stringResource(R.string.me_value_spoken, label, value, spokenUnit),
+) {
+    Column(modifier.clearAndSetSemantics { contentDescription = spoken }, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(value, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold), color = valueColor)
-            Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 3.dp))
+            FitText(value, style = KalosTheme.type.metricLarge)
+            Text(unit, style = KalosTheme.type.metricSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 3.dp))
         }
+    }
+}
+
+@Composable
+private fun LegendItem(label: String, color: Color) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Swatch(color)
+        Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -273,60 +311,16 @@ private fun EmptyLine(text: String) {
     Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
-/** Compact bar chart. Bars above [goal] (when goal > 0) use [overColor]. */
 @Composable
-private fun BarChart(
-    values: List<Float>,
-    goal: Float,
-    barColor: Color,
-    overColor: Color,
-    gridColor: Color,
-    modifier: Modifier = Modifier,
-) {
-    val maxV = (values.maxOrNull() ?: 0f).coerceAtLeast(goal).coerceAtLeast(1f)
-    Canvas(modifier = modifier) {
-        val w = size.width
-        val h = size.height
-        val n = values.size
-        if (n == 0) return@Canvas
-        val gap = 4.dp.toPx()
-        val barW = ((w - gap * (n - 1)) / n).coerceAtLeast(1f)
-
-        // Goal line
-        if (goal > 0f) {
-            val gy = h * (1f - goal / maxV)
-            drawLine(
-                color = gridColor,
-                start = androidx.compose.ui.geometry.Offset(0f, gy),
-                end = androidx.compose.ui.geometry.Offset(w, gy),
-                strokeWidth = 1.dp.toPx(),
-            )
-        }
-
-        values.forEachIndexed { i, v ->
-            val barH = (v / maxV) * h
-            val x = i * (barW + gap)
-            val over = goal > 0f && v > goal * 1.05f
-            drawRect(
-                color = if (over) overColor else barColor.copy(alpha = 0.85f),
-                topLeft = androidx.compose.ui.geometry.Offset(x, h - barH),
-                size = androidx.compose.ui.geometry.Size(barW, barH),
-            )
-        }
-    }
+private fun verdict(v: WeightVerdict): Pair<String, Color> = when (v) {
+    WeightVerdict.ON_TRACK -> stringResource(R.string.me_verdict_on_track) to KalosTheme.nutrients.goalReached
+    WeightVerdict.STALLED -> stringResource(R.string.me_verdict_stalled) to KalosTheme.nutrients.overTarget
+    WeightVerdict.OPPOSITE -> stringResource(R.string.me_verdict_opposite) to KalosTheme.nutrients.overTarget
+    WeightVerdict.NEUTRAL -> stringResource(R.string.me_verdict_neutral) to MaterialTheme.colorScheme.onSurfaceVariant
 }
 
-@Composable
-private fun verdictColor(v: WeightVerdict): Color = when (v) {
-    WeightVerdict.ON_TRACK -> MaterialTheme.colorScheme.primary
-    WeightVerdict.STALLED -> KalosTheme.nutrients.overTarget
-    WeightVerdict.OPPOSITE -> MaterialTheme.colorScheme.error
-    WeightVerdict.NEUTRAL -> MaterialTheme.colorScheme.onSurface
-}
+private fun signed(v: Float): String = (if (v >= 0f) "+" else "") + "%.1f".format(v)
 
-private fun verdictLabel(v: WeightVerdict): String = when (v) {
-    WeightVerdict.ON_TRACK -> "En ligne avec ton objectif."
-    WeightVerdict.STALLED -> "Stagnation sur la période."
-    WeightVerdict.OPPOSITE -> "Direction opposée à ton objectif."
-    WeightVerdict.NEUTRAL -> "Écart par rapport à ton maintien."
-}
+private val SHORT_DATE = DateTimeFormatter.ofPattern("EEE d MMM", Locale.FRENCH)
+
+private fun shortDate(date: String): String = LocalDate.parse(date).format(SHORT_DATE).replaceFirstChar { it.uppercase() }

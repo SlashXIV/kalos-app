@@ -42,7 +42,7 @@ fun formatSecsAsDuration(secs: Int): String {
 fun formatElapsedSince(startedAtMillis: Long, nowMillis: Long = System.currentTimeMillis()): String {
     val minutes = ((nowMillis - startedAtMillis) / 60_000).coerceAtLeast(0)
     return when {
-        minutes < 1 -> "à l'instant"
+        minutes < 1 -> "à l’instant"
         minutes < 60 -> "il y a $minutes min"
         minutes < 24 * 60 -> "il y a ${minutes / 60} h"
         else -> "il y a ${minutes / (24 * 60)} j"

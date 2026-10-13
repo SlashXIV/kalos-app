@@ -27,6 +27,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
 import com.kalos.app.core.domain.model.Food
+import com.kalos.app.core.ui.component.KalosFilterChip
 import com.kalos.app.core.ui.component.Dot
 import com.kalos.app.core.ui.component.EmptyState
 import com.kalos.app.core.ui.component.FoodListItem
@@ -178,7 +179,7 @@ fun FoodSearchScreen(
                 KalosFilterChip(
                     selected = state.sortVolumeEating,
                     onClick = viewModel::onToggleVolumeSort,
-                    label = stringResource(R.string.food_volume_eating),
+                    text = stringResource(R.string.food_volume_eating),
                 )
             }
             Spacer(Modifier.height(4.dp))
@@ -434,16 +435,6 @@ private fun MacroStat(label: String, value: String, unit: String, spokenUnit: St
 }
 
 @Composable
-private fun KalosFilterChip(selected: Boolean, onClick: () -> Unit, label: String) {
-    FilterChip(
-        selected = selected,
-        onClick = onClick,
-        label = { Text(label) },
-        shape = KalosShape.chip,
-    )
-}
-
-@Composable
 private fun FoodFilterRow(
     categories: List<String>,
     selectedCategory: String,
@@ -453,13 +444,13 @@ private fun FoodFilterRow(
 ) {
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         item {
-            KalosFilterChip(selected = onlyCustom, onClick = onCustomToggle, label = stringResource(R.string.food_filter_custom))
+            KalosFilterChip(text = stringResource(R.string.food_filter_custom), selected = onlyCustom, onClick = onCustomToggle)
         }
         items(categories) { category ->
             KalosFilterChip(
                 selected = selectedCategory == category,
                 onClick = { onCategorySelect(category) },
-                label = category,
+                text = category,
             )
         }
     }

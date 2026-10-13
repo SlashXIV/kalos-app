@@ -73,6 +73,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
+import com.kalos.app.core.ui.util.formatKg
 import com.kalos.app.core.domain.model.ExerciseStatus
 import com.kalos.app.core.domain.model.ExerciseTrackingMode
 import com.kalos.app.core.ui.component.Graduation
@@ -84,7 +85,6 @@ import com.kalos.app.core.ui.motion.RollingDigits
 import com.kalos.app.core.ui.theme.KalosTheme
 import com.kalos.app.core.ui.util.formatElapsedSince
 import com.kalos.app.feature.workout.formatClock
-import com.kalos.app.feature.workout.formatKg
 import com.kalos.app.navigation.Screen
 import kotlin.math.cos
 import kotlin.math.sin
@@ -160,7 +160,7 @@ fun ActiveWorkoutScreen(
             }
 
             AnimatedVisibility(visible = state.isResting) {
-                RestBar(secsLeft = state.restSecsLeft, onSkip = viewModel::skipRest)
+                RestBar(secsLeft = state.restSecsLeft, totalSecs = state.restTotalSecs, onSkip = viewModel::skipRest)
             }
         }
     }
@@ -398,7 +398,7 @@ private fun SetTableHeader(mode: ExerciseTrackingMode) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         InstrumentLabel(stringResource(R.string.training_col_number), Modifier.width(28.dp))
-        if (showWeight) InstrumentLabel(stringResource(R.string.training_unit_kg), Modifier.weight(1.5f))
+        if (showWeight) InstrumentLabel(stringResource(R.string.kg), Modifier.weight(1.5f))
         if (mode == ExerciseTrackingMode.REPS_WEIGHT) InstrumentLabel(stringResource(R.string.training_col_reps), Modifier.weight(1.5f))
         if (mode != ExerciseTrackingMode.REPS_WEIGHT) {
             InstrumentLabel(stringResource(R.string.training_col_duration), Modifier.weight(if (showWeight) 1.5f else 3f))
@@ -608,11 +608,8 @@ private fun SetStamp(setNumber: Int, done: Boolean, onToggle: () -> Unit) {
  * Pas de liveRegion : TalkBack ne lit le temps que si l'on se pose dessus, jamais chaque seconde.
  */
 @Composable
-private fun RestBar(secsLeft: Int, onSkip: () -> Unit) {
-    // Durée totale du repos = plus grande valeur vue depuis son début (le ViewModel n'expose que le reste).
-    val max = remember { intArrayOf(0) }
-    if (secsLeft > max[0]) max[0] = secsLeft
-    val total = max[0]
+private fun RestBar(secsLeft: Int, totalSecs: Int, onSkip: () -> Unit) {
+    val total = maxOf(totalSecs, secsLeft)
     val label = stringResource(R.string.training_rest)
     val spoken = stringResource(R.string.training_rest_spoken, secsLeft / 60, secsLeft % 60)
     Row(

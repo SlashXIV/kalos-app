@@ -32,6 +32,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import com.kalos.app.core.ui.component.FitText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -203,12 +204,15 @@ private fun TrainingTabs(titles: List<String>, selected: Int, onSelect: (Int) ->
             val active = i == selected
             Column(
                 Modifier
+                    .weight(1f, fill = false)
                     .heightIn(min = 48.dp)
                     .selectable(selected = active, role = Role.Tab, onClick = { onSelect(i) }),
                 verticalArrangement = Arrangement.Bottom,
             ) {
-                InstrumentLabel(
-                    title,
+                // Une ligne qui se réduit : un onglet ne se casse jamais au milieu du mot (police 200 %).
+                FitText(
+                    title.uppercase(),
+                    style = KalosTheme.type.label,
                     color = if (active) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 14.dp, bottom = 6.dp),
                 )

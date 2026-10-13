@@ -39,6 +39,8 @@ data class ActiveWorkoutUiState(
     val currentExIndex: Int = 0,
     val elapsedSecs: Int = 0,
     val restSecsLeft: Int = 0,
+    /** Durée totale du repos en cours (pour le cadran qui se vide). */
+    val restTotalSecs: Int = 0,
     val isResting: Boolean = false,
     val isSaving: Boolean = false,
     val savedLogId: Long? = null,
@@ -186,7 +188,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             if (left > 0) {
                 restStartedAt = draft.restStartedAt
                 restDurationSecs = draft.restDurationSecs
-                _state.update { it.copy(isResting = true, restSecsLeft = left) }
+                _state.update { it.copy(isResting = true, restSecsLeft = left, restTotalSecs = draft.restDurationSecs) }
                 launchRestLoop()
             }
         }
@@ -242,7 +244,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         restJob?.cancel()
         restStartedAt = System.currentTimeMillis()
         restDurationSecs = seconds
-        _state.update { it.copy(isResting = true, restSecsLeft = seconds) }
+        _state.update { it.copy(isResting = true, restSecsLeft = seconds, restTotalSecs = seconds) }
         launchRestLoop()
     }
 

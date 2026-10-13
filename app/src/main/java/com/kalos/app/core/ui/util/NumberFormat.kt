@@ -13,3 +13,7 @@ import java.util.Locale
  */
 fun formatGroupedInt(value: Number): String =
     NumberFormat.getIntegerInstance(Locale.FRENCH).format(value)
+
+/** Poids ou charge sans « ,0 » final, virgule française : 100 → « 100 », 82.5 → « 82,5 ». */
+fun formatKg(kg: Float): String =
+    if (kg == kg.toLong().toFloat()) kg.toLong().toString() else "%.1f".format(Locale.FRENCH, kg)

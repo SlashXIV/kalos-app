@@ -38,6 +38,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.kalos.app.R
+import com.kalos.app.core.ui.util.formatKg
 import com.kalos.app.core.domain.model.Exercise
 import com.kalos.app.core.domain.repository.ExerciseRepository
 import com.kalos.app.core.domain.repository.WorkoutRepository
@@ -46,7 +47,6 @@ import com.kalos.app.core.ui.component.KalosCard
 import com.kalos.app.core.ui.component.ScreenHeader
 import com.kalos.app.core.ui.component.SectionLabel
 import com.kalos.app.core.ui.theme.KalosTheme
-import com.kalos.app.feature.workout.formatKg
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

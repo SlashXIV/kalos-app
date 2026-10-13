@@ -29,7 +29,7 @@
 
     <!-- Apparence -->
     <string name="appearance_title">Apparence</string>
-    <string name="appearance_subtitle">Palette : %1$s</string>
+    <string name="appearance_subtitle">Palette : %1$s</string>
     <string name="appearance_palette">Palette</string>
     <string name="palette_jade">Jade</string>
     <string name="palette_encre">Encre</string>
@@ -42,7 +42,7 @@
     <string name="appearance_motion_expressive">Expressive</string>
     <string name="appearance_motion_calm">Sobre</string>
     <string name="appearance_motion_expressive_desc">L’aiguille se pose, les titres montent, les graduations s’allument quand l’objectif est atteint.</string>
-    <string name="appearance_motion_calm_desc">Mouvement réduit au strict utile : valeurs affichées directement, transitions brèves.</string>
+    <string name="appearance_motion_calm_desc">Mouvement réduit au strict utile : valeurs affichées directement, transitions brèves.</string>
     <string name="appearance_vibrations">Vibrations</string>
     <string name="appearance_vibrations_desc">Aliment ajouté, série validée, fin du repos.</string>
     <!-- Aujourd’hui (journal du jour) -->
@@ -66,7 +66,7 @@
         <item quantity="one">%1$d aliment · %2$s kcal</item>
         <item quantity="other">%1$d aliments · %2$s kcal</item>
     </plurals>
-    <string name="favorite_added">« %1$s » ajouté</string>
+    <string name="favorite_added">« %1$s » ajouté</string>
     <string name="favorite_save_title">Enregistrer comme favori</string>
     <string name="favorite_name">Nom du repas favori</string>
     <string name="favorite_saved">Repas favori enregistré</string>
@@ -85,13 +85,13 @@
     <string name="water_other">Autre</string>
     <string name="water_goal_dialog">Objectif quotidien</string>
     <string name="water_custom_dialog">Quantité personnalisée</string>
-    <string name="water_custom_hint">Valeur négative pour corriger (ex. : -250)</string>
+    <string name="water_custom_hint">Valeur négative pour corriger (ex. : -250)</string>
     <string name="unit_ml">ml</string>
     <string name="unit_g">g</string>
     <string name="unit_l">L</string>
     <string name="meal_empty">Rien de pesé</string>
-    <string name="meal_options">Options : %1$s</string>
-    <string name="meal_add_food">Ajouter un aliment : %1$s</string>
+    <string name="meal_options">Options : %1$s</string>
+    <string name="meal_add_food">Ajouter un aliment : %1$s</string>
     <string name="meal_item_remove">Retirer %1$s</string>
     <string name="meal_item_spoken">%1$s, %2$s grammes, %3$s kilocalories</string>
     <string name="today_workout">Séance du jour</string>

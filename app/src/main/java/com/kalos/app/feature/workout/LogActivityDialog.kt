@@ -157,8 +157,8 @@ fun LogActivityDialog(
 private fun formatActivityDate(date: LocalDate): String {
     val today = LocalDate.now()
     return when (date) {
-        today -> stringResource(R.string.training_today_cap)
-        today.minusDays(1) -> stringResource(R.string.training_yesterday_cap)
+        today -> stringResource(R.string.today_title)
+        today.minusDays(1) -> stringResource(R.string.yesterday)
         else -> date.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.FRENCH))
     }
 }

@@ -57,7 +57,7 @@ fun SessionStats(log: WorkoutLog, modifier: Modifier = Modifier) {
             StatColumn(
                 label = stringResource(R.string.training_stat_volume),
                 value = kg,
-                unit = stringResource(R.string.training_unit_kg),
+                unit = stringResource(R.string.kg),
                 spoken = stringResource(R.string.training_kg_spoken, kg),
                 modifier = Modifier.weight(1.4f),
             )

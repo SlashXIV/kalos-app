@@ -8,6 +8,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
@@ -34,8 +35,11 @@ fun FitText(
     minFontSize: TextUnit = 10.sp,
 ) {
     val resolved = LocalTextStyle.current.merge(style)
+    // Plancher comparé à la taille réellement dessinée (échelle de police système comprise) :
+    // à 200 %, un libellé peut redescendre jusqu'au plancher au lieu d'être rogné.
+    val fontScale = LocalDensity.current.fontScale
     val minScale = if (resolved.fontSize.isSpecified && resolved.fontSize.value > 0f) {
-        (minFontSize.value / resolved.fontSize.value).coerceAtMost(1f)
+        (minFontSize.value / (resolved.fontSize.value * fontScale)).coerceAtMost(1f)
     } else {
         1f
     }

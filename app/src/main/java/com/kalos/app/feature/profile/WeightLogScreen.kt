@@ -314,7 +314,7 @@ private fun WeightInputDialog(
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-private fun kg1(kg: Float): String = "%.1f".format(kg)
+private fun kg1(kg: Float): String = "%.1f".format(Locale.FRENCH, kg)
 
 private fun signed(v: Float): String = (if (v >= 0f) "+" else "") + kg1(v)
 

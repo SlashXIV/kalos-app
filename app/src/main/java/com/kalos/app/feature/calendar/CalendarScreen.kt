@@ -279,12 +279,15 @@ private fun DayCell(
 private fun KcalGauge(fraction: Float, fill: Color, track: Color, modifier: Modifier = Modifier) {
     Box(
         modifier
-            .size(width = 4.dp, height = 14.dp)
-            .clip(KalosShape.chip)
+            .size(width = 10.dp, height = 14.dp)
             .drawBehind {
-                drawRect(track)
+                val w = 4.dp.toPx()
+                val x = (size.width - w) / 2
+                drawRect(track, Offset(x, 0f), Size(w, size.height))
                 val h = size.height * fraction.coerceIn(0f, 1f)
-                drawRect(fill, Offset(0f, size.height - h), Size(size.width, h))
+                drawRect(fill, Offset(x, size.height - h), Size(w, h))
+                // Au-dessus de l'objectif : un trait barre le haut de la jauge (visible sans la couleur).
+                if (fraction > OVER_LIMIT) drawRect(fill, Offset(0f, 0f), Size(size.width, 2.dp.toPx()))
             },
     )
 }
@@ -301,7 +304,7 @@ private fun CalendarLegend() {
             KcalGauge(fraction = 0.6f, fill = ink, track = MaterialTheme.colorScheme.outlineVariant)
         }
         LegendItem(stringResource(R.string.state_over_target).replaceFirstChar { it.uppercase() }) {
-            Swatch(KalosTheme.nutrients.overTarget)
+            KcalGauge(fraction = 1.3f, fill = KalosTheme.nutrients.overTarget, track = MaterialTheme.colorScheme.outlineVariant)
         }
         LegendItem(stringResource(R.string.me_cal_legend_done)) { Dot(ink) }
         LegendItem(stringResource(R.string.me_cal_legend_planned)) { Dot(ink, filled = false) }

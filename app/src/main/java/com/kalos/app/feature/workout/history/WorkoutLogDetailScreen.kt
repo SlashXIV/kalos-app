@@ -34,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.kalos.app.R
+import com.kalos.app.core.ui.util.formatKg
 import com.kalos.app.core.domain.model.ExerciseStatus
 import com.kalos.app.core.domain.model.ExerciseTrackingMode
 import com.kalos.app.core.domain.model.LogExercise
@@ -50,7 +51,6 @@ import com.kalos.app.core.ui.util.formatGroupedInt
 import com.kalos.app.feature.workout.CompletedSetLine
 import com.kalos.app.feature.workout.ExerciseSetsScale
 import com.kalos.app.feature.workout.SessionStats
-import com.kalos.app.feature.workout.formatKg
 import com.kalos.app.feature.workout.logDateLong
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

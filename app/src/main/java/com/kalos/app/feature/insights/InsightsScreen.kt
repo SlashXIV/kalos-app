@@ -319,7 +319,7 @@ private fun verdict(v: WeightVerdict): Pair<String, Color> = when (v) {
     WeightVerdict.NEUTRAL -> stringResource(R.string.me_verdict_neutral) to MaterialTheme.colorScheme.onSurfaceVariant
 }
 
-private fun signed(v: Float): String = (if (v >= 0f) "+" else "") + "%.1f".format(v)
+private fun signed(v: Float): String = (if (v >= 0f) "+" else "") + "%.1f".format(Locale.FRENCH, v)
 
 private val SHORT_DATE = DateTimeFormatter.ofPattern("EEE d MMM", Locale.FRENCH)
 

@@ -218,12 +218,13 @@ fun MeSeriesChart(
                     }
                 },
         )
-        // Lecture du point courant ; TalkBack la lit déjà comme état du graphique.
-        Text(
-            reading(index),
-            style = KalosTheme.type.metricSmall,
-            color = colors.onSurfaceVariant,
-            modifier = Modifier.clearAndSetSemantics { },
-        )
+        // Lecture du point courant ; TalkBack la lit déjà comme état du graphique. Lue dans son
+        // propre composable : déplacer le curseur ne recompose pas (ni ne reconstruit) le graphique.
+        ChartReading({ reading(index) }, colors.onSurfaceVariant)
     }
+}
+
+@Composable
+private fun ChartReading(text: () -> String, color: androidx.compose.ui.graphics.Color) {
+    Text(text(), style = KalosTheme.type.metricSmall, color = color, modifier = Modifier.clearAndSetSemantics { })
 }

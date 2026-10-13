@@ -15,6 +15,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.semantics
@@ -330,6 +332,8 @@ private fun SmartRemindersCard(state: NotificationsUiState, viewModel: Notificat
                             onClick = { viewModel.setInactivityDays(days) },
                             selected = state.inactivityDays == days,
                             contentDescription = pluralStringResource(R.plurals.me_notif_days_spoken, days, days),
+                            // Le choix actif est annoncé, pas seulement montré par le fond plein.
+                            modifier = Modifier.semantics { selected = state.inactivityDays == days },
                         )
                     }
                     Text(
@@ -353,7 +357,12 @@ private fun SmartRemindersCard(state: NotificationsUiState, viewModel: Notificat
                     Text(stringResource(R.string.me_notif_send_hour), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                     Text(stringResource(R.string.me_hour_value, state.smartHour), style = KalosTheme.type.metric)
                 }
-                HourSlider(state.smartHour.toFloat(), onChange = { viewModel.setSmartHour(it.toInt()) })
+                val hourLabel = stringResource(R.string.me_notif_send_hour)
+                HourSlider(
+                    state.smartHour.toFloat(),
+                    onChange = { viewModel.setSmartHour(it.toInt()) },
+                    modifier = Modifier.semantics { contentDescription = hourLabel },
+                )
                 Text(
                     stringResource(R.string.me_notif_once_daily),
                     style = MaterialTheme.typography.bodySmall,

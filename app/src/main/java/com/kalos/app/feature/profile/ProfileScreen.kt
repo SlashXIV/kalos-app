@@ -42,6 +42,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
+import com.kalos.app.core.ui.util.formatKg
 import com.kalos.app.core.domain.model.Sex
 import com.kalos.app.core.ui.component.FitText
 import com.kalos.app.core.ui.component.InstrumentLabel
@@ -95,12 +96,12 @@ fun ProfileScreen(
                 SectionLabel(stringResource(R.string.me_profile_physical))
                 if (profile != null) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        ProfileStat(stringResource(R.string.me_profile_weight), formatProfileWeight(profile.weightKg), kgUnit, kgSpoken, Modifier.weight(1f))
+                        ProfileStat(stringResource(R.string.me_profile_weight), formatKg(profile.weightKg), kgUnit, kgSpoken, Modifier.weight(1f))
                         ProfileStat(
                             stringResource(R.string.me_profile_height), profile.heightCm.toInt().toString(),
                             stringResource(R.string.cm), stringResource(R.string.me_unit_cm_spoken), Modifier.weight(1f),
                         )
-                        ProfileStat(stringResource(R.string.me_profile_target), formatProfileWeight(profile.targetWeightKg), kgUnit, kgSpoken, Modifier.weight(1f))
+                        ProfileStat(stringResource(R.string.me_profile_target), formatKg(profile.targetWeightKg), kgUnit, kgSpoken, Modifier.weight(1f))
                     }
                     if (state.tdee > 0) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -119,7 +120,7 @@ fun ProfileScreen(
                     val lastWeight = state.lastWeightKg
                     if (lastWeight != null && abs(lastWeight - profile.weightKg) >= 1f) {
                         KalosButton(
-                            stringResource(R.string.me_profile_use_last_weight, "${formatProfileWeight(lastWeight)} $kgUnit"),
+                            stringResource(R.string.me_profile_use_last_weight, "${formatKg(lastWeight)} $kgUnit"),
                             onClick = viewModel::updateReferenceWeightFromLog,
                             ghost = true,
                             modifier = Modifier.fillMaxWidth(),
@@ -192,9 +193,9 @@ private fun BodyWeightCard(weightKg: Float, date: String, delta: Float?, onClick
         else -> d.format(DateTimeFormatter.ofPattern("d MMM", Locale.FRENCH))
     }
     val kg = stringResource(R.string.kg)
-    val deltaLabel = delta?.let { (if (it >= 0f) "+" else "") + formatProfileWeight(it) }
+    val deltaLabel = delta?.let { (if (it >= 0f) "+" else "") + formatKg(it) }
     val title = stringResource(R.string.me_profile_body_weight)
-    val sentence = stringResource(R.string.me_value_spoken, title, formatProfileWeight(weightKg), stringResource(R.string.me_unit_kg_spoken)) +
+    val sentence = stringResource(R.string.me_value_spoken, title, formatKg(weightKg), stringResource(R.string.me_unit_kg_spoken)) +
         ", " + dateLabel + if (deltaLabel != null) ", " + stringResource(R.string.me_weight_delta_spoken, deltaLabel) else ""
 
     KalosCard(onClick = onClick, modifier = Modifier.clearAndSetSemantics {
@@ -206,7 +207,7 @@ private fun BodyWeightCard(weightKg: Float, date: String, delta: Float?, onClick
             Icon(Icons.Filled.MonitorWeight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 InstrumentLabel(title)
-                Text("${formatProfileWeight(weightKg)} $kg", style = KalosTheme.type.metric)
+                Text("${formatKg(weightKg)} $kg", style = KalosTheme.type.metric)
             }
             Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(dateLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -218,11 +219,6 @@ private fun BodyWeightCard(weightKg: Float, date: String, delta: Float?, onClick
         }
     }
 }
-
-/** Pas de « ,0 » final ; séparateur décimal de la langue de l'appareil (87 → « 87 », 82.5 → « 82,5 »). */
-private fun formatProfileWeight(weightKg: Float): String =
-    if (weightKg == weightKg.toLong().toFloat()) "${weightKg.toLong()}"
-    else "%.1f".format(weightKg)
 
 @Composable
 private fun ProfileStat(label: String, value: String, unit: String, spokenUnit: String, modifier: Modifier = Modifier) {

@@ -155,10 +155,11 @@ fun ValueChip(
             .then(if (selected) Modifier.background(colors.onSurface) else Modifier.border(1.dp, colors.outlineVariant, KalosShape.chip))
             .clickable(onClick = onClick)
             .then(if (contentDescription != null) Modifier.semantics { this.contentDescription = contentDescription } else Modifier)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 8.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        FitText(text, style = KalosTheme.type.metricSmall, color = if (selected) colors.surface else colors.onSurface)
+        // Quatre puces sur une ligne : elles se réduisent sur écran étroit plutôt que de rogner « ml ».
+        FitText(text, style = KalosTheme.type.metricSmall, color = if (selected) colors.surface else colors.onSurface, minFontSize = 7.sp)
     }
 }
 

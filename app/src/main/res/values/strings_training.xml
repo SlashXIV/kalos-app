@@ -165,7 +165,6 @@
     <string name="training_col_number">N°</string>
     <string name="training_col_reps">Rép.</string>
     <string name="training_col_duration">Durée</string>
-    <string name="training_unit_kg">kg</string>
     <string name="training_unit_min">min</string>
     <string name="training_unit_h">h</string>
     <string name="training_field_weight">Série %1$d, poids en kilogrammes</string>
@@ -208,8 +207,6 @@
     <string name="training_reps_only">%1$d rép.</string>
     <string name="training_today">aujourd’hui</string>
     <string name="training_yesterday">hier</string>
-    <string name="training_today_cap">Aujourd’hui</string>
-    <string name="training_yesterday_cap">Hier</string>
     <string name="training_log_detail">Détail de séance</string>
     <string name="training_log_not_found">Séance introuvable</string>
     <string name="training_status_skipped">Passé</string>

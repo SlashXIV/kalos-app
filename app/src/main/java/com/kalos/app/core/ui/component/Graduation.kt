@@ -25,6 +25,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kalos.app.core.ui.motion.LocalMotionLevel
@@ -189,8 +191,27 @@ fun GraduatedDial(
                 }
             },
         contentAlignment = Alignment.Center,
-        content = center,
+    ) {
+        // Le texte central tient dans le cercle intérieur : réduit (largeur et hauteur) plutôt
+        // que de déborder sur les graduations quand la police système est agrandie.
+        Box(Modifier.size(size * 0.56f).shrinkToFit(), contentAlignment = Alignment.Center, content = center)
+    }
+}
+
+/** Réduit uniformément son contenu pour qu'il tienne dans les contraintes, sans jamais l'agrandir. */
+private fun Modifier.shrinkToFit(): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(Constraints())
+    val scale = minOf(
+        1f,
+        constraints.maxWidth.toFloat() / placeable.width.coerceAtLeast(1),
+        constraints.maxHeight.toFloat() / placeable.height.coerceAtLeast(1),
     )
+    layout(constraints.maxWidth, constraints.maxHeight) {
+        placeable.placeWithLayer(
+            (constraints.maxWidth - placeable.width) / 2,
+            (constraints.maxHeight - placeable.height) / 2,
+        ) { scaleX = scale; scaleY = scale }
+    }
 }
 
 private fun polar(c: Offset, r: Float, a: Double) = Offset(c.x + r * cos(a).toFloat(), c.y + r * sin(a).toFloat())

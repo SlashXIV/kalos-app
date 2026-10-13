@@ -3,6 +3,7 @@ package com.kalos.app.feature.workout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.kalos.app.R
+import com.kalos.app.core.ui.util.formatKg
 import com.kalos.app.core.domain.model.ExerciseTrackingMode
 import com.kalos.app.core.domain.model.WorkoutSet
 import com.kalos.app.core.ui.util.formatSecsAsDuration
@@ -11,10 +12,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /** Mises en forme partagées par les écrans Sport (chiffres seuls ou textes de strings_training). */
-
-/** 100 → « 100 », 82,5 → « 82,5 ». */
-fun formatKg(kg: Float): String =
-    if (kg == kg.toLong().toFloat()) kg.toLong().toString() else "%.1f".format(Locale.FRENCH, kg)
 
 /** Chronomètre : 75 → « 1:15 », 3 725 → « 1:02:05 ». */
 fun formatClock(secs: Int): String {
@@ -36,7 +33,7 @@ fun trainingDuration(secs: Long): String {
 /** Une série terminée : « 8 × 82,5 kg », « 1:30 », « 1:30 @ 20 kg ». */
 @Composable
 fun setText(set: WorkoutSet, mode: ExerciseTrackingMode): String {
-    val kg = stringResource(R.string.training_unit_kg)
+    val kg = stringResource(R.string.kg)
     return when (mode) {
         ExerciseTrackingMode.REPS_WEIGHT -> when {
             set.reps > 0 && set.weightKg > 0f -> "${set.reps} × ${formatKg(set.weightKg)} $kg"
@@ -70,8 +67,8 @@ fun logDateLong(dateStr: String): String {
     val d = LocalDate.parse(dateStr)
     val today = LocalDate.now()
     return when (d) {
-        today -> stringResource(R.string.training_today_cap)
-        today.minusDays(1) -> stringResource(R.string.training_yesterday_cap)
+        today -> stringResource(R.string.today_title)
+        today.minusDays(1) -> stringResource(R.string.yesterday)
         else -> d.format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.FRENCH)).replaceFirstChar { it.uppercase() }
     }
 }

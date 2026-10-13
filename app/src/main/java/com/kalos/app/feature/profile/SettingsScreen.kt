@@ -199,7 +199,11 @@ fun SettingsScreen(
                 SettingsItem(
                     icon = Icons.Filled.Info,
                     title = stringResource(R.string.me_settings_version),
-                    subtitle = stringResource(R.string.me_settings_version_value),
+                    subtitle = stringResource(
+                        R.string.me_settings_version_value,
+                        // Version lue dans le paquet installé : elle suit versionName sans texte à tenir à jour.
+                        LocalContext.current.run { packageManager.getPackageInfo(packageName, 0).versionName.orEmpty() },
+                    ),
                     enabled = false,
                 )
             }

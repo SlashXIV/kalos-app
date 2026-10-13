@@ -324,7 +324,7 @@ private fun DaySummary(state: NutritionUiState) {
             val sentence = stringResource(R.string.kcal_dial_sentence, formatGroupedInt(kcal), formatGroupedInt(goal), status)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(horizontal = 36.dp).clearAndSetSemantics { contentDescription = sentence },
+                modifier = Modifier.clearAndSetSemantics { contentDescription = sentence },
             ) {
                 InstrumentLabel(stringResource(R.string.kcal_label))
                 FitText(formatGroupedInt(kcal), style = KalosTheme.type.metricHuge)

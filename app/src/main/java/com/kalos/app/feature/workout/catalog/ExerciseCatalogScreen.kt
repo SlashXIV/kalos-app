@@ -35,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
+import com.kalos.app.core.ui.component.KalosFilterChip
 import com.kalos.app.core.ui.component.EmptyState
 import com.kalos.app.core.ui.component.ExerciseListItem
 import com.kalos.app.core.ui.component.KalosSearchBar
@@ -112,9 +113,9 @@ fun ExerciseCatalogScreen(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                CatalogChip(stringResource(R.string.training_favorites), state.onlyFavorites, viewModel::onFavoritesToggle, favorite = true)
+                KalosFilterChip(stringResource(R.string.training_favorites), state.onlyFavorites, viewModel::onFavoritesToggle, selectedIcon = Icons.Filled.Favorite)
                 MUSCLE_FILTERS.forEach { muscle ->
-                    CatalogChip(muscle, state.selectedMuscle == muscle, { viewModel.onMuscleChange(muscle) })
+                    KalosFilterChip(muscle, state.selectedMuscle == muscle, { viewModel.onMuscleChange(muscle) })
                 }
             }
             Row(
@@ -122,7 +123,7 @@ fun ExerciseCatalogScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 TYPE_FILTERS.forEach { type ->
-                    CatalogChip(type, state.selectedType == type, { viewModel.onTypeChange(type) })
+                    KalosFilterChip(type, state.selectedType == type, { viewModel.onTypeChange(type) })
                 }
             }
             Spacer(Modifier.height(8.dp))
@@ -171,25 +172,3 @@ fun ExerciseCatalogScreen(
     }
 }
 
-@Composable
-private fun CatalogChip(text: String, selected: Boolean, onClick: () -> Unit, favorite: Boolean = false) {
-    FilterChip(
-        selected = selected,
-        onClick = onClick,
-        label = { Text(text, style = MaterialTheme.typography.labelMedium) },
-        shape = KalosShape.chip,
-        leadingIcon = if (favorite && selected) {
-            { Icon(Icons.Filled.Favorite, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) }
-        } else null,
-        colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = MaterialTheme.colorScheme.onSurface,
-            selectedLabelColor = MaterialTheme.colorScheme.surface,
-            selectedLeadingIconColor = MaterialTheme.colorScheme.surface,
-        ),
-        border = FilterChipDefaults.filterChipBorder(
-            enabled = true,
-            selected = selected,
-            borderColor = MaterialTheme.colorScheme.outlineVariant,
-        ),
-    )
-}

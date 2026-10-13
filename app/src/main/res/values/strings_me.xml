@@ -188,7 +188,7 @@
     <string name="me_settings_import_action">Importer</string>
     <string name="me_settings_about">À propos</string>
     <string name="me_settings_version">Version</string>
-    <string name="me_settings_version_value">Kalos 3.26.2</string>
+    <string name="me_settings_version_value">Kalos %1$s</string>
 
     <!-- Notifications -->
     <string name="me_notif_smart">Rappels intelligents</string>

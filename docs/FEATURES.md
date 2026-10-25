@@ -54,7 +54,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Favorite foods (shown when query is empty) | Done | |
 | Food detail sheet | Done | Portion / grams mode toggle |
 | "After adding" projected daily totals | Done | Color-coded: normal / warning / over target |
-| Dietary filter applied to results | Done | |
+| Dietary filter applied to results | Partial | Setting kept and backed up, but no longer applied since v3.18.0 (suggestions removed). Decision pending (audit 25 October 2026) |
 | Category filter chips | Done | Single-select, loaded from DB, combinable with text |
 | Custom food filter | Done | "Perso" toggle chip |
 | Create custom food from search screen | Done | |
@@ -201,7 +201,7 @@ Statuses: **Done** · **Partial** · **Planned**
 |---|---|---|
 | Link to Notifications screen | Done | |
 | Appearance | Done | Palette (Jade / Encre / Océan), brightness (System / Light / Dark), Ambiance (Expressive / Sobre), Vibrations. 3.x themes migrated automatically (v4.0.0) |
-| Dietary filters (pork, alcohol, vegetarian, vegan) | Done | Persisted in DataStore |
+| Dietary filters (pork, alcohol, vegetarian, vegan) | Partial | Persisted in SharedPreferences and backed up; not read by search since v3.18.0 |
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |
 | Data import / restore | Done | Confirmation dialog (destructive) |

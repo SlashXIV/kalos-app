@@ -2,6 +2,30 @@
 
 ---
 
+## v4.0.2 — 25 October 2026
+
+Premier lot de l'audit technique du 25 octobre 2026 (`docs/TECHNICAL_AUDIT.md`) : corrections de pertes de données et de saisie, sans changement de schéma ni de calcul métier.
+
+### Fixed — données préservées
+
+- **Séances et programmes** : modifier une séance ne la retire plus des programmes qui l'utilisent. L'enregistrement remplaçait la ligne (suppression puis réinsertion), ce qui effaçait en cascade ses liens de programme ; il met désormais la ligne à jour (`@Upsert`). Même correction pour les programmes et les repas favoris.
+- **Sauvegarde** : les aliments perso archivés sont exportés, une sauvegarde qui en contenait ne pouvait pas être restaurée. Les exercices sont retrouvés par leur identifiant de catalogue à la restauration sur un autre téléphone (leurs numéros dépendent de l'historique d'installation) ; un exercice introuvable donne un message clair au lieu d'une erreur de contrainte.
+- **Écritures atomiques** : création de séance, programmes (enregistrement, activation, liaison d'une séance), ajout d'aliment à un repas, application d'un repas favori, eau et suppression groupée d'aliments passent en transaction.
+- Un type de repas inconnu (sauvegarde modifiée à la main) est ignoré au lieu de faire planter l'écran du jour.
+
+### Fixed — saisie et affichage
+
+- **Virgule décimale** acceptée partout : « 82,5 » en séance enregistrait 0 kg ; « 12,5 » g dans la feuille de quantité n'ajoutait rien ; « 75,5 » kg dans le profil retombait sur 75 kg par défaut. Un seul analyseur partagé (`parseDecimal`).
+- **Reprise d'une séance interrompue** : gainage et cardio gardent leur suivi en durée (le brouillon ne mémorisait pas le mode de suivi).
+- **Courbe de progression d'un exercice** : affiche les 20 dernières séances, et non les 20 plus anciennes.
+- Ajout d'un aliment depuis l'éditeur de repas favoris : la date vide retombe sur aujourd'hui.
+
+### Added — tests
+
+- Tests instrumentés : séance modifiée toujours liée à son programme, progression (20 dernières séances), export des aliments archivés. Tests JVM : analyse décimale, brouillon de séance (mode de suivi, compatibilité des anciens brouillons). Fixture de `FoodDaoTest` corrigée (`nameNormalized` manquant, le test de recherche échouait).
+
+---
+
 ## v4.0.1 — 13 October 2026
 
 Icône redessinée dans la grammaire commune aux applis de l'auteur (Brut, Dromos, Topo) et README illustré. Aucun calcul métier ni schéma de données modifié.

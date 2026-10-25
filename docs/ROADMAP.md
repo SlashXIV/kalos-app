@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: v4.0.0 — 13 October 2026
+> Last updated: v4.0.2 — 25 October 2026
 >
 > The June 2026 UX review cycle (18 findings, 3 waves: v3.10.1 / v3.11.0 / v3.12.0) is fully closed. No pending UX backlog.
 
@@ -71,6 +71,20 @@ Aliment ajouté (l'aiguille avance), objectif du jour atteint (les graduations s
 - Défauts relevés à la relecture, non bloquants (Low) : libellés TalkBack qui gardent l'unité au pluriel pour une quantité de 1 (« 1 grammes ») ; bouton Enregistrer sans indicateur pendant la sauvegarde (aliment perso, objectifs) ; libellés de date « Aujourd'hui / Hier » mis en forme à cinq endroits ; `formatElapsedSince` encore en dur dans le code. — Planned
 
 ---
+
+## Audit technique — 25 October 2026
+
+Détail et statuts dans `docs/TECHNICAL_AUDIT.md` (A1 à A20).
+
+| Lot | Version | Statut | Priorité |
+|---|---|---|---|
+| Pertes de données et saisie (A1 à A6, A8, A9) | v4.0.2 | Done | High |
+| Tests de migration 13→17 (A7) | v4.0.3 | Planned | High |
+| Migration 17→18 : unicité et index, codes stables pour les exercices (A12, A13), sur accord | v4.1.x | Planned | Medium |
+| Séance active : écriture du brouillon, recompositions (A10, A11) | — | Planned | Medium |
+| Règles métier centralisées et testées (A14, A16, A19) | — | Planned | Medium |
+| Filtres alimentaires : rebrancher ou retirer (A18) | — | Planned (décision produit) | Medium |
+| Activités de premier ordre (dépense, distance) | — | Planned (décision produit) | Low |
 
 ## Revue générale — 3 July 2026
 

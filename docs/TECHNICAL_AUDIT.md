@@ -24,6 +24,48 @@ Aucun de ces points n'est bloquant pour l'usage actuel, mais ils méritent une v
 
 ---
 
+## Audit global — 25 October 2026 (v4.0.1)
+
+Audit d'architecture et de modélisation (nourriture, musculation, activités) mené par lecture du code et exploration ciblée ; constats critiques relus dans le code, corrigés avec tests en v4.0.2. Les items antérieurs encore ouverts (M5, M9, B1 à B4) restent valables.
+
+**Correction de statut** : C1 est marqué FIXED mais aucun test de migration n'existe (`MigrationTestHelper` jamais utilisé, seuls les schémas 13 à 17 sont versionnés). H6 n'avait corrigé que les logs et les repas : `WorkoutTemplateDao`, `ProgramDao` et `MealTemplateDao` gardaient `REPLACE` (corrigé en v4.0.2, A1).
+
+### Critique
+
+| # | Constat | Statut |
+|---|---|---|
+| A1 | `REPLACE` sur `workout_template` : modifier une séance supprimait ses liens de programme (CASCADE) | Done v4.0.2 (`@Upsert`, test instrumenté) |
+| A2 | Poids « 82,5 » enregistré à 0 kg en séance ; même défaut en quantité d'aliment et profil | Done v4.0.2 (`parseDecimal`) |
+| A3 | Export sans les aliments perso archivés : restauration impossible | Done v4.0.2 |
+| A4 | Ids d'exercices de seed dépendants de l'historique d'installation : restauration sur un autre téléphone mal remappée | Done v4.0.2 (`exerciseSeedIds`) |
+| A5 | Brouillon de séance sans mode de suivi : exercices chronométrés repris en reps × poids | Done v4.0.2 |
+| A6 | Écritures multi-étapes hors transaction (templates, programmes, repas, eau) | Done v4.0.2 |
+| A7 | Aucun test de migration | Planned — High |
+
+### Recommandé
+
+| # | Constat | Statut |
+|---|---|---|
+| A8 | Courbe de progression : 20 plus anciennes séances | Done v4.0.2 |
+| A9 | Navigation `FoodSearch.pick()` avec date vide | Done v4.0.2 |
+| A10 | Brouillon de séance écrit chaque seconde (debounce sur l'état entier, minuteurs compris) | Planned — Medium |
+| A11 | Séance active : état complet et ViewModel passés aux enfants, `itemsIndexed` des séries sans clé ; recherche d'aliments sans clés | Planned — Medium |
+| A12 | Pas d'unicité `meal_entry(date, mealType)` ; index manquants `workout_log(date)`, `workout_log_exercise(exerciseId)`, `body_weight(date)` | Planned — Medium (migration 17→18, accord requis) |
+| A13 | `level` / `type` d'exercice stockés en libellés français ; enums texte sans repli | Planned — Medium (bloque l'i18n) |
+| A14 | Règles métier recopiées : zone 0,9–1,05 (5 endroits), objectifs par défaut (4), eau (4), volume (3), séance du jour (2) | Planned — Medium |
+| A15 | `DailySummaryRow` (projection Room) exposée par le domaine | Planned — Low |
+| A16 | « Aujourd'hui » figé à la création des ViewModels (Nutrition, Calendrier, Bilan) | Planned — Medium |
+| A17 | OpenFoodFacts : pas de repli kJ (0 kcal), `sugarPer100g` jamais mappé (remis à 0 à l'édition), User-Agent figé `Kalos/3.14` | Planned — Medium |
+| A18 | Filtres alimentaires non appliqués depuis v3.18.0 | Planned — décision produit |
+| A19 | Aucun test de ViewModel ni de repository ; dispatchers en dur | Planned — Medium |
+| A20 | N+1 dans `buildLog`, `getTemplates`, `buildProgram` ; lectures secondaires dans `Flow.map` non réactives | Planned — Low |
+
+### Optionnel
+
+Activités de premier ordre (`kind`, `activityType`, `distanceM`, `energyKcal` sur `workout_log`, dépense MET ; décision sur le budget calorique), e1RM et PR par répétitions, saisie RPE, programmes datés (`startDate`, unicité `isActive`), navigation typée, R8 et baseline profile, ViewModels sortis des fichiers Screen, `datastore-preferences` inutilisé, seeder transactionnel (programmes de seed insérés sans séances).
+
+---
+
 ## Revue technique — 3 July 2026 (v3.17.0)
 
 Revue transverse (notifications, export/import, performance) menée par exploration ciblée. Vue produit correspondante dans `docs/ROADMAP.md` (section « Revue générale — 3 July 2026 »).

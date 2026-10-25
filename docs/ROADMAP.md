@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: v4.2.0 — 25 October 2026
+> Last updated: v4.3.0 — 25 October 2026
 >
 > The June 2026 UX review cycle (18 findings, 3 waves: v3.10.1 / v3.11.0 / v3.12.0) is fully closed. No pending UX backlog.
 
@@ -18,7 +18,7 @@ Sortir Kalos de son allure « Material par défaut » avec la méthode mise au p
 
 | Jalon | Version | Statut | Preuve |
 |---|---|---|---|
-| R1 — Fondations | v4.0.0 | Partial (livrée ; restent les graphiques Sport) | 28 tests JVM verts (contrastes et daltonisme des 3 palettes × clair/sombre, registre, migration des thèmes 3.x, niveau de mouvement, textes en dur, calculs) ; lint sans nouvel avertissement ; tous les écrans vérifiés sur émulateur en sombre et clair, police 200 %, densités 520 et 600, paysage ; arbre TalkBack (uiautomator) : une phrase par mesure ; CPU au repos sur Aujourd'hui ≈ 0,02 s/min, scanner 57,5 s/min (identique à 3.26.2 : le viseur ne coûte rien) ; téléphone 2506BPN68G, build optimisé : défilement du catalogue (160 exercices) et de la recherche d'aliments 0 à 0,06 % d'images en retard, médiane 5 ms, 99e centile 6 ms ; CPU au repos sur Aujourd'hui 0,00 s/min |
+| R1 — Fondations | v4.0.0, v4.3.0 | Done | 28 tests JVM verts (contrastes et daltonisme des 3 palettes × clair/sombre, registre, migration des thèmes 3.x, niveau de mouvement, textes en dur, calculs) ; lint sans nouvel avertissement ; tous les écrans vérifiés sur émulateur en sombre et clair, police 200 %, densités 520 et 600, paysage ; arbre TalkBack (uiautomator) : une phrase par mesure ; CPU au repos sur Aujourd'hui ≈ 0,02 s/min, scanner 57,5 s/min (identique à 3.26.2 : le viseur ne coûte rien) ; téléphone 2506BPN68G, build optimisé : défilement du catalogue (160 exercices) et de la recherche d'aliments 0 à 0,06 % d'images en retard, médiane 5 ms, 99e centile 6 ms ; CPU au repos sur Aujourd'hui 0,00 s/min |
 | R2 — Moments | v4.2.0 | Done | Quatre moments vérifiés sur émulateur, animations ralenties ×5 et captures : pesée de 0 à 712 kcal, objectif atteint (graduations allumées, statut « Objectif du jour atteint », pas de reprise au relancement), tampon et annonces « Série 1 validée. Repos, 90 secondes » / « Repos terminé » (absente quand le repos est passé), récapitulatif (titre, volume compté de 702 à 1 230 kg, règle remplie). Règle de zone testée (JVM) |
 | R3 — Vitrine (README, kit portfolio) | v4.0.1 | Partial (README fait ; reste le kit portfolio) | Icône vectorielle `design/icon/kalos-icon.svg` comparée côte à côte avec Brut, Dromos et Topo ; vérifiée sur émulateur (tiroir d'applis, écran de lancement) ; README avec quatre captures `design/screenshots/` |
 
@@ -33,7 +33,7 @@ Sortir Kalos de son allure « Material par défaut » avec la méthode mise au p
 - **Textes dans strings.xml** — Done. `HardcodedUiTextTest` ; la liste d'attente `hardcoded-ui-pending.txt` est vide.
 - **Composants maison** — Done. `FitText`, `RisingText`, `CountUp`, `RollingDigits`, `GraduatedScale`, `GraduatedDial`, `Graduation`, `MeasureRow`, `MeasureTicket`, `ScreenHeader`, `KalosButton`, `ValueChip`, `KalosFilterChip`, `MeSeriesChart`.
 - **Tous les écrans dans le nouveau langage, clair et sombre** — Done. Aujourd'hui (ex-Nutrition), nutrition, sport, calendrier, bilan, profil, réglages. L'onboarding, jamais branché, est supprimé (et avec lui la route `home` morte).
-- **Graphiques refaits (méthode dataviz)** — Partial. Bilan et poids refaits (`MeSeriesChart` : curseur au doigt, au clavier et TalkBack) ; Vico retiré. Progression d'exercice et volume d'entraînement seulement restylés : à refaire avec la même brique (Medium).
+- **Graphiques refaits (méthode dataviz)** — Done. Bilan et poids (v4.0.0), progression d'exercice et volume hebdomadaire (v4.3.0) sur `MeSeriesChart` : curseur au doigt, au clavier et TalkBack ; Vico retiré. Vérifiés sur émulateur avec une vraie sauvegarde importée, clair et sombre ; semaines sans séance à zéro (test JVM).
 - **Accessibilité et performance mesurées** — Done. Accessibilité vérifiée (voir Preuve) ; `FitText` réduit d'après la taille réellement dessinée. Performance : mesurée sur téléphone (voir Preuve) ; sur émulateur, seuls le CPU au repos et le scanner sont exploitables (défilement trop bruité : 22 à 80 % d'images en retard d'une série à l'autre sur le même APK). Minuteur de repos : à mesurer avec les moments (R2).
 
 **Critère d'acceptation.** Aucun écran ne « fait Material par défaut » ; Sobre et « Supprimer les animations » coupent tout mouvement décoratif ; tests JVM verts ; aucun nouvel avertissement lint.

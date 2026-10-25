@@ -210,8 +210,13 @@ fun MeSeriesChart(
                                 drawCircle(ink, dotR, Offset(cx, ys[index]))
                             }
                             if (endLayout != null) {
-                                val lx = (xs[last] - endLayout.size.width).coerceAtLeast(gutter)
-                                val ly = (ys[last] - dotR - 4.dp.toPx() - endLayout.size.height).coerceAtLeast(0f)
+                                // À gauche du point : le filet du curseur, posé sur le dernier point par défaut, ne le barre pas.
+                                // Au-dessus, sauf si la ligne arrive d'en haut (chute) : alors à hauteur du point.
+                                val h = endLayout.size.height
+                                val falling = last > 0 && ys[last] - ys[last - 1] > h
+                                val lx = (xs[last] - dotR - 4.dp.toPx() - endLayout.size.width).coerceAtLeast(gutter)
+                                val ly = (if (falling) ys[last] - h / 2f else ys[last] - dotR - 4.dp.toPx() - h)
+                                    .coerceIn(0f, size.height - h)
                                 drawText(endLayout, topLeft = Offset(lx, ly))
                             }
                         }

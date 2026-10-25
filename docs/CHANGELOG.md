@@ -2,6 +2,21 @@
 
 ---
 
+## v4.3.0 — 25 October 2026
+
+Fin du jalon R1 de la refonte « Graduation » : les deux graphiques Sport qui n'étaient que restylés passent sur la brique commune `MeSeriesChart`, comme le bilan et le poids.
+
+### Changed — graphiques Sport
+
+- **Progression d'un exercice** (fiche exercice) : ligne de la charge maximale par séance, abscisse datée, repères min et max, dernière valeur étiquetée, première et dernière date sous l'axe. Curseur au doigt, aux flèches et réglable par TalkBack (« 19 août, 22 kilogrammes »).
+- **Volume hebdomadaire** (historique) : barres sur huit semaines consécutives ; une semaine sans séance est une barre à zéro, elle n'est plus retirée de l'axe (les semaines restantes paraissaient contiguës). Repère au maximum, première et dernière semaine sous l'axe, lecture « Semaine du 24 août, 2 943 kilogrammes ».
+
+### Fixed — étiquette de fin des courbes
+
+- L'étiquette de la dernière valeur était barrée par le filet du curseur, et par la ligne quand la courbe finit en chute : elle se place à gauche du point, à sa hauteur quand la courbe descend (poids, progression).
+
+---
+
 ## v4.2.0 — 25 October 2026
 
 Jalon R2 de la refonte « Graduation » : les quatre moments de la planche validée le 13 octobre 2026. Déclenchés par un événement, jamais en boucle ; un toucher les fige sur leur état final ; en ambiance Sobre ou avec « Supprimer les animations », la valeur finale s'affiche directement.

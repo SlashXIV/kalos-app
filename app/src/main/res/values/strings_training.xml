@@ -137,6 +137,10 @@
     <string name="training_secondary_muscles">Muscles secondaires : %1$s</string>
     <string name="training_instructions">Instructions</string>
     <string name="training_progression">Progression</string>
+    <plurals name="training_progression_summary">
+        <item quantity="one">Charge maximale par séance, %d séance</item>
+        <item quantity="other">Charge maximale par séance, %d séances</item>
+    </plurals>
     <string name="training_progression_single">1 séance enregistrée : le graphique s’affichera à partir de 2 séances.</string>
     <string name="training_same_muscle">Même groupe musculaire</string>
     <string name="training_already_added">Déjà ajouté</string>
@@ -219,6 +223,7 @@
     <string name="training_empty_history">Aucune séance enregistrée</string>
     <string name="training_empty_history_hint">Terminez votre première séance pour voir votre historique</string>
     <string name="training_weekly_volume">Volume hebdomadaire</string>
+    <string name="training_week_volume_spoken">Semaine du %1$s, %2$s kilogrammes</string>
     <plurals name="training_weekly_total">
         <item quantity="one">Total sur %1$d semaine : %2$s kg</item>
         <item quantity="other">Total sur %1$d semaines : %2$s kg</item>

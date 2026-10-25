@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: v4.3.4 — 25 October 2026
+> Last updated: v4.3.5 — 25 October 2026
 >
 > The June 2026 UX review cycle (18 findings, 3 waves: v3.10.1 / v3.11.0 / v3.12.0) is fully closed. No pending UX backlog.
 
@@ -87,7 +87,7 @@ Détail et statuts dans `docs/TECHNICAL_AUDIT.md` (A1 à A20).
 | Activités typées avec dépense estimée, affichée seulement (O1) | v4.1.0 | Done | Low |
 | e1RM et record par répétitions, saisie du RPE, affichage en livres (O2) | — | Planned (décision produit) | Low |
 | Programmes datés : semaine courante, un seul programme actif garanti (O3) | — | Planned (décision produit) | Low |
-| Profil de référence (baseline profile) : module de benchmark à créer | — | Planned | Low |
+| Profil de référence (baseline profile) : module `:baselineprofile` | v4.3.5 | Done (démarrage à froid −9 % sur émulateur ; mesure sur téléphone écartée : elle désinstalle l'app) | Low |
 | Recette release avec vraie sauvegarde : historique et moyenne après une pause (A22) | v4.3.1 | Done | High |
 | Pages de 16 Ko : CameraX 1.3.4 → 1.4.2 (A23) | v4.3.2 | Done | Medium |
 

@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Kalos"
 include(":app")
+include(":baselineprofile")

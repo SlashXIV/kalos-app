@@ -2,6 +2,15 @@
 
 ---
 
+## v4.3.5 — 25 October 2026
+
+### Changed — démarrage plus rapide
+
+- **Baseline profile** : le parcours de chaque ouverture (Aujourd'hui qui défile, onglets Sport et Calendrier) est précompilé à l'installation au lieu d'être interprété au premier lancement. Module `:baselineprofile` (générateur et mesure du démarrage à froid), `profileinstaller` dans l'app. Sur émulateur, démarrage à froid médian 1 116 → 1 018 ms (−9 %).
+- La génération ne tourne jamais pendant `assembleRelease` : elle installe et désinstalle l'app sur tous les appareils branchés. Elle se lance à part, émulateur seul : `ANDROID_SERIAL=emulator-5554 ./gradlew :app:generateBaselineProfile`.
+
+---
+
 ## v4.3.4 — 25 October 2026
 
 ### Fixed — programmes à jour

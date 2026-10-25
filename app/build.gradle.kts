@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    // Embarque le baseline profile généré par :baselineprofile dans le build de publication.
+    alias(libs.plugins.baselineprofile)
 }
 
 // Release signing config, loaded from keystore.properties at the repo root (git-ignored,
@@ -95,7 +97,16 @@ android {
     }
 }
 
+baselineProfile {
+    // Jamais pendant assembleRelease : la génération installe et désinstalle l'app sur TOUS les appareils
+    // branchés (téléphone compris, ses données avec). Elle se lance à part, émulateur seul :
+    // ANDROID_SERIAL=emulator-5554 ./gradlew :app:generateBaselineProfile
+    automaticGenerationDuringBuild = false
+}
+
 dependencies {
+    implementation(libs.androidx.profileinstaller)
+    baselineProfile(project(":baselineprofile"))
     // Core
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)

@@ -3,7 +3,9 @@ package com.kalos.app.feature.nutrition.search
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kalos.app.core.data.DietaryPreferencesStore
 import com.kalos.app.core.domain.model.Food
+import com.kalos.app.core.domain.model.passes
 import com.kalos.app.core.domain.model.MealItem
 import com.kalos.app.core.domain.model.MealType
 import com.kalos.app.core.domain.model.NutritionGoal
@@ -67,6 +69,7 @@ class FoodSearchViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val openFoodFacts: OpenFoodFactsDataSource,
     private val scannedFoodHolder: ScannedFoodHolder,
+    private val dietaryPreferences: DietaryPreferencesStore,
 ) : ViewModel() {
 
     private val searchDate = savedStateHandle.get<String>("date")?.ifBlank { null } ?: LocalDate.now().toString()
@@ -90,6 +93,7 @@ class FoodSearchViewModel @Inject constructor(
                 .debounce { (q, _, _) -> if (q.isEmpty()) 0L else 300L }
                 .distinctUntilChanged()
                 .flatMapLatest { (q, cat, custom) -> foodRepository.search(q, cat, custom) }
+                .combine(dietaryPreferences.filtersFlow) { results, filters -> results.filter { it.passes(filters) } }
                 .collect { results -> _state.update { it.copy(results = results, isLoading = false) } }
         }
 

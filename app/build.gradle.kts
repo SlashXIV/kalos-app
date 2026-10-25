@@ -83,7 +83,10 @@ android {
 
     kotlinOptions { jvmTarget = "17" }
 
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
 
     // Avertissements antérieurs à la refonte 4.0 figés ici : tout nouvel avertissement doit se voir.
     lint { baseline = file("lint-baseline.xml") }

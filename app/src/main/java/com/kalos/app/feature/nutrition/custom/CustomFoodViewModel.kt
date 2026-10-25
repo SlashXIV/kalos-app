@@ -94,6 +94,7 @@ class CustomFoodViewModel @Inject constructor(
                     carbs = resolved.carbsPer100g.toFieldString(),
                     fat = resolved.fatPer100g.toFieldString(),
                     fiber = resolved.fiberPer100g.toFieldString(),
+                    serving = resolved.defaultServingG.toFieldString(),
                 )
                 else -> s.copy(barcode = barcode)
             }

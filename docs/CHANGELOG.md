@@ -2,6 +2,39 @@
 
 ---
 
+## v4.1.0 — 25 October 2026
+
+Suite de l'audit technique du 25 octobre 2026 : schéma 18, activités typées, filtres alimentaires rebranchés, séance active plus sobre, règles métier centralisées, release optimisée par R8. La refonte « Moments » passe en v4.2.0.
+
+### Added — activités typées
+
+- **Activité libre** : choix parmi 10 types (escalade, randonnée, natation, course, vélo, football, yoga, boxe, tennis, ski). La dépense est estimée (MET × poids du profil × durée), affichée dans la boîte et dans l'historique (« ≈ 788 kcal »), et n'est jamais ajoutée au budget du jour. Elle est figée à l'enregistrement et sauvegardée.
+
+### Changed — données (schéma 18, migration testée)
+
+- **Un seul créneau par repas et par jour** : les créneaux en double (possibles avant) sont fusionnés par la migration et à la restauration d'une ancienne sauvegarde.
+- **Index** sur les dates de séance, l'exercice des séances passées et les pesées.
+- **Niveau et type d'exercice** stockés en codes stables au lieu des libellés français (prérequis d'une traduction).
+- **Filtres alimentaires** (sans porc, sans alcool, végétarien, végan) de nouveau appliqués aux résultats de recherche ; ils ne faisaient plus rien depuis la v3.18.0.
+- **OpenFoodFacts** : un produit indiqué seulement en kJ n'arrive plus à 0 kcal, la portion est pré-remplie, le code-barres est validé.
+- **Release optimisée par R8** : APK de 37 à 25 Mo.
+
+### Fixed — justesse et sobriété
+
+- La **note d'une activité libre** est enfin enregistrée.
+- **Objectifs** : un champ vide ou invalide n'enregistre plus 2000 kcal par défaut, le bouton reste inactif.
+- **Aujourd'hui, Calendrier et Bilan** suivent le changement de jour au lieu de garder la date d'ouverture.
+- **Séance active** : le brouillon n'est plus écrit à chaque seconde, et le minuteur ne redessine plus la liste des séries.
+- **Historique des séances** chargé en trois requêtes au lieu d'une par exercice et par séance.
+- Les **messages d'erreur** sont en français correct au lieu du message technique de l'exception.
+
+### Changed — code
+
+- Seuils de la zone d'objectif, objectifs par défaut, eau, volume et séance du jour définis une seule fois et testés. Textes des notifications, du bilan et des erreurs dans les ressources ; le garde-fou des textes en dur couvre aussi les ViewModels et les workers. ViewModels sortis des fichiers d'écran. Dépendance `datastore-preferences` retirée. Seeder transactionnel. Routes de navigation déclarées une fois.
+- Tests : 21 instrumentés (dont migration 17→18 et restauration), 48 JVM.
+
+---
+
 ## v4.0.2 — 25 October 2026
 
 Premier lot de l'audit technique du 25 octobre 2026 (`docs/TECHNICAL_AUDIT.md`) : corrections de pertes de données et de saisie, sans changement de schéma ni de calcul métier.

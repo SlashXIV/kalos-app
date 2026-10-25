@@ -48,21 +48,23 @@ Audit d'architecture et de modélisation (nourriture, musculation, activités) m
 |---|---|---|
 | A8 | Courbe de progression : 20 plus anciennes séances | Done v4.0.2 |
 | A9 | Navigation `FoodSearch.pick()` avec date vide | Done v4.0.2 |
-| A10 | Brouillon de séance écrit chaque seconde (debounce sur l'état entier, minuteurs compris) | Planned — Medium |
-| A11 | Séance active : état complet et ViewModel passés aux enfants, `itemsIndexed` des séries sans clé ; recherche d'aliments sans clés | Planned — Medium |
-| A12 | Pas d'unicité `meal_entry(date, mealType)` ; index manquants `workout_log(date)`, `workout_log_exercise(exerciseId)`, `body_weight(date)` | Planned — Medium (migration 17→18, accord requis) |
-| A13 | `level` / `type` d'exercice stockés en libellés français ; enums texte sans repli | Planned — Medium (bloque l'i18n) |
-| A14 | Règles métier recopiées : zone 0,9–1,05 (5 endroits), objectifs par défaut (4), eau (4), volume (3), séance du jour (2) | Planned — Medium |
-| A15 | `DailySummaryRow` (projection Room) exposée par le domaine | Planned — Low |
-| A16 | « Aujourd'hui » figé à la création des ViewModels (Nutrition, Calendrier, Bilan) | Planned — Medium |
-| A17 | OpenFoodFacts : pas de repli kJ (0 kcal), `sugarPer100g` jamais mappé (remis à 0 à l'édition), User-Agent figé `Kalos/3.14` | Planned — Medium |
-| A18 | Filtres alimentaires non appliqués depuis v3.18.0 | Planned — décision produit |
-| A19 | Aucun test de ViewModel ni de repository ; dispatchers en dur | Planned — Medium |
-| A20 | N+1 dans `buildLog`, `getTemplates`, `buildProgram` ; lectures secondaires dans `Flow.map` non réactives | Planned — Low |
+| A10 | Brouillon de séance écrit chaque seconde (debounce sur l'état entier, minuteurs compris) | Done v4.1.0 (clé de sauvegarde sans minuteurs + battement de 30 s, testée ; vérifié sur émulateur) |
+| A11 | Séance active : état complet et ViewModel passés aux enfants, `itemsIndexed` des séries sans clé ; recherche d'aliments sans clés | Done v4.1.0 (contenu séparé des minuteurs ; clés de la recherche d'aliments). Les séries restent sans clé : pas d'identifiant stable, l'état local se resynchronise déjà |
+| A12 | Pas d'unicité `meal_entry(date, mealType)` ; index manquants `workout_log(date)`, `workout_log_exercise(exerciseId)`, `body_weight(date)` | Done v4.1.0 (migration 17→18 testée, doublons fusionnés, aussi à la restauration) |
+| A13 | `level` / `type` d'exercice stockés en libellés français ; enums texte sans repli | Done v4.1.0 (codes BEGINNER/STRENGTH…, migration de données, puces du catalogue alignées) |
+| A14 | Règles métier recopiées : zone 0,9–1,05 (5 endroits), objectifs par défaut (4), eau (4), volume (3), séance du jour (2) | Done v4.1.0 (NutritionGoal, completedVolumeKg, TrainingProgram.workoutOn) |
+| A15 | `DailySummaryRow` (projection Room) exposée par le domaine | Done v4.1.0 (DailyTotals) |
+| A16 | « Aujourd'hui » figé à la création des ViewModels (Nutrition, Calendrier, Bilan) | Done v4.1.0 (todayFlow) |
+| A17 | OpenFoodFacts : pas de repli kJ (0 kcal), `sugarPer100g` jamais mappé (remis à 0 à l'édition), User-Agent figé `Kalos/3.14` | Done v4.1.0 (repli kJ, portion, User-Agent, code-barres validé). `sugarPer100g` : colonne morte, aucune source ne la renseigne |
+| A18 | Filtres alimentaires non appliqués depuis v3.18.0 | Done v4.1.0 (rebranchés sur la recherche, règle testée) |
+| A19 | Aucun test de ViewModel ni de repository ; dispatchers en dur | Partial v4.1.0 (tests métier, importeur, DAO, migrations, brouillon ; pas de test de ViewModel, dispatchers toujours en dur) — Low |
+| A20 | N+1 dans `buildLog`, `getTemplates`, `buildProgram` ; lectures secondaires dans `Flow.map` non réactives | Partial v4.1.0 (historique des séances groupé ; `getTemplates` et `buildProgram` gardent une requête par élément, volumes faibles) — Low |
 
 ### Optionnel
 
-Activités de premier ordre (`kind`, `activityType`, `distanceM`, `energyKcal` sur `workout_log`, dépense MET ; décision sur le budget calorique), e1RM et PR par répétitions, saisie RPE, programmes datés (`startDate`, unicité `isActive`), navigation typée, R8 et baseline profile, ViewModels sortis des fichiers Screen, `datastore-preferences` inutilisé, seeder transactionnel (programmes de seed insérés sans séances).
+Livrés en v4.1.0 : activités typées avec dépense estimée (affichée seulement), R8 et réduction des ressources (APK 37 → 25 Mo, recette release sur émulateur), ViewModels sortis des fichiers d'écran, `datastore-preferences` retiré, seeder transactionnel, routes de navigation déclarées une fois, textes des ViewModels et workers dans les ressources (garde-fou étendu). Le programme seed « Full Body — 3 jours » reste volontairement sans séances (elles sont à créer par l'utilisateur, décision v3.9.0). Restent, sur décision produit : e1RM et record par répétitions, saisie du RPE, livres ; programmes datés ; profil de référence (baseline profile, module de benchmark à créer). Tables de liaison tags/muscles : non nécessaires tant qu'aucun filtre multi-critères ne les demande.
+
+Constat d'origine — Activités de premier ordre (`kind`, `activityType`, `distanceM`, `energyKcal` sur `workout_log`, dépense MET ; décision sur le budget calorique), e1RM et PR par répétitions, saisie RPE, programmes datés (`startDate`, unicité `isActive`), navigation typée, R8 et baseline profile, ViewModels sortis des fichiers Screen, `datastore-preferences` inutilisé, seeder transactionnel (programmes de seed insérés sans séances).
 
 ---
 

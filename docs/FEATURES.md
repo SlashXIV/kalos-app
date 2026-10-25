@@ -1,6 +1,6 @@
 # Features
 
-> Version: 4.0.0
+> Version: 4.1.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -54,11 +54,11 @@ Statuses: **Done** · **Partial** · **Planned**
 | Favorite foods (shown when query is empty) | Done | |
 | Food detail sheet | Done | Portion / grams mode toggle |
 | "After adding" projected daily totals | Done | Color-coded: normal / warning / over target |
-| Dietary filter applied to results | Partial | Setting kept and backed up, but no longer applied since v3.18.0 (suggestions removed). Decision pending (audit 25 October 2026) |
+| Dietary filter applied to results | Done | Re-applied to search results in v4.1.0 (pork and alcohol by name or tag, vegetarian and vegan by category unless tagged) |
 | Category filter chips | Done | Single-select, loaded from DB, combinable with text |
 | Custom food filter | Done | "Perso" toggle chip |
 | Create custom food from search screen | Done | |
-| Barcode scanner | Done | CameraX + ML Kit (bundled); local cache → OpenFoodFacts → manual, graceful offline fallback (v3.14.0) |
+| Barcode scanner | Done | CameraX + ML Kit (bundled); local cache → OpenFoodFacts → manual, graceful offline fallback (v3.14.0). Since v4.1.0: kJ-only products converted, serving size pre-filled |
 | Satiety / volume-eating signal | Done | Rule-based "Rassasiant/Peu rassasiant" label (density + protein + fibre) in food lists + portion sheet, plus a "Volume eating" sort in search; green→amber never red (v3.15.0) |
 
 ### Custom foods
@@ -91,7 +91,7 @@ Statuses: **Done** · **Partial** · **Planned**
 |---|---|---|
 | ~160 seeded exercises | Done | Incl. calisthénie / street workout pack (v3.23.0): front/back lever, planche, handstand, HSPU, human flag, rowing inversé… |
 | Exercise attachment variants | Partial | Naming convention "Exercice (attache)"; e.g. triceps extension corde/barre/overhead as distinct exercises, separate PR history. Seeder Phase 5 propagates renames (v3.19.0). A dedicated `variant` field + catalog grouping remains Planned. |
-| Free activity logging | Done | Log another sport without detail (name + duration + date + note) from the Sport screen; stored as an exercise-less session, counts in history & calendar (v3.23.0) |
+| Free activity logging | Done | Log another sport without detail (name + duration + date + note) from the Sport screen; stored as an exercise-less session, counts in history & calendar (v3.23.0). Since v4.1.0: one of 10 activity types, estimated energy (MET × profile weight × duration) shown in the dialog and the history, never added to the daily budget |
 | Text search | Done | Accent-insensitive (nameNormalized), no debounce |
 | Filter by muscle group (13 options) | Done | |
 | Filter by type (5 options) | Done | |
@@ -201,7 +201,7 @@ Statuses: **Done** · **Partial** · **Planned**
 |---|---|---|
 | Link to Notifications screen | Done | |
 | Appearance | Done | Palette (Jade / Encre / Océan), brightness (System / Light / Dark), Ambiance (Expressive / Sobre), Vibrations. 3.x themes migrated automatically (v4.0.0) |
-| Dietary filters (pork, alcohol, vegetarian, vegan) | Partial | Persisted in SharedPreferences and backed up; not read by search since v3.18.0 |
+| Dietary filters (pork, alcohol, vegetarian, vegan) | Done | Persisted in SharedPreferences and backed up; applied to food search (v4.1.0) |
 | Halal mode info card | Done | |
 | Data export (JSON) | Done | Via file picker |
 | Data import / restore | Done | Confirmation dialog (destructive) |

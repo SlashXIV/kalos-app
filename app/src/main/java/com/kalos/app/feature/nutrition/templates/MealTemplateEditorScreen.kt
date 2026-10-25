@@ -19,15 +19,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
 import com.kalos.app.core.domain.model.Food
-import com.kalos.app.core.domain.repository.FoodRepository
-import com.kalos.app.core.domain.repository.MealTemplateRepository
 import com.kalos.app.core.ui.component.KalosButton
 import com.kalos.app.core.ui.component.KalosNumberField
 import com.kalos.app.core.ui.component.ScreenHeader
@@ -36,100 +31,8 @@ import com.kalos.app.core.ui.theme.KalosTheme
 import com.kalos.app.core.ui.util.formatGroupedInt
 import com.kalos.app.feature.nutrition.search.PICKED_FOOD_ID_KEY
 import com.kalos.app.navigation.Screen
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlin.math.roundToInt
 import com.kalos.app.core.ui.util.parseDecimal
-
-data class EditorItem(val food: Food, val amountG: Float) {
-    val kcal: Float get() = food.kcalForAmount(amountG)
-}
-
-data class MealTemplateEditorUiState(
-    val id: Long = -1L,
-    val name: String = "",
-    val items: List<EditorItem> = emptyList(),
-    val isLoading: Boolean = true,
-    val saved: Boolean = false,
-) {
-    val isNew: Boolean get() = id <= 0L
-    val canSave: Boolean get() = name.isNotBlank() && items.isNotEmpty()
-    val totalKcal: Float get() = items.sumOf { it.kcal.toDouble() }.toFloat()
-}
-
-@HiltViewModel
-class MealTemplateEditorViewModel @Inject constructor(
-    private val repository: MealTemplateRepository,
-    private val foodRepository: FoodRepository,
-    savedStateHandle: SavedStateHandle,
-) : ViewModel() {
-
-    private val initialId: Long = savedStateHandle["templateId"] ?: -1L
-
-    private val _state = MutableStateFlow(MealTemplateEditorUiState(id = initialId))
-    val state: StateFlow<MealTemplateEditorUiState> = _state.asStateFlow()
-
-    init {
-        if (initialId > 0L) {
-            viewModelScope.launch {
-                val template = repository.getTemplate(initialId)
-                _state.update { s ->
-                    if (template == null) s.copy(isLoading = false)
-                    else s.copy(
-                        name = template.name,
-                        items = template.items.map { EditorItem(it.food, it.amountG) },
-                        isLoading = false,
-                    )
-                }
-            }
-        } else {
-            _state.update { it.copy(isLoading = false) }
-        }
-    }
-
-    fun onNameChange(value: String) {
-        _state.update { it.copy(name = value) }
-    }
-
-    fun onAmountChange(index: Int, grams: Float) {
-        _state.update { s ->
-            s.copy(items = s.items.mapIndexed { i, item -> if (i == index) item.copy(amountG = grams) else item })
-        }
-    }
-
-    fun removeItem(index: Int) {
-        _state.update { s -> s.copy(items = s.items.filterIndexed { i, _ -> i != index }) }
-    }
-
-    fun addFood(foodId: Long) {
-        viewModelScope.launch {
-            val food = foodRepository.getById(foodId) ?: return@launch
-            _state.update { s ->
-                // Already present → leave it (user adjusts grams inline) rather than duplicate.
-                if (s.items.any { it.food.id == foodId }) s
-                else {
-                    val defaultG = food.defaultServingG.takeIf { it > 0f } ?: 100f
-                    s.copy(items = s.items + EditorItem(food, defaultG))
-                }
-            }
-        }
-    }
-
-    fun save() {
-        val s = _state.value
-        if (!s.canSave) return
-        val idArg = if (s.id > 0L) s.id else 0L
-        viewModelScope.launch {
-            val newId = repository.saveTemplate(idArg, s.name.trim(), s.items.map { it.food.id to it.amountG })
-            _state.update { it.copy(id = newId, saved = true) }
-        }
-    }
-}
 
 @Composable
 fun MealTemplateEditorScreen(

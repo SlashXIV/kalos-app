@@ -22,38 +22,14 @@ import com.kalos.app.core.ui.component.SectionLabel
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.kalos.app.core.data.DietaryPreferencesStore
-import com.kalos.app.core.data.ThemePreferenceStore
 import com.kalos.app.core.domain.model.DietaryFilter
 import androidx.compose.ui.res.stringResource
 import com.kalos.app.R
-import com.kalos.app.core.ui.theme.AppearanceSettings
-import com.kalos.app.core.ui.theme.Brightness
-import com.kalos.app.core.ui.theme.MotionPreference
 import com.kalos.app.core.ui.theme.Palettes
 import com.kalos.app.navigation.Screen
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDate
-import javax.inject.Inject
-
-@HiltViewModel
-class SettingsViewModel @Inject constructor(
-    private val prefsStore: DietaryPreferencesStore,
-    private val themeStore: ThemePreferenceStore,
-) : ViewModel() {
-    val filters: StateFlow<Set<DietaryFilter>> = prefsStore.filtersFlow
-    fun toggle(filter: DietaryFilter, enabled: Boolean) = prefsStore.setFilter(filter, enabled)
-
-    val appearance: StateFlow<AppearanceSettings> = themeStore.settings
-    fun setPalette(id: String) = themeStore.setPalette(id)
-    fun setBrightness(brightness: Brightness) = themeStore.setBrightness(brightness)
-    fun setMotion(motion: MotionPreference) = themeStore.setMotion(motion)
-    fun setVibrations(enabled: Boolean) = themeStore.setVibrations(enabled)
-}
 
 @Composable
 fun SettingsScreen(

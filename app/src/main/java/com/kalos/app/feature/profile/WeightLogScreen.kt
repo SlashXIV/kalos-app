@@ -21,10 +21,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
@@ -36,10 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.kalos.app.R
-import com.kalos.app.core.domain.repository.WorkoutRepository
 import com.kalos.app.core.ui.component.FitText
 import com.kalos.app.core.ui.component.InstrumentLabel
 import com.kalos.app.core.ui.component.KalosButton
@@ -50,57 +46,18 @@ import com.kalos.app.core.ui.component.MeSeriesChart
 import com.kalos.app.core.ui.component.ScreenHeader
 import com.kalos.app.core.ui.component.SectionLabel
 import com.kalos.app.core.ui.theme.KalosTheme
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
-import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
 import com.kalos.app.core.ui.util.parseDecimal
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
-// ─── ViewModel ───────────────────────────────────────────────────────────────
-
-data class WeightLogUiState(
-    val entries: List<Pair<String, Float>> = emptyList(),
-    val isSaving: Boolean = false,
-) {
-    val hasTodayEntry: Boolean
-        get() = entries.firstOrNull()?.first == LocalDate.now().toString()
-}
-
-@HiltViewModel
-class WeightLogViewModel @Inject constructor(
-    private val workoutRepository: WorkoutRepository,
-) : ViewModel() {
-
-    private val _isSaving = MutableStateFlow(false)
-
-    val uiState: StateFlow<WeightLogUiState> = combine(
-        workoutRepository.getBodyWeightHistory(),
-        _isSaving,
-    ) { entries, isSaving ->
-        WeightLogUiState(entries = entries, isSaving = isSaving)
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = WeightLogUiState(),
-    )
-
-    fun logWeight(weightKg: Float) {
-        viewModelScope.launch {
-            _isSaving.value = true
-            workoutRepository.logBodyWeight(LocalDate.now().toString(), weightKg)
-            _isSaving.value = false
-        }
-    }
-}
-
-// ─── Screen ──────────────────────────────────────────────────────────────────
 
 @Composable
 fun WeightLogScreen(

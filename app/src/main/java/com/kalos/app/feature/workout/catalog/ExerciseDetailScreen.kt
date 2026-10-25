@@ -22,7 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -34,51 +33,18 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.kalos.app.R
 import com.kalos.app.core.ui.util.formatKg
-import com.kalos.app.core.domain.model.Exercise
-import com.kalos.app.core.domain.repository.ExerciseRepository
-import com.kalos.app.core.domain.repository.WorkoutRepository
 import com.kalos.app.core.ui.component.KalosButton
 import com.kalos.app.core.ui.component.KalosCard
 import com.kalos.app.core.ui.component.ScreenHeader
 import com.kalos.app.core.ui.component.SectionLabel
 import com.kalos.app.core.ui.theme.KalosTheme
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import javax.inject.Inject
-
-data class ExerciseDetailUiState(
-    val exercise: Exercise? = null,
-    val progression: List<Pair<String, Float>> = emptyList(),
-    val pr: Float? = null,
-)
-
-@HiltViewModel
-class ExerciseDetailViewModel @Inject constructor(
-    private val repo: ExerciseRepository,
-    private val workoutRepo: WorkoutRepository,
-) : ViewModel() {
-    private val _state = MutableStateFlow(ExerciseDetailUiState())
-    val state: StateFlow<ExerciseDetailUiState> = _state
-
-    fun load(id: Long) {
-        viewModelScope.launch {
-            val exercise = repo.getById(id)
-            val progression = workoutRepo.getExerciseProgression(id)
-            val pr = workoutRepo.getMaxWeight(id)
-            _state.value = ExerciseDetailUiState(exercise = exercise, progression = progression, pr = pr)
-        }
-    }
-}
+import androidx.compose.runtime.getValue
 
 @Composable
 fun ExerciseDetailScreen(

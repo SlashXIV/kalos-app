@@ -22,7 +22,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,16 +30,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.kalos.app.R
 import com.kalos.app.core.ui.util.formatKg
 import com.kalos.app.core.domain.model.ExerciseStatus
-import com.kalos.app.core.domain.model.ExerciseTrackingMode
 import com.kalos.app.core.domain.model.LogExercise
-import com.kalos.app.core.domain.model.WorkoutLog
 import com.kalos.app.core.domain.model.WorkoutSet
-import com.kalos.app.core.domain.repository.WorkoutRepository
 import com.kalos.app.core.ui.component.EditWorkoutSetDialog
 import com.kalos.app.core.ui.component.InstrumentLabel
 import com.kalos.app.core.ui.component.KalosCard
@@ -52,110 +47,10 @@ import com.kalos.app.feature.workout.CompletedSetLine
 import com.kalos.app.feature.workout.ExerciseSetsScale
 import com.kalos.app.feature.workout.SessionStats
 import com.kalos.app.feature.workout.logDateLong
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlin.math.roundToInt
-import androidx.annotation.StringRes
-import android.util.Log
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.getValue
 
-// ─── ViewModel ───────────────────────────────────────────────────────────────
-
-data class PendingSetEdit(
-    val set: WorkoutSet,
-    val exerciseId: Long,
-    val trackingMode: ExerciseTrackingMode,
-)
-
-data class WorkoutLogDetailUiState(
-    val log: WorkoutLog? = null,
-    val maxWeights: Map<Long, Float?> = emptyMap(),
-    val isLoading: Boolean = true,
-    val pendingEdit: PendingSetEdit? = null,
-    val isSavingEdit: Boolean = false,
-    @StringRes val errorMessage: Int? = null,
-)
-
-@HiltViewModel
-class WorkoutLogDetailViewModel @Inject constructor(
-    private val workoutRepository: WorkoutRepository,
-) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(WorkoutLogDetailUiState())
-    val uiState: StateFlow<WorkoutLogDetailUiState> = _uiState.asStateFlow()
-
-    fun load(logId: Long) {
-        viewModelScope.launch {
-            val log = workoutRepository.getLog(logId)
-            if (log != null) {
-                val maxWeights = workoutRepository.getMaxWeightsForExercises(
-                    log.exercises.map { it.exercise.id }
-                )
-                _uiState.value = WorkoutLogDetailUiState(
-                    log = log,
-                    maxWeights = maxWeights,
-                    isLoading = false,
-                )
-            } else {
-                _uiState.value = WorkoutLogDetailUiState(isLoading = false)
-            }
-        }
-    }
-
-    fun openEditDialog(set: WorkoutSet, exerciseId: Long, trackingMode: ExerciseTrackingMode) {
-        _uiState.update { it.copy(pendingEdit = PendingSetEdit(set, exerciseId, trackingMode)) }
-    }
-
-    fun dismissEditDialog() {
-        _uiState.update { it.copy(pendingEdit = null) }
-    }
-
-    fun saveSetEdit(newReps: Int, newWeightKg: Float, newDurationSecs: Int) {
-        val pending = _uiState.value.pendingEdit ?: return
-        val log = _uiState.value.log ?: return
-        _uiState.update { it.copy(pendingEdit = null, isSavingEdit = true, errorMessage = null) }
-        viewModelScope.launch {
-            runCatching {
-                val finalLog = workoutRepository.editSet(
-                    logId = log.id,
-                    exerciseId = pending.exerciseId,
-                    set = pending.set.copy(
-                        reps = newReps,
-                        weightKg = newWeightKg,
-                        durationSecs = newDurationSecs,
-                    ),
-                )
-                val maxWeights = finalLog?.let {
-                    workoutRepository.getMaxWeightsForExercises(it.exercises.map { le -> le.exercise.id })
-                } ?: emptyMap()
-                finalLog to maxWeights
-            }
-                .onSuccess { (finalLog, maxWeights) ->
-                    _uiState.update {
-                        it.copy(log = finalLog, maxWeights = maxWeights, isSavingEdit = false)
-                    }
-                }
-                .onFailure { e ->
-                    Log.w("Kalos", "Operation failed", e)
-                    _uiState.update {
-                        it.copy(
-                            isSavingEdit = false,
-                            errorMessage = R.string.error_set_edit_failed,
-                        )
-                    }
-                }
-        }
-    }
-
-    fun onErrorShown() = _uiState.update { it.copy(errorMessage = null) }
-}
-
-// ─── Screen ──────────────────────────────────────────────────────────────────
 
 @Composable
 fun WorkoutLogDetailScreen(

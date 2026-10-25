@@ -14,48 +14,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
 import com.kalos.app.core.domain.model.Food
-import com.kalos.app.core.domain.repository.FoodRepository
 import com.kalos.app.core.ui.component.EmptyState
 import com.kalos.app.core.ui.component.FoodListItem
 import com.kalos.app.core.ui.component.KalosSearchBar
 import com.kalos.app.core.ui.component.ScreenHeader
 import com.kalos.app.navigation.Screen
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-data class MyFoodsUiState(
-    val foods: List<Food> = emptyList(),
-    val query: String = "",
-)
-
-@HiltViewModel
-class MyFoodsViewModel @Inject constructor(
-    private val foodRepository: FoodRepository,
-) : ViewModel() {
-
-    private val _query = MutableStateFlow("")
-    private val _allFoods = foodRepository.getCustomFoods()
-
-    val state: StateFlow<MyFoodsUiState> = combine(_allFoods, _query) { foods, query ->
-        val filtered = if (query.isBlank()) foods
-        else foods.filter { it.name.contains(query, ignoreCase = true) || it.brand.contains(query, ignoreCase = true) }
-        MyFoodsUiState(foods = filtered, query = query)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MyFoodsUiState())
-
-    fun onQueryChange(v: String) { _query.value = v }
-
-    fun delete(food: Food) {
-        viewModelScope.launch { foodRepository.archiveOrDelete(food.id) }
-    }
-}
 
 @Composable
 fun MyFoodsScreen(

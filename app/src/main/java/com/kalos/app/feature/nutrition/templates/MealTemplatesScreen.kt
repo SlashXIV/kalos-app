@@ -17,13 +17,10 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
 import com.kalos.app.core.domain.model.MealTemplate
-import com.kalos.app.core.domain.repository.MealTemplateRepository
 import com.kalos.app.core.ui.component.EmptyState
 import com.kalos.app.core.ui.component.MeasureTicket
 import com.kalos.app.core.ui.component.ScreenHeader
@@ -32,26 +29,7 @@ import com.kalos.app.core.ui.theme.KalosShape
 import com.kalos.app.core.ui.theme.KalosTheme
 import com.kalos.app.core.ui.util.formatGroupedInt
 import com.kalos.app.navigation.Screen
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlin.math.roundToInt
-
-@HiltViewModel
-class MealTemplatesViewModel @Inject constructor(
-    private val repository: MealTemplateRepository,
-) : ViewModel() {
-
-    val templates: StateFlow<List<MealTemplate>> = repository.getTemplates()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-
-    fun delete(id: Long) {
-        viewModelScope.launch { repository.deleteTemplate(id) }
-    }
-}
 
 @Composable
 fun MealTemplatesScreen(

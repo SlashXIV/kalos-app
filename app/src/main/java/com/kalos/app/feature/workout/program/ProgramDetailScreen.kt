@@ -5,13 +5,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -25,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
@@ -35,85 +32,19 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
 import com.kalos.app.core.domain.model.ProgramWorkout
-import com.kalos.app.core.domain.model.TrainingProgram
-import com.kalos.app.core.domain.repository.ProgramRepository
-import com.kalos.app.core.notification.ReminderScheduler
 import com.kalos.app.core.ui.component.InstrumentLabel
 import com.kalos.app.core.ui.component.KalosCard
 import com.kalos.app.core.ui.component.ScreenHeader
 import com.kalos.app.core.ui.component.SectionLabel
 import com.kalos.app.core.ui.theme.KalosTheme
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
-import javax.inject.Inject
-
-data class ProgramNotifState(
-    val enabled: Boolean = false,
-    val dayOf: Boolean = true,
-    val dayBefore: Boolean = false,
-)
-
-@HiltViewModel
-class ProgramDetailViewModel @Inject constructor(
-    private val programRepository: ProgramRepository,
-    private val reminderScheduler: ReminderScheduler,
-) : ViewModel() {
-
-    private val _program = MutableStateFlow<TrainingProgram?>(null)
-    val program: StateFlow<TrainingProgram?> = _program
-
-    private val _notif = MutableStateFlow(ProgramNotifState())
-    val notif: StateFlow<ProgramNotifState> = _notif
-
-    fun load(id: Long) {
-        viewModelScope.launch {
-            _program.value = programRepository.getById(id)
-            _notif.value = ProgramNotifState(
-                enabled = reminderScheduler.isProgramEnabled(id),
-                dayOf = reminderScheduler.isProgramDayOf(id),
-                dayBefore = reminderScheduler.isProgramDayBefore(id),
-            )
-        }
-    }
-
-    fun activate() {
-        val id = _program.value?.id ?: return
-        viewModelScope.launch {
-            programRepository.activate(id)
-            reminderScheduler.schedule()
-            _program.value = _program.value?.copy(isActive = true)
-        }
-    }
-
-    fun setNotifEnabled(v: Boolean) {
-        val id = _program.value?.id ?: return
-        reminderScheduler.setProgramEnabled(id, v)
-        _notif.value = _notif.value.copy(enabled = v)
-    }
-
-    fun setNotifDayOf(v: Boolean) {
-        val id = _program.value?.id ?: return
-        reminderScheduler.setProgramDayOf(id, v)
-        _notif.value = _notif.value.copy(dayOf = v)
-    }
-
-    fun setNotifDayBefore(v: Boolean) {
-        val id = _program.value?.id ?: return
-        reminderScheduler.setProgramDayBefore(id, v)
-        _notif.value = _notif.value.copy(dayBefore = v)
-    }
-}
+import androidx.compose.runtime.getValue
 
 @Composable
 fun ProgramDetailScreen(

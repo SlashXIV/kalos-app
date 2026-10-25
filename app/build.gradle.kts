@@ -29,6 +29,11 @@ android {
     namespace = "com.kalos.app"
     compileSdk = 35
 
+    // Exported Room schemas feed MigrationTestHelper in instrumented tests.
+    sourceSets {
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    }
+
     defaultConfig {
         applicationId = "com.kalos.app"
         minSdk = 26

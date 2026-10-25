@@ -40,7 +40,7 @@ Audit d'architecture et de modélisation (nourriture, musculation, activités) m
 | A4 | Ids d'exercices de seed dépendants de l'historique d'installation : restauration sur un autre téléphone mal remappée | Done v4.0.2 (`exerciseSeedIds`) |
 | A5 | Brouillon de séance sans mode de suivi : exercices chronométrés repris en reps × poids | Done v4.0.2 |
 | A6 | Écritures multi-étapes hors transaction (templates, programmes, repas, eau) | Done v4.0.2 |
-| A7 | Aucun test de migration | Planned — High |
+| A7 | Aucun test de migration | Done v4.0.2 (13→17 ; 7 à 12 sans schéma exporté, non testables) |
 
 ### Recommandé
 

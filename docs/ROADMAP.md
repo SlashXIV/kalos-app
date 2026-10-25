@@ -79,7 +79,7 @@ Détail et statuts dans `docs/TECHNICAL_AUDIT.md` (A1 à A20).
 | Lot | Version | Statut | Priorité |
 |---|---|---|---|
 | Pertes de données et saisie (A1 à A6, A8, A9) | v4.0.2 | Done | High |
-| Tests de migration 13→17 (A7) | v4.0.3 | Planned | High |
+| Tests de migration 13→17 (A7) | v4.0.2 | Done | High |
 | Migration 17→18 : unicité et index, codes stables pour les exercices (A12, A13), sur accord | v4.1.x | Planned | Medium |
 | Séance active : écriture du brouillon, recompositions (A10, A11) | — | Planned | Medium |
 | Règles métier centralisées et testées (A14, A16, A19) | — | Planned | Medium |

@@ -22,6 +22,7 @@ Premier lot de l'audit technique du 25 octobre 2026 (`docs/TECHNICAL_AUDIT.md`) 
 
 ### Added — tests
 
+- **Tests de migration Room** (`MigrationTestHelper`) : chaque étape 13→17 validée contre son schéma exporté, et données utilisateur conservées jusqu'à la v17. Les versions 7 à 12 n'ont pas de schéma exporté et restent hors test.
 - Tests instrumentés : séance modifiée toujours liée à son programme, progression (20 dernières séances), export des aliments archivés. Tests JVM : analyse décimale, brouillon de séance (mode de suivi, compatibilité des anciens brouillons). Fixture de `FoodDaoTest` corrigée (`nameNormalized` manquant, le test de recherche échouait).
 
 ---

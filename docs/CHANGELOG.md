@@ -2,6 +2,14 @@
 
 ---
 
+## v4.3.2 — 25 October 2026
+
+### Fixed — téléphones à pages mémoire de 16 Ko
+
+- CameraX passe de 1.3.4 à 1.4.2 : sa bibliothèque native de traitement d'image était alignée sur 4 Ko, ce qui faisait afficher par Android un avertissement de compatibilité au lancement et tourner l'app en mode de compatibilité sur les appareils à pages de 16 Ko. Toutes les bibliothèques 64 bits sont désormais alignées sur 16 Ko. Scanner vérifié sur émulateur (viseur, autorisation caméra).
+
+---
+
 ## v4.3.1 — 25 October 2026
 
 Correctifs relevés en recette sur la build release, avec une vraie sauvegarde importée.

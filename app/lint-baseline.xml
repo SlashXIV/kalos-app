@@ -839,8 +839,8 @@
 
     <issue
         id="GradleDependency"
-        message="A newer version of androidx.camera:camera-camera2 than 1.3.4 is available: 1.6.2"
-        errorLine1="camerax = &quot;1.3.4&quot;"
+        message="A newer version of androidx.camera:camera-camera2 than 1.4.2 is available: 1.6.2"
+        errorLine1="camerax = &quot;1.4.2&quot;"
         errorLine2="          ~~~~~~~">
         <location
             file="$HOME/Downloads/kcal_tracker/gradle/libs.versions.toml"
@@ -850,8 +850,8 @@
 
     <issue
         id="GradleDependency"
-        message="A newer version of androidx.camera:camera-camera2 than 1.3.4 is available: 1.6.2"
-        errorLine1="camerax = &quot;1.3.4&quot;"
+        message="A newer version of androidx.camera:camera-camera2 than 1.4.2 is available: 1.6.2"
+        errorLine1="camerax = &quot;1.4.2&quot;"
         errorLine2="          ~~~~~~~">
         <location
             file="$HOME/Downloads/kcal_tracker/gradle/libs.versions.toml"
@@ -861,8 +861,8 @@
 
     <issue
         id="GradleDependency"
-        message="A newer version of androidx.camera:camera-camera2 than 1.3.4 is available: 1.6.2"
-        errorLine1="camerax = &quot;1.3.4&quot;"
+        message="A newer version of androidx.camera:camera-camera2 than 1.4.2 is available: 1.6.2"
+        errorLine1="camerax = &quot;1.4.2&quot;"
         errorLine2="          ~~~~~~~">
         <location
             file="$HOME/Downloads/kcal_tracker/gradle/libs.versions.toml"
@@ -872,8 +872,8 @@
 
     <issue
         id="GradleDependency"
-        message="A newer version of androidx.camera:camera-core than 1.3.4 is available: 1.6.2"
-        errorLine1="camerax = &quot;1.3.4&quot;"
+        message="A newer version of androidx.camera:camera-core than 1.4.2 is available: 1.6.2"
+        errorLine1="camerax = &quot;1.4.2&quot;"
         errorLine2="          ~~~~~~~">
         <location
             file="$HOME/Downloads/kcal_tracker/gradle/libs.versions.toml"
@@ -883,8 +883,8 @@
 
     <issue
         id="GradleDependency"
-        message="A newer version of androidx.camera:camera-core than 1.3.4 is available: 1.6.2"
-        errorLine1="camerax = &quot;1.3.4&quot;"
+        message="A newer version of androidx.camera:camera-core than 1.4.2 is available: 1.6.2"
+        errorLine1="camerax = &quot;1.4.2&quot;"
         errorLine2="          ~~~~~~~">
         <location
             file="$HOME/Downloads/kcal_tracker/gradle/libs.versions.toml"
@@ -894,8 +894,8 @@
 
     <issue
         id="GradleDependency"
-        message="A newer version of androidx.camera:camera-core than 1.3.4 is available: 1.6.2"
-        errorLine1="camerax = &quot;1.3.4&quot;"
+        message="A newer version of androidx.camera:camera-core than 1.4.2 is available: 1.6.2"
+        errorLine1="camerax = &quot;1.4.2&quot;"
         errorLine2="          ~~~~~~~">
         <location
             file="$HOME/Downloads/kcal_tracker/gradle/libs.versions.toml"
@@ -905,8 +905,8 @@
 
     <issue
         id="GradleDependency"
-        message="A newer version of androidx.camera:camera-lifecycle than 1.3.4 is available: 1.6.2"
-        errorLine1="camerax = &quot;1.3.4&quot;"
+        message="A newer version of androidx.camera:camera-lifecycle than 1.4.2 is available: 1.6.2"
+        errorLine1="camerax = &quot;1.4.2&quot;"
         errorLine2="          ~~~~~~~">
         <location
             file="$HOME/Downloads/kcal_tracker/gradle/libs.versions.toml"
@@ -916,8 +916,8 @@
 
     <issue
         id="GradleDependency"
-        message="A newer version of androidx.camera:camera-lifecycle than 1.3.4 is available: 1.6.2"
-        errorLine1="camerax = &quot;1.3.4&quot;"
+        message="A newer version of androidx.camera:camera-lifecycle than 1.4.2 is available: 1.6.2"
+        errorLine1="camerax = &quot;1.4.2&quot;"
         errorLine2="          ~~~~~~~">
         <location
             file="$HOME/Downloads/kcal_tracker/gradle/libs.versions.toml"
@@ -927,8 +927,8 @@
 
     <issue
         id="GradleDependency"
-        message="A newer version of androidx.camera:camera-lifecycle than 1.3.4 is available: 1.6.2"
-        errorLine1="camerax = &quot;1.3.4&quot;"
+        message="A newer version of androidx.camera:camera-lifecycle than 1.4.2 is available: 1.6.2"
+        errorLine1="camerax = &quot;1.4.2&quot;"
         errorLine2="          ~~~~~~~">
         <location
             file="$HOME/Downloads/kcal_tracker/gradle/libs.versions.toml"
@@ -938,8 +938,8 @@
 
     <issue
         id="GradleDependency"
-        message="A newer version of androidx.camera:camera-view than 1.3.4 is available: 1.6.2"
-        errorLine1="camerax = &quot;1.3.4&quot;"
+        message="A newer version of androidx.camera:camera-view than 1.4.2 is available: 1.6.2"
+        errorLine1="camerax = &quot;1.4.2&quot;"
         errorLine2="          ~~~~~~~">
         <location
             file="$HOME/Downloads/kcal_tracker/gradle/libs.versions.toml"
@@ -949,8 +949,8 @@
 
     <issue
         id="GradleDependency"
-        message="A newer version of androidx.camera:camera-view than 1.3.4 is available: 1.6.2"
-        errorLine1="camerax = &quot;1.3.4&quot;"
+        message="A newer version of androidx.camera:camera-view than 1.4.2 is available: 1.6.2"
+        errorLine1="camerax = &quot;1.4.2&quot;"
         errorLine2="          ~~~~~~~">
         <location
             file="$HOME/Downloads/kcal_tracker/gradle/libs.versions.toml"
@@ -960,8 +960,8 @@
 
     <issue
         id="GradleDependency"
-        message="A newer version of androidx.camera:camera-view than 1.3.4 is available: 1.6.2"
-        errorLine1="camerax = &quot;1.3.4&quot;"
+        message="A newer version of androidx.camera:camera-view than 1.4.2 is available: 1.6.2"
+        errorLine1="camerax = &quot;1.4.2&quot;"
         errorLine2="          ~~~~~~~">
         <location
             file="$HOME/Downloads/kcal_tracker/gradle/libs.versions.toml"

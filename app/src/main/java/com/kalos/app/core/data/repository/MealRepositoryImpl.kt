@@ -3,11 +3,11 @@ package com.kalos.app.core.data.repository
 import androidx.room.withTransaction
 import com.kalos.app.core.data.mapper.toDomain
 import com.kalos.app.core.database.KalosDatabase
-import com.kalos.app.core.database.dao.DailySummaryRow
 import com.kalos.app.core.database.dao.FoodDao
 import com.kalos.app.core.database.dao.MealEntryDao
 import com.kalos.app.core.database.entity.MealEntryEntity
 import com.kalos.app.core.database.entity.MealEntryItemEntity
+import com.kalos.app.core.domain.model.DailyTotals
 import com.kalos.app.core.domain.model.MealEntry
 import com.kalos.app.core.domain.model.MealItem
 import com.kalos.app.core.domain.model.MealType
@@ -15,6 +15,7 @@ import com.kalos.app.core.domain.repository.MealRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class MealRepositoryImpl @Inject constructor(
@@ -88,8 +89,12 @@ class MealRepositoryImpl @Inject constructor(
         itemIds.forEach { mealDao.deleteItemById(it) }
     }
 
-    override fun getDailySummaries(startDate: String, endDate: String): Flow<List<DailySummaryRow>> =
-        mealDao.getDailySummaries(startDate, endDate)
+    override fun getDailySummaries(startDate: String, endDate: String): Flow<List<DailyTotals>> =
+        mealDao.getDailySummaries(startDate, endDate).map { rows ->
+            rows.map {
+                DailyTotals(it.date, it.totalKcal ?: 0f, it.totalProtein ?: 0f, it.totalCarbs ?: 0f, it.totalFat ?: 0f)
+            }
+        }
 
     override fun getLoggedDates(): Flow<List<String>> = mealDao.getLoggedDates()
 

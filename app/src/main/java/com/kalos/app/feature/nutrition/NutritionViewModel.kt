@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
+import com.kalos.app.core.domain.model.NutritionGoal
+import com.kalos.app.core.ui.util.todayFlow
 
 data class NutritionUiState(
     val date: String = LocalDate.now().toString(),
@@ -27,7 +29,7 @@ data class NutritionUiState(
     val isLoading: Boolean = true,
     val isToday: Boolean = true,
     val waterMl: Int = 0,
-    val waterGoalMl: Int = 2000,
+    val waterGoalMl: Int = NutritionGoal.DEFAULT_WATER_ML,
 ) {
     val waterProgress: Float get() = if (waterGoalMl > 0) (waterMl.toFloat() / waterGoalMl).coerceIn(0f, 1f) else 0f
     val isWaterGoalReached: Boolean get() = waterMl >= waterGoalMl
@@ -51,15 +53,25 @@ class NutritionViewModel @Inject constructor(
     /** Séance du programme actif prévue aujourd'hui (même règle que le calendrier), et si elle est faite. */
     val todayWorkout: StateFlow<TodayWorkout?> = combine(
         programRepository.getActive(),
-        workoutRepository.getLogsForDate(LocalDate.now().toString()),
-    ) { program, logs ->
-        val today = LocalDate.now().dayOfWeek.value
-        program?.workouts?.firstOrNull { it.dayOfWeek == today }?.template
+        todayFlow().flatMapLatest { day -> workoutRepository.getLogsForDate(day.toString()).map { day to it } },
+    ) { program, (day, logs) ->
+        program?.workoutOn(day.dayOfWeek.value)?.template
             ?.let { TodayWorkout(it, done = logs.isNotEmpty()) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     private val _date = MutableStateFlow(LocalDate.now().toString())
     val date: StateFlow<String> = _date
+
+    init {
+        // Viewing today when the day changes (midnight, or back after a night): follow it.
+        viewModelScope.launch {
+            var previous = LocalDate.now()
+            todayFlow().collect { today ->
+                if (_date.value == previous.toString()) _date.value = today.toString()
+                previous = today
+            }
+        }
+    }
 
     val mealTemplates: StateFlow<List<MealTemplate>> = mealTemplateRepository.getTemplates()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -142,7 +154,7 @@ class NutritionViewModel @Inject constructor(
     }
 
     fun setWaterGoal(goalMl: Int) {
-        if (goalMl < 100) return
+        if (goalMl < NutritionGoal.MIN_WATER_GOAL_ML) return
         waterRepository.setGoalMl(goalMl)
         _waterGoalMl.value = goalMl
     }

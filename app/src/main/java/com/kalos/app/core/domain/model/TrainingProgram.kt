@@ -10,7 +10,10 @@ data class TrainingProgram(
     val isCustom: Boolean = false,
     val workouts: List<ProgramWorkout> = emptyList(),
     val createdAt: Long = System.currentTimeMillis(),
-)
+) {
+    /** The session planned on [dayOfWeek] (1 = Monday … 7 = Sunday); programs repeat weekly. */
+    fun workoutOn(dayOfWeek: Int): ProgramWorkout? = workouts.firstOrNull { it.dayOfWeek == dayOfWeek }
+}
 
 data class ProgramWorkout(
     val id: Long = 0,

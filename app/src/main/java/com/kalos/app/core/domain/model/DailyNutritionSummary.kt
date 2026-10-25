@@ -6,10 +6,10 @@ data class DailyNutritionSummary(
     val totalProtein: Float = 0f,
     val totalCarbs: Float = 0f,
     val totalFat: Float = 0f,
-    val goalKcal: Int = 2000,
-    val goalProtein: Int = 150,
-    val goalCarbs: Int = 200,
-    val goalFat: Int = 67,
+    val goalKcal: Int = NutritionGoal.DEFAULT_KCAL,
+    val goalProtein: Int = NutritionGoal.DEFAULT_PROTEIN_G,
+    val goalCarbs: Int = NutritionGoal.DEFAULT_CARBS_G,
+    val goalFat: Int = NutritionGoal.DEFAULT_FAT_G,
     val meals: List<MealEntry> = emptyList(),
 ) {
     val remainingKcal get() = goalKcal - totalKcal

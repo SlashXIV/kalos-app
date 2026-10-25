@@ -86,6 +86,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import com.kalos.app.core.domain.model.NutritionGoal
 
 @Composable
 fun NutritionScreen(
@@ -311,7 +312,7 @@ private fun DaySummary(state: NutritionUiState) {
     val goal = state.goal.kcal
     val kcal = state.totalKcal.roundToInt()
     val rest = goal - kcal
-    val over = goal > 0 && state.totalKcal > goal * 1.05f
+    val over = goal > 0 && state.totalKcal > goal * NutritionGoal.ZONE_HIGH
     val status = if (rest >= 0) stringResource(R.string.kcal_remaining, formatGroupedInt(rest))
                  else stringResource(R.string.kcal_over, formatGroupedInt(abs(rest)))
     val nutrients = KalosTheme.nutrients
@@ -338,7 +339,7 @@ private fun DaySummary(state: NutritionUiState) {
                     style = MaterialTheme.typography.labelLarge,
                     color = when {
                         over -> nutrients.overTarget
-                        goal > 0 && state.totalKcal >= goal * 0.9f -> nutrients.goalReached
+                        goal > 0 && state.totalKcal >= goal * NutritionGoal.ZONE_LOW -> nutrients.goalReached
                         else -> MaterialTheme.colorScheme.onSurface
                     },
                 )

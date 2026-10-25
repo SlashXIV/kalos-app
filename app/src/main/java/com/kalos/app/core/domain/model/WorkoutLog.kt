@@ -24,8 +24,12 @@ data class LogExercise(
     val status: ExerciseStatus = ExerciseStatus.PLANNED,
     val replacedExerciseName: String = "",
 ) {
-    val totalVolume get() = sets.filter { it.isCompleted }.sumOf { (it.reps * it.weightKg).toDouble() }.toFloat()
+    val totalVolume get() = sets.completedVolumeKg()
 }
+
+/** Volume of the completed sets, reps × kg (timed and bodyweight sets count 0). */
+fun List<WorkoutSet>.completedVolumeKg(): Float =
+    filter { it.isCompleted }.sumOf { (it.reps * it.weightKg).toDouble() }.toFloat()
 
 data class WorkoutSet(
     val id: Long = 0,

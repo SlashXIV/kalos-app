@@ -20,6 +20,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.kalos.app.R
 import com.kalos.app.core.ui.theme.KalosTheme
+import com.kalos.app.core.domain.model.NutritionGoal
 
 /**
  * Une quantité et son objectif : libellé avec sa pastille, « 118 / 160 g », règle graduée.
@@ -36,7 +37,7 @@ fun MeasureRow(
     spokenUnit: String,
     color: Color,
     modifier: Modifier = Modifier,
-    overLimit: Float = 1.05f,
+    overLimit: Float = NutritionGoal.ZONE_HIGH,
 ) {
     val over = goal > 0f && value > goal * overLimit
     val sentence = stringResource(R.string.measure_sentence, label, valueText, goalText, spokenUnit) +

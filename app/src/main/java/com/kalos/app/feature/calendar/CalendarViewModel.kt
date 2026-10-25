@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.*
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
+import com.kalos.app.core.ui.util.todayFlow
 
 data class CalendarUiState(
     val month: YearMonth = YearMonth.now(),
@@ -88,36 +89,34 @@ class CalendarViewModel @Inject constructor(
     /** kcal par jour du mois affiché, pour les jauges de la grille (état d'interface seul). */
     val monthKcal: StateFlow<Map<String, Float>> = _month.flatMapLatest { m ->
         mealRepository.getDailySummaries(m.atDay(1).toString(), m.atEndOfMonth().toString())
-    }.map { rows -> rows.associate { it.date to (it.totalKcal ?: 0f) } }
+    }.map { rows -> rows.associate { it.date to it.totalKcal } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    private val today = LocalDate.now().toString()
-    private val sevenDaysAgo = LocalDate.now().minusDays(6).toString()
-
-    val insightsState: StateFlow<CalendarInsightsState> = combine(
-        mealRepository.getDailySummaries(sevenDaysAgo, today),
-        userRepository.observeGoal(),
-        workoutRepository.getTrainedDates(),
-    ) { summaries, goal, trainedDates ->
-        val daysWithData = summaries.count { (it.totalKcal ?: 0f) > 0f }
-        val avgKcal = if (daysWithData == 0) 0f
-                      else summaries.sumOf { (it.totalKcal ?: 0f).toDouble() }.toFloat() / daysWithData
-        // Même repli que l'écran Aujourd'hui : l'objectif par défaut tant qu'aucun n'est enregistré.
-        val kcalGoal = (goal ?: NutritionGoal()).kcal.toFloat()
-        val now = LocalDate.now()
-        val workoutsPerWeek = (3 downTo 0).map { weekOffset ->
-            val weekEnd = now.minusDays((weekOffset * 7).toLong())
-            val weekStart = weekEnd.minusDays(6)
-            trainedDates.count { dateStr ->
-                val d = LocalDate.parse(dateStr)
-                !d.isBefore(weekStart) && !d.isAfter(weekEnd)
+    val insightsState: StateFlow<CalendarInsightsState> = todayFlow().flatMapLatest { now ->
+        combine(
+            mealRepository.getDailySummaries(now.minusDays(6).toString(), now.toString()),
+            userRepository.observeGoal(),
+            workoutRepository.getTrainedDates(),
+        ) { summaries, goal, trainedDates ->
+            val daysWithData = summaries.count { it.totalKcal > 0f }
+            val avgKcal = if (daysWithData == 0) 0f
+                          else summaries.sumOf { it.totalKcal.toDouble() }.toFloat() / daysWithData
+            // Même repli que l'écran Aujourd'hui : l'objectif par défaut tant qu'aucun n'est enregistré.
+            val kcalGoal = (goal ?: NutritionGoal()).kcal.toFloat()
+            val workoutsPerWeek = (3 downTo 0).map { weekOffset ->
+                val weekEnd = now.minusDays((weekOffset * 7).toLong())
+                val weekStart = weekEnd.minusDays(6)
+                trainedDates.count { dateStr ->
+                    val d = LocalDate.parse(dateStr)
+                    !d.isBefore(weekStart) && !d.isAfter(weekEnd)
+                }
             }
+            CalendarInsightsState(
+                avgKcal7d = avgKcal,
+                kcalGoal = kcalGoal,
+                workoutsPerWeek = workoutsPerWeek,
+            )
         }
-        CalendarInsightsState(
-            avgKcal7d = avgKcal,
-            kcalGoal = kcalGoal,
-            workoutsPerWeek = workoutsPerWeek,
-        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CalendarInsightsState())
 
     fun previousMonth() = _month.update { it.minusMonths(1) }

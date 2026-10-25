@@ -43,10 +43,10 @@ import javax.inject.Inject
 import kotlin.math.roundToInt
 
 data class EditGoalsState(
-    val kcal: String = "2000",
-    val protein: String = "150",
-    val carbs: String = "200",
-    val fat: String = "67",
+    val kcal: String = NutritionGoal.DEFAULT_KCAL.toString(),
+    val protein: String = NutritionGoal.DEFAULT_PROTEIN_G.toString(),
+    val carbs: String = NutritionGoal.DEFAULT_CARBS_G.toString(),
+    val fat: String = NutritionGoal.DEFAULT_FAT_G.toString(),
     val hasProfile: Boolean = false,
     val isSaving: Boolean = false,
     val savedSuccessfully: Boolean = false,
@@ -65,7 +65,10 @@ data class EditGoalsState(
     val bFatG: Int = 0,
     val bCarbsG: Int = 0,
     val bTargetKcal: Int = 0,
-)
+) {
+    val isValid: Boolean get() = (kcal.toIntOrNull() ?: 0) > 0 &&
+        listOf(protein, carbs, fat).all { (it.toIntOrNull() ?: -1) >= 0 }
+}
 
 @HiltViewModel
 class EditGoalsViewModel @Inject constructor(
@@ -130,16 +133,12 @@ class EditGoalsViewModel @Inject constructor(
 
     fun save() {
         val s = _state.value
+        // An empty or invalid field used to silently save the default value: refuse instead.
+        if (!s.isValid) return
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
             userRepository.saveGoal(
-                NutritionGoal(
-                    kcal = s.kcal.toIntOrNull() ?: 2000,
-                    proteinG = s.protein.toIntOrNull() ?: 150,
-                    carbsG = s.carbs.toIntOrNull() ?: 200,
-                    fatG = s.fat.toIntOrNull() ?: 67,
-                    isCustom = true,
-                )
+                NutritionGoal(kcal = s.kcal.toInt(), proteinG = s.protein.toInt(), carbsG = s.carbs.toInt(), fatG = s.fat.toInt(), isCustom = true)
             )
             _state.update { it.copy(isSaving = false, savedSuccessfully = true) }
         }
@@ -175,7 +174,7 @@ fun EditGoalsScreen(
                     }
                 },
             ) {
-                IconButton(onClick = viewModel::save, enabled = !state.isSaving) {
+                IconButton(onClick = viewModel::save, enabled = !state.isSaving && state.isValid) {
                     Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.action_save))
                 }
             }
@@ -255,7 +254,7 @@ fun EditGoalsScreen(
             KalosButton(
                 stringResource(R.string.action_save),
                 onClick = viewModel::save,
-                enabled = !state.isSaving,
+                enabled = !state.isSaving && state.isValid,
                 modifier = Modifier.fillMaxWidth(),
             )
         }

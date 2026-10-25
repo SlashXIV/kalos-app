@@ -39,6 +39,16 @@ interface WorkoutLogDao {
     @Query("SELECT * FROM workout_log_exercise WHERE logId = :logId ORDER BY orderIndex ASC")
     suspend fun getExercisesForLogOnce(logId: Long): List<WorkoutLogExEntity>
 
+    // Batched loads for log lists (callers chunk ids below SQLite's 999-variable limit).
+    @Query("SELECT * FROM workout_log_exercise WHERE logId IN (:logIds) ORDER BY orderIndex ASC")
+    suspend fun getExercisesForLogs(logIds: List<Long>): List<WorkoutLogExEntity>
+
+    @Query("""
+        SELECT s.* FROM workout_log_set s JOIN workout_log_exercise e ON s.logExerciseId = e.id
+        WHERE e.logId IN (:logIds) ORDER BY s.setNumber ASC
+    """)
+    suspend fun getSetsForLogs(logIds: List<Long>): List<WorkoutLogSetEntity>
+
     // ABORT: caller passes id=0. REPLACE here would CASCADE-delete every set of the conflicting row.
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertLogExercise(ex: WorkoutLogExEntity): Long

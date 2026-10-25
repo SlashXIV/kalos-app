@@ -21,7 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
-import com.kalos.app.core.database.dao.DailySummaryRow
+import com.kalos.app.core.domain.model.DailyTotals
 import com.kalos.app.core.ui.component.EmptyState
 import com.kalos.app.core.ui.component.InstrumentLabel
 import com.kalos.app.core.ui.component.KalosButton
@@ -106,12 +106,12 @@ fun NutritionHistoryScreen(
 
 /** Un jour : date, kcal en grand, grammes des macros avec leur pastille. Une phrase TalkBack. */
 @Composable
-private fun DaySummaryCard(summary: DailySummaryRow, onClick: () -> Unit) {
+private fun DaySummaryCard(summary: DailyTotals, onClick: () -> Unit) {
     val date = formatHistoryDate(summary.date)
-    val kcal = formatGroupedInt((summary.totalKcal ?: 0f).roundToInt())
-    val p = formatGroupedInt((summary.totalProtein ?: 0f).roundToInt())
-    val c = formatGroupedInt((summary.totalCarbs ?: 0f).roundToInt())
-    val f = formatGroupedInt((summary.totalFat ?: 0f).roundToInt())
+    val kcal = formatGroupedInt(summary.totalKcal.roundToInt())
+    val p = formatGroupedInt(summary.totalProtein.roundToInt())
+    val c = formatGroupedInt(summary.totalCarbs.roundToInt())
+    val f = formatGroupedInt(summary.totalFat.roundToInt())
     val spoken = stringResource(R.string.food_history_day_spoken, date, kcal, p, c, f)
     val nutrients = KalosTheme.nutrients
     KalosCard(onClick = onClick) {
@@ -145,26 +145,26 @@ private fun DaySummaryCard(summary: DailySummaryRow, onClick: () -> Unit) {
 }
 
 // texte-technique : export TSV pour le presse-papiers, en-têtes de colonnes en texte brut.
-private fun buildNutritionTsv(summaries: List<DailySummaryRow>): String {
+private fun buildNutritionTsv(summaries: List<DailyTotals>): String {
     val recent = summaries.take(14)
     val sb = StringBuilder()
     sb.appendLine("Kalos — Historique nutritionnel (14 jours)")
     sb.appendLine("Date\tKcal\tProtéines (g)\tGlucides (g)\tLipides (g)")
     for (s in recent) {
-        val kcal = (s.totalKcal ?: 0f).roundToInt()
-        val p    = (s.totalProtein ?: 0f).roundToInt()
-        val c    = (s.totalCarbs ?: 0f).roundToInt()
-        val f    = (s.totalFat ?: 0f).roundToInt()
+        val kcal = s.totalKcal.roundToInt()
+        val p    = s.totalProtein.roundToInt()
+        val c    = s.totalCarbs.roundToInt()
+        val f    = s.totalFat.roundToInt()
         sb.appendLine("${s.date}\t$kcal\t$p\t$c\t$f")
     }
     if (recent.isNotEmpty()) {
         val n = recent.size.toDouble()
         val avgKcal = (recent.sumOf { (it.totalKcal  ?: 0f).toDouble() } / n).toFloat().roundToInt()
-        val avgP    = (recent.sumOf { (it.totalProtein ?: 0f).toDouble() } / n).toFloat().roundToInt()
+        val avgP    = (recent.sumOf { it.totalProtein.toDouble() } / n).toFloat().roundToInt()
         val avgC    = (recent.sumOf { (it.totalCarbs  ?: 0f).toDouble() } / n).toFloat().roundToInt()
         val avgF    = (recent.sumOf { (it.totalFat    ?: 0f).toDouble() } / n).toFloat().roundToInt()
         val totKcal = recent.sumOf { (it.totalKcal  ?: 0f).toDouble() }.toFloat().roundToInt()
-        val totP    = recent.sumOf { (it.totalProtein ?: 0f).toDouble() }.toFloat().roundToInt()
+        val totP    = recent.sumOf { it.totalProtein.toDouble() }.toFloat().roundToInt()
         val totC    = recent.sumOf { (it.totalCarbs  ?: 0f).toDouble() }.toFloat().roundToInt()
         val totF    = recent.sumOf { (it.totalFat    ?: 0f).toDouble() }.toFloat().roundToInt()
         sb.appendLine("Moyenne\t$avgKcal\t$avgP\t$avgC\t$avgF")

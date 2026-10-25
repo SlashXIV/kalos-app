@@ -7,10 +7,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.kalos.app.core.domain.model.NutritionGoal
 
 data class WaterUiState(
     val todayMl: Int = 0,
-    val goalMl: Int = 2000,
+    val goalMl: Int = NutritionGoal.DEFAULT_WATER_ML,
 ) {
     val progress: Float get() = if (goalMl > 0) (todayMl.toFloat() / goalMl).coerceIn(0f, 1f) else 0f
     val isGoalReached: Boolean get() = todayMl >= goalMl
@@ -41,7 +42,7 @@ class WaterViewModel @Inject constructor(
     }
 
     fun setGoal(goalMl: Int) {
-        if (goalMl < 100) return
+        if (goalMl < NutritionGoal.MIN_WATER_GOAL_ML) return
         waterRepository.setGoalMl(goalMl)
         _goalMl.value = goalMl
     }

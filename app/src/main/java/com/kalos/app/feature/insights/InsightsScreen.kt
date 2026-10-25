@@ -53,10 +53,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
+import com.kalos.app.core.domain.model.NutritionGoal
 
-/** Zone d'objectif calorique, la même que pour « jours dans la cible » (InsightsViewModel). */
-private const val ZONE_LOW = 0.90f
-private const val ZONE_HIGH = 1.05f
 
 @Composable
 fun InsightsScreen(
@@ -191,13 +189,13 @@ private fun NutritionCard(n: NutritionInsight) {
                     if (goal > 0f) add(stringResource(R.string.me_pct_of_goal, (k / goal * 100).roundToInt()))
                 }.joinToString(", ")
             }
-            val overDays = if (goal > 0f) n.kcalPerDay.count { it > goal * ZONE_HIGH } else 0
+            val overDays = if (goal > 0f) n.kcalPerDay.count { it > goal * NutritionGoal.ZONE_HIGH } else 0
             MeSeriesChart(
                 values = n.kcalPerDay,
                 reading = { readings[it] },
                 summary = pluralStringResource(R.plurals.me_insights_kcal_chart, n.kcalPerDay.size, n.kcalPerDay.size),
-                band = if (goal > 0f) goal * ZONE_LOW..goal * ZONE_HIGH else null,
-                overAbove = if (goal > 0f) goal * ZONE_HIGH else Float.POSITIVE_INFINITY,
+                band = if (goal > 0f) goal * NutritionGoal.ZONE_LOW..goal * NutritionGoal.ZONE_HIGH else null,
+                overAbove = if (goal > 0f) goal * NutritionGoal.ZONE_HIGH else Float.POSITIVE_INFINITY,
                 ticks = if (goal > 0f) listOf(goal) else emptyList(),
             )
             FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {

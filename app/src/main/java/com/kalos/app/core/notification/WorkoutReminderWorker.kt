@@ -42,7 +42,7 @@ class WorkoutReminderWorker(
         val tomorrowDow = today.plusDays(1).dayOfWeek.value
 
         if (dayOf) {
-            program.workouts.firstOrNull { it.dayOfWeek == todayDow }?.let { pw ->
+            program.workoutOn(todayDow)?.let { pw ->
                 val name = pw.template?.name ?: "Séance"
                 NotificationHelper.postWorkoutReminder(
                     applicationContext,
@@ -54,7 +54,7 @@ class WorkoutReminderWorker(
         }
 
         if (dayBefore) {
-            program.workouts.firstOrNull { it.dayOfWeek == tomorrowDow }?.let { pw ->
+            program.workoutOn(tomorrowDow)?.let { pw ->
                 val name = pw.template?.name ?: "Séance"
                 NotificationHelper.postWorkoutReminder(
                     applicationContext,

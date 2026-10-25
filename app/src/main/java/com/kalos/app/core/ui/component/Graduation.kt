@@ -34,6 +34,7 @@ import com.kalos.app.core.ui.motion.Motion
 import com.kalos.app.core.ui.theme.KalosTheme
 import kotlin.math.cos
 import kotlin.math.sin
+import com.kalos.app.core.domain.model.NutritionGoal
 
 /** L'objectif est placé aux 4/5 de l'échelle : on voit venir l'objectif et on voit le dépassement. */
 private const val SCALE_HEADROOM = 1.25f
@@ -159,8 +160,8 @@ fun GraduatedDial(
                 fun angle(f: Float) = Math.toRadians(135.0 + 270.0 * f.coerceIn(0f, 1f))
                 val outer = Array(n + 1) { i -> polar(c, r - 4.dp.toPx(), angle(i / n.toFloat())) }
                 val inner = Array(n + 1) { i -> polar(c, r - 4.dp.toPx() - (if (i % 5 == 0) 16 else 9).dp.toPx(), angle(i / n.toFloat())) }
-                val zoneLo = goal * 0.9f / max
-                val zoneHi = goal * 1.05f / max
+                val zoneLo = goal * NutritionGoal.ZONE_LOW / max
+                val zoneHi = goal * NutritionGoal.ZONE_HIGH / max
                 val zr = r + 3.dp.toPx()
                 val zoneStart = (135f + 270f * zoneLo)
                 val zoneSweep = 270f * (zoneHi - zoneLo)

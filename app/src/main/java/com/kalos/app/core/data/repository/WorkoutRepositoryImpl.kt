@@ -79,27 +79,41 @@ class WorkoutRepositoryImpl @Inject constructor(
     override suspend fun deleteTemplate(template: WorkoutTemplate) =
         templateDao.delete(WorkoutTemplateEntity(id = template.id, name = template.name))
 
-    override fun getLogs(): Flow<List<WorkoutLog>> = logDao.getAll().map { logs ->
-        logs.map { buildLog(it) }
-    }
+    override fun getLogs(): Flow<List<WorkoutLog>> = logDao.getAll().map { buildLogs(it) }
 
-    override fun getLogsForDate(date: String): Flow<List<WorkoutLog>> = logDao.getForDate(date).map { logs ->
-        logs.map { buildLog(it) }
-    }
+    override fun getLogsForDate(date: String): Flow<List<WorkoutLog>> = logDao.getForDate(date).map { buildLogs(it) }
 
     override fun getTrainedDates(): Flow<List<String>> = logDao.getTrainedDates()
 
     override suspend fun getLog(id: Long): WorkoutLog? {
         val entity = logDao.getById(id) ?: return null
-        return buildLog(entity)
+        return buildLogs(listOf(entity)).single()
     }
 
-    private suspend fun buildLog(entity: WorkoutLogEntity): WorkoutLog {
-        val logExercises = logDao.getExercisesForLogOnce(entity.id)
+    /** Builds logs with three batched reads per 500 logs instead of one sets query per exercise. */
+    private suspend fun buildLogs(entities: List<WorkoutLogEntity>): List<WorkoutLog> {
+        if (entities.isEmpty()) return emptyList()
+        val logExercises = mutableListOf<WorkoutLogExEntity>()
+        val sets = mutableListOf<WorkoutLogSetEntity>()
+        entities.map { it.id }.chunked(500).forEach { ids ->
+            logExercises += logDao.getExercisesForLogs(ids)
+            sets += logDao.getSetsForLogs(ids)
+        }
+        val exercisesByLog = logExercises.groupBy { it.logId }
+        val setsByLogExercise = sets.groupBy { it.logExerciseId }
         val exerciseMap = exercisesByIdFor(logExercises.map { it.exerciseId })
+        return entities.map { buildLog(it, exercisesByLog[it.id].orEmpty(), setsByLogExercise, exerciseMap) }
+    }
+
+    private fun buildLog(
+        entity: WorkoutLogEntity,
+        logExercises: List<WorkoutLogExEntity>,
+        setsByLogExercise: Map<Long, List<WorkoutLogSetEntity>>,
+        exerciseMap: Map<Long, Exercise>,
+    ): WorkoutLog {
         val exercises = logExercises.map { le ->
             val ex = exerciseMap[le.exerciseId]
-            val sets = logDao.getSetsForExerciseOnce(le.id).map { s ->
+            val sets = setsByLogExercise[le.id].orEmpty().map { s ->
                 WorkoutSet(id = s.id, logExerciseId = s.logExerciseId, setNumber = s.setNumber,
                     reps = s.reps, weightKg = s.weightKg, durationSecs = s.durationSecs,
                     isCompleted = s.isCompleted, rpe = s.rpe)
@@ -162,7 +176,6 @@ class WorkoutRepositoryImpl @Inject constructor(
                 date = log.date, startedAt = log.startedAt, notes = log.notes,
                 activityType = log.activityType?.name, energyKcal = log.energyKcal))
 
-            var totalVolume = 0f
             log.exercises.forEachIndexed { i, le ->
                 val logExId = logDao.insertLogExercise(WorkoutLogExEntity(
                     logId = logId, exerciseId = le.exercise.id,
@@ -172,7 +185,6 @@ class WorkoutRepositoryImpl @Inject constructor(
 
                 if (le.status == ExerciseStatus.SKIPPED) return@forEachIndexed
                 le.sets.forEach { set ->
-                    if (set.isCompleted) totalVolume += set.reps * set.weightKg
                     logDao.upsertSet(WorkoutLogSetEntity(
                         id = 0, logExerciseId = logExId, setNumber = set.setNumber,
                         reps = set.reps, weightKg = set.weightKg,
@@ -185,7 +197,7 @@ class WorkoutRepositoryImpl @Inject constructor(
             logDao.updateLog(entity.copy(
                 finishedAt = System.currentTimeMillis(),
                 durationSecs = durationSecs,
-                totalVolumeKg = totalVolume,
+                totalVolumeKg = log.exercises.filter { it.status != ExerciseStatus.SKIPPED }.sumOf { it.totalVolume.toDouble() }.toFloat(),
             ))
             logId
         }
@@ -198,9 +210,7 @@ class WorkoutRepositoryImpl @Inject constructor(
                 isCompleted = set.isCompleted, rpe = set.rpe))
 
             val reloaded = getLog(logId) ?: return@withTransaction null
-            val newVolume = reloaded.exercises.flatMap { it.sets }
-                .filter { it.isCompleted }
-                .sumOf { (it.reps * it.weightKg).toDouble() }.toFloat()
+            val newVolume = reloaded.exercises.sumOf { it.totalVolume.toDouble() }.toFloat()
             val entity = logDao.getById(logId) ?: return@withTransaction null
             logDao.updateLog(entity.copy(totalVolumeKg = newVolume))
             getLog(logId)

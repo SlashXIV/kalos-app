@@ -66,6 +66,26 @@ class WorkoutDaoTest {
     }
 
     @Test
+    fun batchedLogLoadsReturnEveryExerciseAndSet() = runTest {
+        db.exerciseDao().insertAll(listOf(ExerciseEntity(name = "Squat", primaryMuscle = "Quadriceps")))
+        val exerciseId = db.exerciseDao().getAllOnce().single().id
+        val logDao = db.workoutLogDao()
+        val logIds = (1..3).map { day ->
+            val logId = logDao.insertLog(WorkoutLogEntity(date = "2026-02-0$day", startedAt = day.toLong()))
+            repeat(2) { i ->
+                val logExId = logDao.insertLogExercise(
+                    WorkoutLogExEntity(logId = logId, exerciseId = exerciseId, exerciseName = "Squat", orderIndex = i))
+                repeat(3) { n -> logDao.upsertSet(WorkoutLogSetEntity(logExerciseId = logExId, setNumber = n + 1)) }
+            }
+            logId
+        }
+
+        assertEquals(4, logDao.getExercisesForLogs(logIds.take(2)).size)
+        assertEquals(12, logDao.getSetsForLogs(logIds.take(2)).size)
+        assertEquals(18, logDao.getSetsForLogs(logIds).size)
+    }
+
+    @Test
     fun exportIncludesArchivedCustomFoods() = runTest {
         db.foodDao().insertAll(listOf(
             food("Galette maison", isArchived = false),

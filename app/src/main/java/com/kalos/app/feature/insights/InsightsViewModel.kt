@@ -16,6 +16,8 @@ import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import com.kalos.app.core.domain.model.DailyTotals
+import com.kalos.app.core.ui.util.todayFlow
 
 enum class InsightsPeriod(val days: Int, val label: String) {
     WEEK(7, "7 jours"),
@@ -83,15 +85,15 @@ class InsightsViewModel @Inject constructor(
 
     private data class Data(
         val period: InsightsPeriod,
-        val summaries: List<com.kalos.app.core.database.dao.DailySummaryRow>,
+        val today: LocalDate,
+        val summaries: List<DailyTotals>,
         val goal: NutritionGoal?,
         val profile: UserProfile?,
         val trainedDates: List<String>,
         val weights: List<Pair<String, Float>>,
     )
 
-    private val dataFlow: Flow<Data> = _period.flatMapLatest { period ->
-        val today = LocalDate.now()
+    private val dataFlow: Flow<Data> = combine(_period, todayFlow()) { p, t -> p to t }.flatMapLatest { (period, today) ->
         val start = today.minusDays((period.days - 1).toLong()).toString()
         combine(
             mealRepository.getDailySummaries(start, today.toString()),
@@ -100,7 +102,7 @@ class InsightsViewModel @Inject constructor(
             workoutRepository.getTrainedDates(),
             workoutRepository.getBodyWeightHistory(),
         ) { summaries, goal, profile, trainedDates, weights ->
-            Data(period, summaries, goal, profile, trainedDates, weights)
+            Data(period, today, summaries, goal, profile, trainedDates, weights)
         }
     }
 
@@ -120,38 +122,38 @@ class InsightsViewModel @Inject constructor(
     }
 
     private fun build(data: Data, weeklyTarget: Int?): InsightsUiState {
-        val today = LocalDate.now()
+        val today = data.today
         val periodStart = today.minusDays((data.period.days - 1).toLong())
 
         // ── Nutrition ──────────────────────────────────────────────────────────
         val goalKcal = data.goal?.kcal ?: 0
         val goalProtein = data.goal?.proteinG ?: 0
         val tracked = data.summaries
-            .filter { (it.totalKcal ?: 0f) > 0f }
+            .filter { it.totalKcal > 0f }
             .sortedBy { it.date }
         val daysWithData = tracked.size
         val avgKcal = if (daysWithData == 0) 0f
-            else tracked.sumOf { (it.totalKcal ?: 0f).toDouble() }.toFloat() / daysWithData
+            else tracked.sumOf { it.totalKcal.toDouble() }.toFloat() / daysWithData
         val avgProtein = if (daysWithData == 0) 0f
-            else tracked.sumOf { (it.totalProtein ?: 0f).toDouble() }.toFloat() / daysWithData
+            else tracked.sumOf { it.totalProtein.toDouble() }.toFloat() / daysWithData
         // "On target": kcal within [90%, 105%] of goal; protein at or above goal.
         val daysOnKcalTarget = if (goalKcal <= 0) 0 else tracked.count {
-            val k = it.totalKcal ?: 0f
-            k in (goalKcal * 0.90f)..(goalKcal * 1.05f)
+            val k = it.totalKcal
+            k in (goalKcal * NutritionGoal.ZONE_LOW)..(goalKcal * NutritionGoal.ZONE_HIGH)
         }
         val daysOnProteinTarget = if (goalProtein <= 0) 0 else tracked.count {
-            (it.totalProtein ?: 0f) >= goalProtein
+            it.totalProtein >= goalProtein
         }
         val nutrition = NutritionInsight(
             avgKcal = avgKcal.roundToInt(),
             avgProtein = avgProtein.roundToInt(),
             goalKcal = goalKcal,
             goalProtein = goalProtein,
-            isKcalOver = goalKcal > 0 && avgKcal > goalKcal * 1.05f,
+            isKcalOver = goalKcal > 0 && avgKcal > goalKcal * NutritionGoal.ZONE_HIGH,
             daysWithData = daysWithData,
             daysOnKcalTarget = daysOnKcalTarget,
             daysOnProteinTarget = daysOnProteinTarget,
-            kcalPerDay = tracked.map { it.totalKcal ?: 0f },
+            kcalPerDay = tracked.map { it.totalKcal },
             kcalDates = tracked.map { it.date },
         )
 

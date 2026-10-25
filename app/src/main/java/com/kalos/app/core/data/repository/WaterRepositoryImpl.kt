@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import javax.inject.Inject
+import com.kalos.app.core.domain.model.NutritionGoal
 
 class WaterRepositoryImpl @Inject constructor(
     private val database: KalosDatabase,
@@ -26,7 +27,7 @@ class WaterRepositoryImpl @Inject constructor(
     override fun observeWaterForDate(date: String): Flow<Int> =
         dao.observeForDate(date).map { it ?: 0 }
 
-    override fun getGoalMl(): Int = prefs.getInt("goal_ml", 2000)
+    override fun getGoalMl(): Int = prefs.getInt("goal_ml", NutritionGoal.DEFAULT_WATER_ML)
 
     override suspend fun addWater(amountMl: Int, date: String) {
         if (amountMl == 0) return

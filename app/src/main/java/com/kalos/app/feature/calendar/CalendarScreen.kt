@@ -69,9 +69,9 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.roundToInt
+import com.kalos.app.core.domain.model.NutritionGoal
 
 /** Au-delà de 105 % de l'objectif, le jour est « au-dessus » (même seuil que le cadran du jour). */
-private const val OVER_LIMIT = 1.05f
 
 @Composable
 fun CalendarScreen(
@@ -137,7 +137,7 @@ fun CalendarScreen(
                 val planned = run {
                     val dow = LocalDate.parse(selected).dayOfWeek.value
                     if (selected in state.plannedWorkoutDates)
-                        state.activeProgram?.workouts?.firstOrNull { it.dayOfWeek == dow }
+                        state.activeProgram?.workoutOn(dow)
                     else null
                 }
                 DayDetailCard(
@@ -215,7 +215,7 @@ private fun DayCell(
     onClick: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    val over = kcalGoal > 0f && kcal > kcalGoal * OVER_LIMIT
+    val over = kcalGoal > 0f && kcal > kcalGoal * NutritionGoal.ZONE_HIGH
     val ink = if (isSelected) colors.surface else colors.onSurface
     val gaugeFill = if (over) KalosTheme.nutrients.overTarget else ink
 
@@ -287,7 +287,7 @@ private fun KcalGauge(fraction: Float, fill: Color, track: Color, modifier: Modi
                 val h = size.height * fraction.coerceIn(0f, 1f)
                 drawRect(fill, Offset(x, size.height - h), Size(w, h))
                 // Au-dessus de l'objectif : un trait barre le haut de la jauge (visible sans la couleur).
-                if (fraction > OVER_LIMIT) drawRect(fill, Offset(0f, 0f), Size(size.width, 2.dp.toPx()))
+                if (fraction > NutritionGoal.ZONE_HIGH) drawRect(fill, Offset(0f, 0f), Size(size.width, 2.dp.toPx()))
             },
     )
 }

@@ -74,6 +74,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
 import com.kalos.app.core.ui.util.formatKg
+import com.kalos.app.core.domain.model.ExerciseReference
 import com.kalos.app.core.domain.model.ExerciseStatus
 import com.kalos.app.core.domain.model.ExerciseTrackingMode
 import com.kalos.app.core.ui.component.Graduation
@@ -156,7 +157,8 @@ fun ActiveWorkoutScreen(
                 state.exercises.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(stringResource(R.string.training_no_exercises), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                else -> ActiveContent(state, viewModel, Modifier.weight(1f))
+                // Only the session content, not the ticking timers, so a tick does not recompose the sets.
+                else -> ActiveContent(state.exercises, state.currentExIndex, state.exerciseReferences, viewModel, Modifier.weight(1f))
             }
 
             AnimatedVisibility(visible = state.isResting) {
@@ -249,8 +251,14 @@ fun ActiveWorkoutScreen(
 }
 
 @Composable
-private fun ActiveContent(state: ActiveWorkoutUiState, viewModel: ActiveWorkoutViewModel, modifier: Modifier) {
-    val tabIndex = state.currentExIndex.coerceIn(0, state.exercises.size - 1)
+private fun ActiveContent(
+    exercises: List<ExerciseProgress>,
+    currentExIndex: Int,
+    references: Map<Long, ExerciseReference>,
+    viewModel: ActiveWorkoutViewModel,
+    modifier: Modifier,
+) {
+    val tabIndex = currentExIndex.coerceIn(0, exercises.size - 1)
     val accent = MaterialTheme.colorScheme.primary
     Column(modifier) {
         // Onglets d'exercices + ajout d'un exercice.
@@ -267,7 +275,7 @@ private fun ActiveContent(state: ActiveWorkoutUiState, viewModel: ActiveWorkoutV
                     }
                 },
             ) {
-                state.exercises.forEachIndexed { i, ep ->
+                exercises.forEachIndexed { i, ep ->
                     val textColor = when {
                         ep.status == ExerciseStatus.SKIPPED -> MaterialTheme.colorScheme.onSurfaceVariant
                         tabIndex == i -> MaterialTheme.colorScheme.onSurface
@@ -295,7 +303,7 @@ private fun ActiveContent(state: ActiveWorkoutUiState, viewModel: ActiveWorkoutV
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         val exIdx = tabIndex
-        val ep = state.exercises[exIdx]
+        val ep = exercises[exIdx]
 
         ExerciseActionBar(
             ep = ep,
@@ -323,7 +331,7 @@ private fun ActiveContent(state: ActiveWorkoutUiState, viewModel: ActiveWorkoutV
             modifier = Modifier.weight(1f),
         ) {
             item(key = "ref") {
-                ExerciseReferenceBlock(ep, state)
+                ExerciseReferenceBlock(ep, references[ep.templateExercise.exercise.id])
             }
             item(key = "head") { SetTableHeader(mode) }
 
@@ -356,7 +364,7 @@ private fun ActiveContent(state: ActiveWorkoutUiState, viewModel: ActiveWorkoutV
 
 /** Muscle principal et repère de charge (record + dernière séance), modes avec poids seulement. */
 @Composable
-private fun ExerciseReferenceBlock(ep: ExerciseProgress, state: ActiveWorkoutUiState) {
+private fun ExerciseReferenceBlock(ep: ExerciseProgress, ref: ExerciseReference?) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         if (ep.templateExercise.exercise.primaryMuscle.isNotBlank()) {
@@ -364,7 +372,6 @@ private fun ExerciseReferenceBlock(ep: ExerciseProgress, state: ActiveWorkoutUiS
         }
         val mode = ep.templateExercise.exercise.trackingMode
         val showWeightRef = mode == ExerciseTrackingMode.REPS_WEIGHT || mode == ExerciseTrackingMode.DURATION_WEIGHT
-        val ref = state.exerciseReferences[ep.templateExercise.exercise.id]
         if (showWeightRef && ref != null) {
             val pr = stringResource(R.string.training_ref_pr, formatKg(ref.prKg))
             // « Dernière séance » masquée quand elle égale le record (redondant).

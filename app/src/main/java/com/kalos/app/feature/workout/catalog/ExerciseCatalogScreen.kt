@@ -42,10 +42,13 @@ import com.kalos.app.core.ui.component.KalosSearchBar
 import com.kalos.app.core.ui.component.ScreenHeader
 import com.kalos.app.core.ui.theme.KalosShape
 import com.kalos.app.navigation.Screen
+import com.kalos.app.core.domain.model.ExerciseType
 
 // Valeurs de filtre = valeurs stockées dans le catalogue (comparées telles quelles par le ViewModel).
 private val MUSCLE_FILTERS = listOf("Pectoraux", "Grand dorsal", "Épaules", "Biceps", "Triceps", "Quadriceps", "Ischio-jambiers", "Fessiers", "Abdominaux", "Mollets", "Cardio", "Trapèzes", "Érecteurs")
-private val TYPE_FILTERS = listOf("Musculation", "Poids du corps", "Cardio", "HIIT", "Mobilité")
+private val TYPE_FILTERS = listOf(
+    ExerciseType.STRENGTH, ExerciseType.BODYWEIGHT, ExerciseType.CARDIO, ExerciseType.HIIT, ExerciseType.MOBILITY,
+)
 
 @Composable
 fun ExerciseCatalogScreen(
@@ -123,7 +126,8 @@ fun ExerciseCatalogScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 TYPE_FILTERS.forEach { type ->
-                    KalosFilterChip(type, state.selectedType == type, { viewModel.onTypeChange(type) })
+                    // The filter matches the stored code (enum name), the chip shows the label.
+                    KalosFilterChip(type.label, state.selectedType == type.name, { viewModel.onTypeChange(type.name) })
                 }
             }
             Spacer(Modifier.height(8.dp))

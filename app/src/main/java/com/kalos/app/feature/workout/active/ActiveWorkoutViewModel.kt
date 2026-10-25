@@ -70,6 +70,12 @@ class ActiveWorkoutViewModel @Inject constructor(
         // Idle gaps longer than this are excluded from the recorded session duration
         // on resume; shorter gaps count as in-session rest.
         const val IDLE_GAP_THRESHOLD_MS = 5 * 60 * 1000L
+
+        private const val DRAFT_HEARTBEAT_SECS = 30
+
+        /** Equal for two states that do not need a new draft save. */
+        internal fun draftSaveKey(s: ActiveWorkoutUiState) =
+            s.copy(elapsedSecs = s.elapsedSecs / DRAFT_HEARTBEAT_SECS, restSecsLeft = 0)
     }
 
     private val _state = MutableStateFlow(ActiveWorkoutUiState())
@@ -86,6 +92,11 @@ class ActiveWorkoutViewModel @Inject constructor(
         viewModelScope.launch {
             _state
                 .filter { !it.isLoading && !it.isSaving && it.savedLogId == null && !it.resumeAvailable }
+                // Timers tick every 0.5–1 s and are rebuilt from timestamps on resume: drop them so
+                // only real edits trigger a save, plus a 30 s heartbeat that keeps lastSavedAt fresh
+                // for the idle-gap rule (5 min threshold).
+                .map(::draftSaveKey)
+                .distinctUntilChanged()
                 .debounce(400)
                 .collect { s -> persistDraft(s) }
         }

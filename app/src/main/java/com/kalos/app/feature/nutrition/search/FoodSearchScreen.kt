@@ -184,18 +184,21 @@ fun FoodSearchScreen(
                 )
             }
             Spacer(Modifier.height(4.dp))
+            val displayed = remember(state.results, state.sortVolumeEating) {
+                if (state.sortVolumeEating) state.results.sortedBy { it.kcalPer100g } else state.results
+            }
             LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
                 if (state.query.isEmpty() && !hasActiveFilter) {
                     if (state.recent.isNotEmpty()) {
                         item { SectionHeader(stringResource(R.string.food_section_recent)) }
-                        items(state.recent) { food ->
+                        items(state.recent, key = { "recent-${it.id}" }) { food ->
                             FoodListItem(food = food, onClick = { onFoodClick(food) })
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         }
                     }
                     if (state.favorites.isNotEmpty()) {
                         item { SectionHeader(stringResource(R.string.food_section_favorites)) }
-                        items(state.favorites) { food ->
+                        items(state.favorites, key = { "fav-${it.id}" }) { food ->
                             FoodListItem(food = food, onClick = { onFoodClick(food) })
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         }
@@ -219,12 +222,7 @@ fun FoodSearchScreen(
                             )
                         }
                     } else {
-                        val displayed = if (state.sortVolumeEating) {
-                            state.results.sortedBy { it.kcalPer100g }
-                        } else {
-                            state.results
-                        }
-                        items(displayed) { food ->
+                        items(displayed, key = { "res-${it.id}" }) { food ->
                             FoodListItem(food = food, onClick = { onFoodClick(food) })
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         }

@@ -406,8 +406,9 @@ private fun MealTicket(
                 }
             }
         }
-        if (entry != null && entry.items.isNotEmpty()) {
-            consolidate(entry.items).forEach { item ->
+        val lines = remember(entry?.items) { entry?.items?.let(::consolidate).orEmpty() }
+        if (lines.isNotEmpty()) {
+            lines.forEach { item ->
                 val amount = formatGroupedInt(item.totalAmountG.roundToInt())
                 val kcal = formatGroupedInt(item.totalKcal.roundToInt())
                 TicketLine(

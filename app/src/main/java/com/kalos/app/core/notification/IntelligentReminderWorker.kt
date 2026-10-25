@@ -13,6 +13,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import com.kalos.app.R
 
 class IntelligentReminderWorker(
     context: Context,
@@ -44,8 +45,8 @@ class IntelligentReminderWorker(
             if (!hasFood) {
                 NotificationHelper.postSmartReminder(
                     applicationContext,
-                    "N'oubliez pas de journaliser 🥗",
-                    "Aucun repas enregistré aujourd'hui — suivez votre nutrition pour progresser.",
+                    applicationContext.getString(R.string.notif_nutrition_title),
+                    applicationContext.getString(R.string.notif_nutrition_body),
                     NOTIF_NUTRITION,
                     NotificationHelper.DEST_NUTRITION,
                 )
@@ -59,11 +60,11 @@ class IntelligentReminderWorker(
             val daysSince = if (lastTrainDate == null) Int.MAX_VALUE
                            else ChronoUnit.DAYS.between(lastTrainDate, LocalDate.now()).toInt()
             if (daysSince >= inactivityDays) {
-                val msg = if (lastTrainDate == null) "Vous n'avez encore fait aucune séance — commencez aujourd'hui !"
-                          else "Dernière séance il y a $daysSince jours — remettez-vous en selle !"
+                val msg = if (lastTrainDate == null) applicationContext.getString(R.string.notif_workout_never)
+                          else applicationContext.resources.getQuantityString(R.plurals.notif_workout_since, daysSince, daysSince)
                 NotificationHelper.postSmartReminder(
                     applicationContext,
-                    "Il est temps de s'entraîner 💪",
+                    applicationContext.getString(R.string.notif_workout_title),
                     msg,
                     NOTIF_WORKOUT,
                     NotificationHelper.DEST_WORKOUT,
@@ -77,8 +78,8 @@ class IntelligentReminderWorker(
             if (waterMl < goalMl / 2) {
                 NotificationHelper.postSmartReminder(
                     applicationContext,
-                    "Pensez à vous hydrater 💧",
-                    "$waterMl ml bus — objectif ${goalMl} ml.",
+                    applicationContext.getString(R.string.notif_water_title),
+                    applicationContext.getString(R.string.notif_water_body, waterMl, goalMl),
                     NOTIF_HYDRATION,
                     NotificationHelper.DEST_WATER,
                 )

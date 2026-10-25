@@ -32,6 +32,25 @@ class HardcodedUiTextTest {
     }
 
     @Test
+    fun `aucun texte francais code en dur dans les ViewModels et les workers`() {
+        // Hors des composables, un texte d'interface se repère à ses lettres accentuées ou à
+        // son apostrophe typographique : il doit venir des ressources (getString, @StringRes).
+        val root = File("src/main/java")
+        val findings = root.walkTopDown()
+            .filter { it.isFile && (it.name.endsWith("ViewModel.kt") || it.name.endsWith("Worker.kt")) }
+            .sortedBy { it.path }
+            .flatMap { f ->
+                f.readLines().withIndex().filter { (_, line) ->
+                    val code = line.trimStart()
+                    !code.startsWith("//") && !code.startsWith("*") && !code.startsWith("/*") && !OPT_OUT.containsMatchIn(line) &&
+                        !code.contains("Log.") && FRENCH_LITERAL.containsMatchIn(line.substringBefore("//"))
+                }.map { (i, line) -> "${f.relativeTo(root)}:${i + 1}  ${line.trim()}" }
+            }
+            .toList()
+        assertTrue("Texte français codé en dur :\n" + findings.joinToString("\n"), findings.isEmpty())
+    }
+
+    @Test
     fun `les ecrans en attente existent encore`() {
         // Un fichier migré ou renommé doit sortir de la liste : elle ne fait que rétrécir.
         val missing = PENDING.filterNot { File("src/main/java/$it").exists() }
@@ -64,6 +83,7 @@ class HardcodedUiTextTest {
             """(?:\bText\(\s*|\bshowSnackbar\(\s*|\b(contentDescription|title|subtitle|message|label|hint|""" +
                 """actionLabel|confirmLabel|text|placeholder|description)\s*=\s*)"((?:[^"\\]|\\.)*)"""",
         )
+        val FRENCH_LITERAL = Regex(""""[^"]*[àâçéèêëîïôûùüÿœÀÂÇÉÈÊÎÔÛ’][^"]*"""")
         val TEMPLATE = Regex("""\$\{[^}]*}|\$[A-Za-z_][A-Za-z0-9_]*""")
         val OPT_OUT = Regex("""//\s*texte-technique\s*:\s*\S""")
         val ANIMATION_CALL = Regex("""\b(?:animate\w*|\w*Transition|AnimatedVisibility|AnimatedContent|Crossfade)\s*\(""")

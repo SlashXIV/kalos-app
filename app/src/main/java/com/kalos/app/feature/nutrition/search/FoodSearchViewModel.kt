@@ -1,5 +1,6 @@
 package com.kalos.app.feature.nutrition.search
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,6 +24,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 import com.kalos.app.core.ui.util.parseDecimal
+import com.kalos.app.R
+import androidx.annotation.StringRes
 
 enum class ServingMode { GRAMS, UNITS }
 
@@ -37,7 +40,7 @@ data class FoodSearchUiState(
     val servingCount: String = "1",
     val isLoading: Boolean = false,
     val addedSuccessfully: Boolean = false,
-    val errorMessage: String? = null,
+    @StringRes val errorMessage: Int? = null,
     // Set when a scanned barcode has no local match → screen navigates to manual creation
     // pre-filled with this barcode (and, if the OpenFoodFacts lookup succeeded, the macros
     // handed off via ScannedFoodHolder). Null otherwise.
@@ -204,7 +207,7 @@ class FoodSearchViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isResolvingBarcode = false,
-                            errorMessage = "Pas de connexion à OpenFoodFacts. Réessayez, ou créez l'aliment manuellement.",
+                            errorMessage = R.string.food_off_unavailable,
                         )
                     }
                 }
@@ -243,10 +246,10 @@ class FoodSearchViewModel @Inject constructor(
                     _state.update { it.copy(selectedFood = null, amountG = "100", addedSuccessfully = true) }
                 }
                 .onFailure { e ->
+                    Log.w("FoodSearch", "Adding food to meal failed", e)
                     _state.update {
                         it.copy(
-                            errorMessage = e.message?.takeIf { msg -> msg.isNotBlank() }
-                                ?: "Impossible d'ajouter l'aliment au repas",
+                            errorMessage = R.string.food_add_failed,
                         )
                     }
                 }

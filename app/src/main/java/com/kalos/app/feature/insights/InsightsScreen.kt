@@ -54,6 +54,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
 import com.kalos.app.core.domain.model.NutritionGoal
+import androidx.compose.ui.res.stringArrayResource
 
 
 @Composable
@@ -114,11 +115,12 @@ private fun PeriodSelector(selected: InsightsPeriod, onSelect: (InsightsPeriod) 
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun SummaryCard(headline: String, highlights: List<SummaryHighlight>) {
-    if (headline.isBlank()) return
+private fun SummaryCard(headline: SummaryHeadline?, highlights: List<SummaryHighlight>) {
+    if (headline == null) return
+    val pool = stringArrayResource(headline.pool)
     KalosCard {
         InstrumentLabel(stringResource(R.string.me_insights_keep))
-        Text(headline, style = MaterialTheme.typography.titleMedium)
+        Text(pool[headline.seed.mod(pool.size)], style = MaterialTheme.typography.titleMedium)
         if (highlights.isNotEmpty()) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 highlights.forEach { h ->
@@ -130,8 +132,9 @@ private fun SummaryCard(headline: String, highlights: List<SummaryHighlight>) {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
-                        Text(h.value, style = KalosTheme.type.metric)
-                        Text(h.label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(h.valueRes, *h.valueArgs.toTypedArray()), style = KalosTheme.type.metric)
+                        val label = if (h.labelPlurals != 0) pluralStringResource(h.labelPlurals, h.count) else stringResource(h.labelRes)
+                        Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }

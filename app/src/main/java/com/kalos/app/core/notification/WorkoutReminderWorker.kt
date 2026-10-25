@@ -10,6 +10,7 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
+import com.kalos.app.R
 
 class WorkoutReminderWorker(
     context: Context,
@@ -43,11 +44,11 @@ class WorkoutReminderWorker(
 
         if (dayOf) {
             program.workoutOn(todayDow)?.let { pw ->
-                val name = pw.template?.name ?: "Séance"
+                val name = pw.template?.name ?: applicationContext.getString(R.string.notif_program_unnamed)
                 NotificationHelper.postWorkoutReminder(
                     applicationContext,
-                    "Séance aujourd'hui 💪",
-                    "$name — ${program.name}",
+                    applicationContext.getString(R.string.notif_program_today),
+                    applicationContext.getString(R.string.notif_program_body, name, program.name),
                     notifId = NOTIF_ID_TODAY,
                 )
             }
@@ -55,11 +56,11 @@ class WorkoutReminderWorker(
 
         if (dayBefore) {
             program.workoutOn(tomorrowDow)?.let { pw ->
-                val name = pw.template?.name ?: "Séance"
+                val name = pw.template?.name ?: applicationContext.getString(R.string.notif_program_unnamed)
                 NotificationHelper.postWorkoutReminder(
                     applicationContext,
-                    "Rappel : séance demain",
-                    "$name — ${program.name}",
+                    applicationContext.getString(R.string.notif_program_tomorrow),
+                    applicationContext.getString(R.string.notif_program_body, name, program.name),
                     notifId = NOTIF_ID_TOMORROW,
                 )
             }

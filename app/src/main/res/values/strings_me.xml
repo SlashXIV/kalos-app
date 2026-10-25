@@ -66,6 +66,60 @@
     <string name="me_period_week">7 jours</string>
     <string name="me_period_month">30 jours</string>
     <string name="me_insights_keep">À retenir</string>
+    <string-array name="insights_headline_empty">
+        <item>Rien à analyser pour l’instant — logue tes repas et tes séances pour voir ton bilan.</item>
+    </string-array>
+    <string-array name="insights_headline_all_good">
+        <item>Période solide, tu tiens le cap.</item>
+        <item>Beau travail sur cette période.</item>
+        <item>Régularité au rendez-vous, continue comme ça.</item>
+        <item>Tout est aligné : assiette et séances suivent.</item>
+    </string-array>
+    <string-array name="insights_headline_nutrition_only">
+        <item>Alimentation carrée, mais peu de séances.</item>
+        <item>Côté assiette c’est bon ; l’entraînement est à relancer.</item>
+        <item>Nutrition maîtrisée, il manque du volume à l’entraînement.</item>
+    </string-array>
+    <string-array name="insights_headline_training_only">
+        <item>Bonne assiduité en séance, mais l’alimentation dérape.</item>
+        <item>Entraînement régulier ; à resserrer côté calories.</item>
+        <item>Tu t’entraînes bien — l’assiette reste à cadrer.</item>
+    </string-array>
+    <string-array name="insights_headline_mid">
+        <item>Bon rythme, avec quelques écarts.</item>
+        <item>Sur la bonne voie, encore quelques irrégularités.</item>
+        <item>Correct dans l’ensemble, des ajustements possibles.</item>
+    </string-array>
+    <string-array name="insights_headline_uneven">
+        <item>Période en dents de scie.</item>
+        <item>Des hauts et des bas sur cette période.</item>
+        <item>Semaine difficile à tenir — on repart au propre.</item>
+    </string-array>
+    <string name="insights_hl_days_value">%1$d/%2$d j</string>
+    <string name="insights_hl_days_label">calories dans la cible</string>
+    <string name="insights_hl_protein_value">%1$d g</string>
+    <string name="insights_hl_count">%1$d</string>
+    <string name="insights_hl_protein_label">protéines / j</string>
+    <plurals name="insights_hl_sessions_label">
+        <item quantity="one">séance</item>
+        <item quantity="other">séances</item>
+    </plurals>
+    <string name="insights_hl_weight_value">%1$s kg</string>
+    <string name="insights_hl_weight_label">sur la période</string>
+    <string name="notif_nutrition_title">N’oubliez pas de journaliser 🥗</string>
+    <string name="notif_nutrition_body">Aucun repas enregistré aujourd’hui — suivez votre nutrition pour progresser.</string>
+    <string name="notif_workout_title">Il est temps de s’entraîner 💪</string>
+    <string name="notif_workout_never">Vous n’avez encore fait aucune séance — commencez aujourd’hui !</string>
+    <plurals name="notif_workout_since">
+        <item quantity="one">Dernière séance il y a %1$d jour — remettez-vous en selle !</item>
+        <item quantity="other">Dernière séance il y a %1$d jours — remettez-vous en selle !</item>
+    </plurals>
+    <string name="notif_water_title">Pensez à vous hydrater 💧</string>
+    <string name="notif_water_body">%1$d ml bus — objectif %2$d ml.</string>
+    <string name="notif_program_today">Séance aujourd’hui 💪</string>
+    <string name="notif_program_tomorrow">Rappel : séance demain</string>
+    <string name="notif_program_unnamed">Séance</string>
+    <string name="notif_program_body">%1$s — %2$s</string>
     <string name="me_insights_nutrition">Nutrition</string>
     <string name="me_insights_weight">Poids</string>
     <string name="me_insights_training">Entraînement</string>

@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.kalos.app.core.ui.util.parseDecimal
+import com.kalos.app.R
+import androidx.annotation.StringRes
+import android.util.Log
 
 data class CustomFoodState(
     val editingFoodId: Long = 0,
@@ -35,7 +38,7 @@ data class CustomFoodState(
     val savedSuccessfully: Boolean = false,
     val deletedSuccessfully: Boolean = false,
     val duplicateFood: Food? = null,
-    val errorMessage: String? = null,
+    @StringRes val errorMessage: Int? = null,
 )
 
 @HiltViewModel
@@ -132,7 +135,8 @@ class CustomFoodViewModel @Inject constructor(
             if (!s.isEditing) {
                 val duplicate = runCatching { foodRepository.findDuplicate(s.name.trim()) }
                     .getOrElse { e ->
-                        _state.update { it.copy(isSaving = false, errorMessage = e.toUserMessage("Erreur lors de la vérification du doublon")) }
+                        Log.w("Kalos", "Operation failed", e)
+                        _state.update { it.copy(isSaving = false, errorMessage = R.string.error_food_duplicate_check) }
                         return@launch
                     }
                 if (duplicate != null) {
@@ -160,7 +164,8 @@ class CustomFoodViewModel @Inject constructor(
             runCatching { foodRepository.archiveOrDelete(foodId) }
                 .onSuccess { _state.update { it.copy(deletedSuccessfully = true) } }
                 .onFailure { e ->
-                    _state.update { it.copy(errorMessage = e.toUserMessage("Impossible de supprimer l'aliment")) }
+                    Log.w("Kalos", "Operation failed", e)
+                    _state.update { it.copy(errorMessage = R.string.error_food_delete) }
                 }
         }
     }
@@ -195,7 +200,8 @@ class CustomFoodViewModel @Inject constructor(
         }
             .onSuccess { _state.update { it.copy(isSaving = false, savedSuccessfully = true) } }
             .onFailure { e ->
-                _state.update { it.copy(isSaving = false, errorMessage = e.toUserMessage("Impossible d'enregistrer l'aliment")) }
+                Log.w("Kalos", "Operation failed", e)
+                _state.update { it.copy(isSaving = false, errorMessage = R.string.error_food_save) }
             }
     }
 }
@@ -206,5 +212,3 @@ class CustomFoodViewModel @Inject constructor(
 private fun Float.toFieldString(): String =
     if (this == toLong().toFloat()) toLong().toString() else toString()
 
-internal fun Throwable.toUserMessage(fallback: String): String =
-    message?.takeIf { it.isNotBlank() } ?: fallback

@@ -17,6 +17,9 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 import com.kalos.app.core.ui.util.parseDecimal
+import com.kalos.app.R
+import androidx.annotation.StringRes
+import android.util.Log
 
 data class SetInput(
     val reps: String = "",
@@ -53,7 +56,7 @@ data class ActiveWorkoutUiState(
     val exercisePickerMuscle: String = "",
     val confirmReplaceExIndex: Int = -1,
     val confirmReplaceExercise: Exercise? = null,
-    val errorMessage: String? = null,
+    @StringRes val errorMessage: Int? = null,
     // Historical load reference per exercise id (PR + last session), loaded lazily.
     val exerciseReferences: Map<Long, ExerciseReference> = emptyMap(),
 )
@@ -235,10 +238,10 @@ class ActiveWorkoutViewModel @Inject constructor(
                 }
                 _state.update { it.copy(templateName = template.name, exercises = exercises, isLoading = false) }
             } else {
-                _state.update { it.copy(templateName = "Séance libre", isLoading = false) }
+                _state.update { it.copy(templateName = "", isLoading = false) }
             }
         } else {
-            _state.update { it.copy(templateName = "Séance libre", isLoading = false) }
+            _state.update { it.copy(templateName = "", isLoading = false) }
         }
         startTimer()
     }
@@ -523,12 +526,12 @@ class ActiveWorkoutViewModel @Inject constructor(
                     _state.update { it.copy(isSaving = false, savedLogId = logId) }
                 }
                 .onFailure { e ->
+                    Log.w("Kalos", "Operation failed", e)
                     // Draft kept so the user can retry without losing input.
                     _state.update {
                         it.copy(
                             isSaving = false,
-                            errorMessage = e.message?.takeIf { msg -> msg.isNotBlank() }
-                                ?: "Échec de l'enregistrement de la séance",
+                            errorMessage = R.string.error_workout_save_failed,
                         )
                     }
                 }

@@ -104,7 +104,6 @@ dependencies {
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.activity.compose)
     implementation(libs.splashscreen)
-    implementation(libs.datastore.preferences)
     implementation(libs.work.runtime.ktx)
 
     // Compose

@@ -101,4 +101,9 @@
     </plurals>
     <string name="workout_start_action">Démarrer</string>
     <string name="workout_done_today">Séance faite</string>
+    <string name="error_workout_save_failed">Échec de l’enregistrement de la séance</string>
+    <string name="error_set_edit_failed">Échec de la modification de la série</string>
+    <string name="error_food_duplicate_check">Erreur lors de la vérification du doublon</string>
+    <string name="error_food_delete">Impossible de supprimer l’aliment</string>
+    <string name="error_food_save">Impossible d’enregistrer l’aliment</string>
 </resources>

@@ -89,6 +89,7 @@ import com.kalos.app.feature.workout.formatClock
 import com.kalos.app.navigation.Screen
 import kotlin.math.cos
 import kotlin.math.sin
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,9 +104,10 @@ fun ActiveWorkoutScreen(
 
     LaunchedEffect(templateId) { viewModel.loadTemplate(templateId) }
 
+    val context = LocalContext.current
     LaunchedEffect(state.errorMessage) {
-        state.errorMessage?.let { msg ->
-            snackbarHostState.showSnackbar(msg)
+        state.errorMessage?.let { res ->
+            snackbarHostState.showSnackbar(context.getString(res))
             viewModel.onErrorShown()
         }
     }
@@ -135,7 +137,10 @@ fun ActiveWorkoutScreen(
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             ScreenHeader(
-                title = state.templateName.ifBlank { stringResource(R.string.training_in_progress) },
+                title = when {
+                    state.isLoading -> stringResource(R.string.training_in_progress)
+                    else -> state.templateName.ifBlank { stringResource(R.string.training_free_workout) }
+                },
                 eyebrow = stringResource(R.string.training_elapsed, formatClock(state.elapsedSecs)),
                 small = true,
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -205,7 +210,7 @@ fun ActiveWorkoutScreen(
             title = { Text(stringResource(R.string.training_in_progress)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(stringResource(R.string.training_resume_body, state.templateName, timeLabel))
+                    Text(stringResource(R.string.training_resume_body, state.templateName.ifBlank { stringResource(R.string.training_free_workout) }, timeLabel))
                     if (state.resumeIsStale) {
                         Text(
                             stringResource(R.string.training_resume_stale),

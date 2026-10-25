@@ -108,4 +108,6 @@
     <string name="food_macro_p">P %1$s g</string>
     <string name="food_macro_c">G %1$s g</string>
     <string name="food_macro_f">L %1$s g</string>
+    <string name="food_off_unavailable">Pas de connexion à OpenFoodFacts. Réessayez, ou créez l’aliment manuellement.</string>
+    <string name="food_add_failed">Impossible d’ajouter l’aliment au repas</string>
 </resources>

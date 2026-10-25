@@ -1,6 +1,8 @@
 package com.kalos.app.core.data.seed
 
 import android.content.Context
+import androidx.room.withTransaction
+import com.kalos.app.core.database.KalosDatabase
 import com.kalos.app.core.database.dao.ExerciseDao
 import com.kalos.app.core.database.dao.FoodDao
 import com.kalos.app.core.database.dao.ProgramDao
@@ -24,6 +26,7 @@ class DatabaseSeeder @Inject constructor(
     private val foodDao: FoodDao,
     private val exerciseDao: ExerciseDao,
     private val programDao: ProgramDao,
+    private val database: KalosDatabase,
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -34,10 +37,12 @@ class DatabaseSeeder @Inject constructor(
     // or trackingMode/name values change.
     private val SEED_EXERCISES_VERSION = 6
 
+    // One transaction per phase: hundreds of inserts commit at once, and a crash mid-seed
+    // never leaves a half-filled catalog.
     suspend fun seedIfEmpty() = withContext(Dispatchers.IO) {
-        if (foodDao.count() == 0) seedFoods()
-        seedExercisesDifferential()
-        if (programDao.count() == 0) seedPrograms()
+        database.withTransaction { if (foodDao.count() == 0) seedFoods() }
+        database.withTransaction { seedExercisesDifferential() }
+        database.withTransaction { if (programDao.count() == 0) seedPrograms() }
     }
 
     private suspend fun seedExercisesDifferential() {

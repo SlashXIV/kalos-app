@@ -60,6 +60,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.roundToInt
+import androidx.annotation.StringRes
+import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 
 // ─── ViewModel ───────────────────────────────────────────────────────────────
 
@@ -75,7 +78,7 @@ data class WorkoutLogDetailUiState(
     val isLoading: Boolean = true,
     val pendingEdit: PendingSetEdit? = null,
     val isSavingEdit: Boolean = false,
-    val errorMessage: String? = null,
+    @StringRes val errorMessage: Int? = null,
 )
 
 @HiltViewModel
@@ -138,11 +141,11 @@ class WorkoutLogDetailViewModel @Inject constructor(
                     }
                 }
                 .onFailure { e ->
+                    Log.w("Kalos", "Operation failed", e)
                     _uiState.update {
                         it.copy(
                             isSavingEdit = false,
-                            errorMessage = e.message?.takeIf { msg -> msg.isNotBlank() }
-                                ?: "Échec de la modification de la série",
+                            errorMessage = R.string.error_set_edit_failed,
                         )
                     }
                 }
@@ -163,9 +166,10 @@ fun WorkoutLogDetailScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(logId) { viewModel.load(logId) }
+    val context = LocalContext.current
     LaunchedEffect(state.errorMessage) {
-        state.errorMessage?.let { msg ->
-            snackbarHostState.showSnackbar(msg)
+        state.errorMessage?.let { res ->
+            snackbarHostState.showSnackbar(context.getString(res))
             viewModel.onErrorShown()
         }
     }

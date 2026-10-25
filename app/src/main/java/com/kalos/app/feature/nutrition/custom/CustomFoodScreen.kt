@@ -25,6 +25,7 @@ import com.kalos.app.core.ui.component.KalosNumberField
 import com.kalos.app.core.ui.component.ScreenHeader
 import com.kalos.app.core.ui.component.SectionLabel
 import com.kalos.app.core.ui.theme.KalosShape
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun CustomFoodScreen(
@@ -42,9 +43,10 @@ fun CustomFoodScreen(
     LaunchedEffect(barcode) { viewModel.setBarcode(barcode) }
     LaunchedEffect(state.savedSuccessfully) { if (state.savedSuccessfully) navController.popBackStack() }
     LaunchedEffect(state.deletedSuccessfully) { if (state.deletedSuccessfully) navController.popBackStack() }
+    val context = LocalContext.current
     LaunchedEffect(state.errorMessage) {
-        state.errorMessage?.let { msg ->
-            snackbarHostState.showSnackbar(msg)
+        state.errorMessage?.let { res ->
+            snackbarHostState.showSnackbar(context.getString(res))
             viewModel.onErrorShown()
         }
     }

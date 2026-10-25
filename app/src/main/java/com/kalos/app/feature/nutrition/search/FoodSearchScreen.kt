@@ -48,6 +48,7 @@ import com.kalos.app.feature.nutrition.scan.SCANNED_BARCODE_KEY
 import com.kalos.app.navigation.Screen
 import kotlin.math.roundToInt
 import com.kalos.app.core.ui.util.parseDecimal
+import androidx.compose.ui.platform.LocalContext
 
 /** savedStateHandle key: id of the food picked in pick mode, read by the caller. */
 const val PICKED_FOOD_ID_KEY = "picked_food_id"
@@ -83,9 +84,10 @@ fun FoodSearchScreen(
             navController.popBackStack()
         }
     }
+    val context = LocalContext.current
     LaunchedEffect(state.errorMessage) {
-        state.errorMessage?.let { msg ->
-            snackbarHostState.showSnackbar(msg)
+        state.errorMessage?.let { res ->
+            snackbarHostState.showSnackbar(context.getString(res))
             viewModel.onErrorShown()
         }
     }

@@ -4,37 +4,51 @@ import androidx.room.withTransaction
 import com.kalos.app.core.database.KalosDatabase
 import com.kalos.app.core.database.dao.ProgramDao
 import com.kalos.app.core.database.dao.WorkoutTemplateDao
-import com.kalos.app.core.database.dao.ExerciseDao
 import com.kalos.app.core.database.entity.ProgramWorkoutEntity
 import com.kalos.app.core.database.entity.TrainingProgramEntity
+import com.kalos.app.core.database.entity.WorkoutTemplateEntity
 import com.kalos.app.core.domain.model.*
 import com.kalos.app.core.domain.repository.ProgramRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class ProgramRepositoryImpl @Inject constructor(
     private val database: KalosDatabase,
     private val dao: ProgramDao,
     private val templateDao: WorkoutTemplateDao,
-    private val exerciseDao: ExerciseDao,
 ) : ProgramRepository {
 
-    override fun getAll(): Flow<List<TrainingProgram>> = dao.getAll().map { programs ->
-        programs.map { buildProgram(it) }
+    /** Séances liées, séances et nombre d'exercices : trois requêtes, réémises à chaque modification. */
+    private class Links(
+        val workoutsByProgram: Map<Long, List<ProgramWorkoutEntity>>,
+        val templates: Map<Long, WorkoutTemplateEntity>,
+        val exerciseCounts: Map<Long, Int>,
+    )
+
+    private val links: Flow<Links> = combine(dao.getAllWorkouts(), templateDao.getAll(), templateDao.getAllExercises()) { workouts, templates, exercises ->
+        Links(
+            workoutsByProgram = workouts.groupBy { it.programId },
+            templates = templates.associateBy { it.id },
+            exerciseCounts = exercises.groupingBy { it.templateId }.eachCount(),
+        )
     }
 
-    override fun getActive(): Flow<TrainingProgram?> = dao.getActive().map { it?.let { buildProgram(it) } }
+    override fun getAll(): Flow<List<TrainingProgram>> =
+        combine(dao.getAll(), links) { programs, l -> programs.map { buildProgram(it, l) } }
+
+    override fun getActive(): Flow<TrainingProgram?> =
+        combine(dao.getActive(), links) { program, l -> program?.let { buildProgram(it, l) } }
 
     override suspend fun getById(id: Long): TrainingProgram? {
-        return dao.getById(id)?.let { buildProgram(it) }
+        return dao.getById(id)?.let { buildProgram(it, links.first()) }
     }
 
-    private suspend fun buildProgram(entity: TrainingProgramEntity): TrainingProgram {
-        val workoutEntities = dao.getWorkoutsForProgramOnce(entity.id)
-        val workouts = workoutEntities.mapNotNull { pw ->
-            val t = templateDao.getById(pw.templateId) ?: return@mapNotNull null
-            val count = templateDao.countExercisesForTemplate(pw.templateId)
+    private fun buildProgram(entity: TrainingProgramEntity, links: Links): TrainingProgram {
+        val workouts = links.workoutsByProgram[entity.id].orEmpty().mapNotNull { pw ->
+            val t = links.templates[pw.templateId] ?: return@mapNotNull null
+            val count = links.exerciseCounts[pw.templateId] ?: 0
             ProgramWorkout(
                 id = pw.id, programId = pw.programId,
                 template = WorkoutTemplate(

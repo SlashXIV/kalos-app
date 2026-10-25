@@ -5,6 +5,13 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.kalos.app.core.database.KalosDatabase
 import com.kalos.app.core.database.entity.*
+import com.kalos.app.core.data.repository.ProgramRepositoryImpl
+import com.kalos.app.core.domain.model.ProgramWorkout
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.*
@@ -42,6 +49,35 @@ class WorkoutDaoTest {
         assertEquals("Push renommé", templateDao.getById(templateId)?.name)
         assertEquals(1, programDao.getWorkoutsForProgramOnce(programId).size)
         assertEquals(1, programDao.getWorkoutsForTemplate(templateId).size)
+    }
+
+    @Test
+    fun programList_followsTemplateEdits(): Unit = runBlocking {
+        val templateDao = db.workoutTemplateDao()
+        val programDao = db.programDao()
+        val repository = ProgramRepositoryImpl(db, programDao, templateDao)
+        db.exerciseDao().insertAll(listOf(ExerciseEntity(name = "Squat", primaryMuscle = "Quadriceps")))
+        val exerciseId = db.exerciseDao().getAllOnce().single().id
+        val templateId = templateDao.upsert(WorkoutTemplateEntity(name = "Jambes"))
+        val programId = programDao.upsert(TrainingProgramEntity(name = "Force"))
+        programDao.upsertWorkout(ProgramWorkoutEntity(programId = programId, templateId = templateId, dayOfWeek = 1))
+
+        val emissions = Channel<ProgramWorkout>(Channel.UNLIMITED)
+        val collector = launch(Dispatchers.IO) {
+            repository.getAll().collect { emissions.send(it.single().workouts.single()) }
+        }
+        assertEquals("Jambes", emissions.receive().template?.name)
+
+        // Seules la séance et ses exercices changent, pas la table des programmes : la liste suit quand même.
+        templateDao.upsert(WorkoutTemplateEntity(id = templateId, name = "Jambes lourdes"))
+        templateDao.upsertExercise(WorkoutTemplateExEntity(templateId = templateId, exerciseId = exerciseId, orderIndex = 0))
+        val updated = withTimeout(5_000) {
+            var w = emissions.receive()
+            while (w.template?.exerciseCount != 1) w = emissions.receive()
+            w
+        }
+        assertEquals("Jambes lourdes", updated.template?.name)
+        collector.cancel()
     }
 
     @Test

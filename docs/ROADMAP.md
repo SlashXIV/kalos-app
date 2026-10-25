@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: v4.3.3 — 25 October 2026
+> Last updated: v4.3.4 — 25 October 2026
 >
 > The June 2026 UX review cycle (18 findings, 3 waves: v3.10.1 / v3.11.0 / v3.12.0) is fully closed. No pending UX backlog.
 

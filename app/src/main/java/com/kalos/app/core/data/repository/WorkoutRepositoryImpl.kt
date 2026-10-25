@@ -11,6 +11,7 @@ import com.kalos.app.core.database.entity.*
 import com.kalos.app.core.domain.model.*
 import com.kalos.app.core.domain.repository.WorkoutRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -21,23 +22,24 @@ class WorkoutRepositoryImpl @Inject constructor(
     private val exerciseDao: ExerciseDao,
 ) : WorkoutRepository {
 
-    override fun getTemplates(): Flow<List<WorkoutTemplate>> = templateDao.getAll().map { templates ->
-        templates.map { t ->
-            val exEntities = templateDao.getExercisesForTemplateOnce(t.id)
-            val exerciseMap = exercisesByIdFor(exEntities.map { it.exerciseId })
-            val exercises = exEntities.mapNotNull { te ->
-                val ex = exerciseMap[te.exerciseId] ?: return@mapNotNull null
-                TemplateExercise(
-                    id = te.id, templateId = t.id, exercise = ex,
-                    orderIndex = te.orderIndex, defaultSets = te.defaultSets,
-                    defaultReps = te.defaultReps, defaultWeightKg = te.defaultWeightKg,
-                    restSeconds = te.restSeconds, notes = te.notes,
-                )
+    override fun getTemplates(): Flow<List<WorkoutTemplate>> =
+        combine(templateDao.getAll(), templateDao.getAllExercises()) { templates, allExercises ->
+            val exerciseMap = exercisesByIdFor(allExercises.map { it.exerciseId })
+            val byTemplate = allExercises.groupBy { it.templateId }
+            templates.map { t ->
+                val exercises = byTemplate[t.id].orEmpty().mapNotNull { te ->
+                    val ex = exerciseMap[te.exerciseId] ?: return@mapNotNull null
+                    TemplateExercise(
+                        id = te.id, templateId = t.id, exercise = ex,
+                        orderIndex = te.orderIndex, defaultSets = te.defaultSets,
+                        defaultReps = te.defaultReps, defaultWeightKg = te.defaultWeightKg,
+                        restSeconds = te.restSeconds, notes = te.notes,
+                    )
+                }
+                WorkoutTemplate(id = t.id, name = t.name, description = t.description,
+                    estimatedDurationMin = t.estimatedDurationMin, exercises = exercises)
             }
-            WorkoutTemplate(id = t.id, name = t.name, description = t.description,
-                estimatedDurationMin = t.estimatedDurationMin, exercises = exercises)
         }
-    }
 
     override suspend fun getTemplate(id: Long): WorkoutTemplate? {
         val t = templateDao.getById(id) ?: return null

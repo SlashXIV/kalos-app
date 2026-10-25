@@ -2,6 +2,14 @@
 
 ---
 
+## v4.3.4 — 25 October 2026
+
+### Fixed — programmes à jour
+
+- La liste des programmes (onglet Programmes, calendrier, rappels, Aujourd'hui) n'écoutait que la table des programmes : renommer une séance ou changer ses exercices laissait l'ancien nom et l'ancien nombre d'exercices affichés. Séances et programmes se construisent désormais à partir d'une requête par table (au lieu d'une ou deux par élément) et se mettent à jour à chaque modification. Test instrumenté.
+
+---
+
 ## v4.3.3 — 25 October 2026
 
 Défauts relevés à la relecture de la refonte (Low).

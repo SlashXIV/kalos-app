@@ -31,6 +31,9 @@ interface ProgramDao {
     suspend fun activate(id: Long)
 
     // Program workouts
+    @Query("SELECT * FROM program_workout ORDER BY weekNumber ASC, dayOfWeek ASC")
+    fun getAllWorkouts(): Flow<List<ProgramWorkoutEntity>>
+
     @Query("SELECT * FROM program_workout WHERE programId = :programId ORDER BY weekNumber ASC, dayOfWeek ASC")
     fun getWorkoutsForProgram(programId: Long): Flow<List<ProgramWorkoutEntity>>
 

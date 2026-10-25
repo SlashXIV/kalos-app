@@ -38,8 +38,8 @@ android {
         applicationId = "com.kalos.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 42000
-        versionName = "4.2.0"
+        versionCode = 43001
+        versionName = "4.3.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }

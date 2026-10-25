@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Textes de la famille Sport (séances, programmes, historique, catalogue). -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Écran Sport -->
     <string name="training_title">Sport</string>
     <string name="training_tab_workouts">Séances</string>
@@ -174,7 +174,8 @@
     <string name="training_remove_set">Retirer la série %1$d</string>
     <string name="training_add_set">Ajouter une série</string>
     <string name="training_rest">Repos</string>
-    <string name="moment_set_validated">Série %1$d validée. Repos, %2$d secondes</string>
+    <!-- %1$d est le numéro de la série, pas une quantité : pas de pluriel. -->
+    <string name="moment_set_validated" tools:ignore="PluralsCandidate">Série %1$d validée. Repos, %2$d secondes</string>
     <string name="moment_rest_done">Repos terminé</string>
     <string name="training_rest_spoken">Repos, %1$d min %2$d s restantes</string>
     <string name="training_skip_rest">Passer</string>

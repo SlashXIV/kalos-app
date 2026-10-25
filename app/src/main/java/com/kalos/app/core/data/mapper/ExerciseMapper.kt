@@ -10,6 +10,13 @@ import kotlinx.serialization.json.Json
 
 private val json = Json { ignoreUnknownKeys = true }
 
+// Accepts the stable enum name and, for seed files and pre-v18 data, the French label.
+fun exerciseLevelOf(raw: String): ExerciseLevel =
+    ExerciseLevel.entries.firstOrNull { it.name == raw || it.label == raw } ?: ExerciseLevel.BEGINNER
+
+fun exerciseTypeOf(raw: String): ExerciseType =
+    ExerciseType.entries.firstOrNull { it.name == raw || it.label == raw } ?: ExerciseType.STRENGTH
+
 fun ExerciseEntity.toDomain(): Exercise {
     val muscles: List<String> = try {
         json.decodeFromString(secondaryMuscles)
@@ -20,8 +27,8 @@ fun ExerciseEntity.toDomain(): Exercise {
         primaryMuscle = primaryMuscle,
         secondaryMuscles = muscles,
         equipment = equipment,
-        level = ExerciseLevel.entries.firstOrNull { it.label == level } ?: ExerciseLevel.BEGINNER,
-        type = ExerciseType.entries.firstOrNull { it.label == type } ?: ExerciseType.STRENGTH,
+        level = exerciseLevelOf(level),
+        type = exerciseTypeOf(type),
         trackingMode = runCatching { ExerciseTrackingMode.valueOf(trackingMode) }
             .getOrDefault(ExerciseTrackingMode.REPS_WEIGHT),
         description = description,
@@ -38,8 +45,8 @@ fun Exercise.toEntity() = ExerciseEntity(
     primaryMuscle = primaryMuscle,
     secondaryMuscles = json.encodeToString(secondaryMuscles),
     equipment = equipment,
-    level = level.label,
-    type = type.label,
+    level = level.name,
+    type = type.name,
     trackingMode = trackingMode.name,
     description = description,
     instructions = instructions,

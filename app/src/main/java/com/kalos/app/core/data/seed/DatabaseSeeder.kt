@@ -15,6 +15,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.kalos.app.core.data.mapper.exerciseLevelOf
+import com.kalos.app.core.data.mapper.exerciseTypeOf
 
 @Singleton
 class DatabaseSeeder @Inject constructor(
@@ -51,7 +53,7 @@ class DatabaseSeeder @Inject constructor(
                 ExerciseEntity(
                     name = s.name, primaryMuscle = s.primaryMuscle,
                     secondaryMuscles = json.encodeToString(s.secondaryMuscles),
-                    equipment = s.equipment, level = s.level, type = s.type,
+                    equipment = s.equipment, level = exerciseLevelOf(s.level).name, type = exerciseTypeOf(s.type).name,
                     trackingMode = s.trackingMode,
                     description = s.description, instructions = s.instructions,
                     seedId = s.id.ifEmpty { null },
@@ -81,7 +83,7 @@ class DatabaseSeeder @Inject constructor(
                     ExerciseEntity(
                         name = seed.name, primaryMuscle = seed.primaryMuscle,
                         secondaryMuscles = json.encodeToString(seed.secondaryMuscles),
-                        equipment = seed.equipment, level = seed.level, type = seed.type,
+                        equipment = seed.equipment, level = exerciseLevelOf(seed.level).name, type = exerciseTypeOf(seed.type).name,
                         trackingMode = seed.trackingMode,
                         description = seed.description, instructions = seed.instructions,
                         seedId = seed.id,

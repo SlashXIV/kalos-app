@@ -31,6 +31,7 @@ object DatabaseModule {
                 KalosDatabase.MIGRATION_14_15,
                 KalosDatabase.MIGRATION_15_16,
                 KalosDatabase.MIGRATION_16_17,
+                KalosDatabase.MIGRATION_17_18,
             )
             // Keep a safety net for downgrades only (dev/sideload scenarios).
             // Upgrades MUST be covered by an explicit migration — a missing one will crash

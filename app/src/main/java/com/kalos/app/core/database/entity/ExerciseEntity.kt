@@ -10,8 +10,8 @@ data class ExerciseEntity(
     val primaryMuscle: String,
     val secondaryMuscles: String = "[]",  // JSON array of strings
     val equipment: String = "Aucun",
-    val level: String = "Débutant",       // Débutant | Intermédiaire | Avancé
-    val type: String = "Musculation",     // Musculation | Cardio | Poids du corps | Mobilité | HIIT
+    val level: String = "BEGINNER",       // ExerciseLevel name (French labels before v18)
+    val type: String = "STRENGTH",        // ExerciseType name (French labels before v18)
     val trackingMode: String = "REPS_WEIGHT",  // REPS_WEIGHT | DURATION | DURATION_WEIGHT
     val description: String = "",
     val instructions: String = "",

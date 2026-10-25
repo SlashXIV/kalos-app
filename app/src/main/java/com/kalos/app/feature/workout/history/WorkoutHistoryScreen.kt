@@ -280,6 +280,7 @@ private fun WorkoutLogCard(log: WorkoutLog, onClick: () -> Unit) {
         if (log.totalVolumeKg > 0f) {
             add(stringResource(R.string.training_kg_value, formatGroupedInt(log.totalVolumeKg.roundToInt())))
         }
+        log.energyKcal?.let { add(stringResource(R.string.training_activity_energy_short, formatGroupedInt(it))) }
     }
     KalosCard(onClick = onClick, contentPadding = PaddingValues(12.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

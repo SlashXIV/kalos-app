@@ -113,7 +113,9 @@ class WorkoutRepositoryImpl @Inject constructor(
         return WorkoutLog(id = entity.id, templateId = entity.templateId, templateName = entity.templateName,
             date = entity.date, startedAt = entity.startedAt, finishedAt = entity.finishedAt,
             durationSecs = entity.durationSecs, notes = entity.notes, totalVolumeKg = entity.totalVolumeKg,
-            exercises = exercises)
+            exercises = exercises,
+            activityType = ActivityType.entries.find { it.name == entity.activityType },
+            energyKcal = entity.energyKcal)
     }
 
     override suspend fun startLog(log: WorkoutLog): Long = database.withTransaction {
@@ -157,7 +159,8 @@ class WorkoutRepositoryImpl @Inject constructor(
         database.withTransaction {
             val logId = logDao.insertLog(WorkoutLogEntity(
                 templateId = log.templateId, templateName = log.templateName,
-                date = log.date, startedAt = log.startedAt))
+                date = log.date, startedAt = log.startedAt, notes = log.notes,
+                activityType = log.activityType?.name, energyKcal = log.energyKcal))
 
             var totalVolume = 0f
             log.exercises.forEachIndexed { i, le ->

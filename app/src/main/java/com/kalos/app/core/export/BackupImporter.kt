@@ -223,10 +223,13 @@ class BackupImporter @Inject constructor(
         }
 
         // ── Meal entries ─────────────────────────────────────────────────────
+        // Backups made before v4.1.0 may hold several slots for the same (date, mealType):
+        // merge them, the table now enforces one slot per meal per day.
+        val entryIdBySlot = mutableMapOf<Pair<String, String>, Long>()
         backup.mealEntries.forEach { entry ->
-            val newEntryId = importDao.insertMealEntry(
-                MealEntryEntity(id = 0, date = entry.date, mealType = entry.mealType)
-            )
+            val newEntryId = entryIdBySlot.getOrPut(entry.date to entry.mealType) {
+                importDao.insertMealEntry(MealEntryEntity(id = 0, date = entry.date, mealType = entry.mealType))
+            }
             entry.items.forEach { item ->
                 // Remap custom food IDs; seed food IDs are passed through.
                 val resolvedFoodId = foodIdMap[item.foodId] ?: item.foodId
@@ -302,6 +305,7 @@ class BackupImporter @Inject constructor(
                     startedAt = log.startedAt, finishedAt = log.finishedAt,
                     durationSecs = log.durationSecs, notes = log.notes,
                     totalVolumeKg = log.totalVolumeKg,
+                    activityType = log.activityType, energyKcal = log.energyKcal,
                 )
             )
             log.exercises.forEach { ex ->

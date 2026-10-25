@@ -29,7 +29,7 @@ import com.kalos.app.core.database.entity.*
         MealTemplateEntity::class,
         MealTemplateItemEntity::class,
     ],
-    version = 17,
+    version = 18,
     exportSchema = true,
 )
 abstract class KalosDatabase : RoomDatabase() {
@@ -110,6 +110,45 @@ abstract class KalosDatabase : RoomDatabase() {
                 database.execSQL(
                     "CREATE INDEX IF NOT EXISTS `index_meal_entry_date` ON `meal_entry` (`date`)"
                 )
+            }
+        }
+        val MIGRATION_17_18 = object : Migration(17, 18) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // One meal slot per (date, mealType): move items of duplicate slots onto the
+                // oldest one, drop the duplicates, then enforce it with a unique index.
+                database.execSQL(
+                    "UPDATE meal_entry_item SET mealEntryId = (" +
+                        "SELECT MIN(keep.id) FROM meal_entry keep JOIN meal_entry cur " +
+                        "ON keep.date = cur.date AND keep.mealType = cur.mealType " +
+                        "WHERE cur.id = meal_entry_item.mealEntryId)"
+                )
+                database.execSQL(
+                    "DELETE FROM meal_entry WHERE id NOT IN (SELECT MIN(id) FROM meal_entry GROUP BY date, mealType)"
+                )
+                database.execSQL("DROP INDEX IF EXISTS `index_meal_entry_date`")
+                database.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS `index_meal_entry_date_mealType` ON `meal_entry` (`date`, `mealType`)"
+                )
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_workout_log_date` ON `workout_log` (`date`)")
+                database.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_workout_log_exercise_exerciseId` ON `workout_log_exercise` (`exerciseId`)"
+                )
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_body_weight_date` ON `body_weight` (`date`)")
+                // Free activities: type and estimated energy (both null for existing rows).
+                database.execSQL("ALTER TABLE workout_log ADD COLUMN activityType TEXT")
+                database.execSQL("ALTER TABLE workout_log ADD COLUMN energyKcal INTEGER")
+                // Exercise level/type: French labels → stable enum names.
+                listOf(
+                    "level" to listOf("Débutant" to "BEGINNER", "Intermédiaire" to "INTERMEDIATE", "Avancé" to "ADVANCED"),
+                    "type" to listOf(
+                        "Musculation" to "STRENGTH", "Cardio" to "CARDIO", "Poids du corps" to "BODYWEIGHT",
+                        "Mobilité" to "MOBILITY", "HIIT" to "HIIT",
+                    ),
+                ).forEach { (column, pairs) ->
+                    pairs.forEach { (label, code) ->
+                        database.execSQL("UPDATE exercise SET $column = ? WHERE $column = ?", arrayOf(code, label))
+                    }
+                }
             }
         }
         val MIGRATION_11_12 = object : Migration(11, 12) {

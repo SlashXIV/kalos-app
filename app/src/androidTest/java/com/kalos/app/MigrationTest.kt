@@ -35,10 +35,54 @@ class MigrationTest {
         helper.runMigrationsAndValidate(dbName, 15, true, KalosDatabase.MIGRATION_14_15).close()
         helper.runMigrationsAndValidate(dbName, 16, true, KalosDatabase.MIGRATION_15_16).close()
         helper.runMigrationsAndValidate(dbName, 17, true, KalosDatabase.MIGRATION_16_17).close()
+        helper.runMigrationsAndValidate(dbName, 18, true, KalosDatabase.MIGRATION_17_18).close()
     }
 
     @Test
-    fun userDataSurvivesMigrationTo17() = runTest {
+    fun migration18MergesDuplicateMealSlotsAndStoresExerciseCodes() {
+        helper.createDatabase(dbName, 17).apply {
+            execSQL(
+                "INSERT INTO food (id, name, nameNormalized, brand, category, kcalPer100g, proteinPer100g, " +
+                    "carbsPer100g, fatPer100g, fiberPer100g, sugarPer100g, defaultServingG, servingUnit, " +
+                    "isCustom, isFavorite, lastUsedAt, tags, isArchived, barcode) " +
+                    "VALUES (1, 'Riz', 'riz', '', 'Féculents', 130, 3, 28, 0, 0, 0, 100, 'g', 0, 0, 0, '', 0, NULL)"
+            )
+            execSQL("INSERT INTO meal_entry (id, date, mealType) VALUES (1, '2026-10-25', 'LUNCH')")
+            execSQL("INSERT INTO meal_entry (id, date, mealType) VALUES (2, '2026-10-25', 'LUNCH')")
+            execSQL("INSERT INTO meal_entry (id, date, mealType) VALUES (3, '2026-10-25', 'DINNER')")
+            listOf(1, 2, 3).forEach { entryId ->
+                execSQL(
+                    "INSERT INTO meal_entry_item (mealEntryId, foodId, amountG, kcal, proteinG, carbsG, fatG) " +
+                        "VALUES ($entryId, 1, 100, 130, 3, 28, 0)"
+                )
+            }
+            execSQL(
+                "INSERT INTO exercise (id, name, primaryMuscle, secondaryMuscles, equipment, level, type, " +
+                    "description, instructions, imageUrl, isCustom, isFavorite, seedId, nameNormalized, trackingMode) " +
+                    "VALUES (1, 'Planche', 'Abdominaux', '[]', 'Aucun', 'Intermédiaire', 'Poids du corps', '', '', '', 0, 0, 'plank', 'planche', 'DURATION')"
+            )
+            close()
+        }
+
+        helper.runMigrationsAndValidate(dbName, 18, true, KalosDatabase.MIGRATION_17_18).use { db ->
+            db.query("SELECT id FROM meal_entry ORDER BY id").use { c ->
+                val ids = buildList { while (c.moveToNext()) add(c.getLong(0)) }
+                assertEquals(listOf(1L, 3L), ids)
+            }
+            db.query("SELECT mealEntryId, COUNT(*) FROM meal_entry_item GROUP BY mealEntryId ORDER BY mealEntryId").use { c ->
+                val counts = buildList { while (c.moveToNext()) add(c.getLong(0) to c.getInt(1)) }
+                assertEquals(listOf(1L to 2, 3L to 1), counts)
+            }
+            db.query("SELECT level, type FROM exercise").use { c ->
+                c.moveToFirst()
+                assertEquals("INTERMEDIATE", c.getString(0))
+                assertEquals("BODYWEIGHT", c.getString(1))
+            }
+        }
+    }
+
+    @Test
+    fun userDataSurvivesMigrationToLatest() = runTest {
         helper.createDatabase(dbName, 13).apply {
             execSQL(
                 "INSERT INTO food (id, name, nameNormalized, brand, category, kcalPer100g, proteinPer100g, " +
@@ -63,14 +107,17 @@ class MigrationTest {
             ApplicationProvider.getApplicationContext(), KalosDatabase::class.java, dbName,
         ).addMigrations(
             KalosDatabase.MIGRATION_13_14, KalosDatabase.MIGRATION_14_15,
-            KalosDatabase.MIGRATION_15_16, KalosDatabase.MIGRATION_16_17,
+            KalosDatabase.MIGRATION_15_16, KalosDatabase.MIGRATION_16_17, KalosDatabase.MIGRATION_17_18,
         ).allowMainThreadQueries().build()
         try {
             val meals = db.mealEntryDao().getEntriesForDate("2026-10-25").first()
             assertEquals(1, meals.size)
             assertEquals(300f, db.mealEntryDao().getAllItemsForDate("2026-10-25").first().single().kcal)
             assertEquals(null, db.foodDao().getById(1)?.barcode)
-            assertEquals("REPS_WEIGHT", db.exerciseDao().getAllOnce().single().trackingMode)
+            val exercise = db.exerciseDao().getAllOnce().single()
+            assertEquals("REPS_WEIGHT", exercise.trackingMode)
+            assertEquals("BEGINNER", exercise.level)
+            assertEquals("STRENGTH", exercise.type)
         } finally {
             db.close()
         }

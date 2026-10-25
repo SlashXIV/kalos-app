@@ -11,6 +11,8 @@ data class WorkoutLog(
     val notes: String = "",
     val totalVolumeKg: Float = 0f,
     val exercises: List<LogExercise> = emptyList(),
+    val activityType: ActivityType? = null,
+    val energyKcal: Int? = null,
 )
 
 data class LogExercise(

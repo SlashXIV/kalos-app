@@ -138,6 +138,8 @@ data class WorkoutLogBackup(
     val notes: String,
     val totalVolumeKg: Float,
     val exercises: List<LogExerciseBackup>,
+    val activityType: String? = null,  // added v4.1.0 — free activities
+    val energyKcal: Int? = null,       // added v4.1.0
 )
 
 @Serializable

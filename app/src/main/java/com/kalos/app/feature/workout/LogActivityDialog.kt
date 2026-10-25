@@ -6,15 +6,24 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kalos.app.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kalos.app.core.domain.model.ActivityType
 import com.kalos.app.core.domain.model.WorkoutLog
+import com.kalos.app.core.domain.repository.UserRepository
 import com.kalos.app.core.domain.repository.WorkoutRepository
+import com.kalos.app.core.domain.usecase.EstimateActivityEnergyUseCase
+import com.kalos.app.core.ui.util.formatGroupedInt
+import androidx.annotation.StringRes
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import com.kalos.app.core.ui.component.KalosNumberField
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -28,16 +37,28 @@ import javax.inject.Inject
 @HiltViewModel
 class LogActivityViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository,
+    userRepository: UserRepository,
+    private val estimateEnergy: EstimateActivityEnergyUseCase,
 ) : ViewModel() {
 
+    val weight: StateFlow<Float?> = userRepository.observeProfile()
+        .map { it?.weightKg }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /** Estimated energy, or null when the type or the profile weight is unknown. */
+    fun estimate(type: ActivityType?, weightKg: Float?, durationSecs: Long): Int? =
+        if (type == null || weightKg == null || durationSecs <= 0) null else estimateEnergy(type, weightKg, durationSecs)
+
     /** Records a free activity (e.g. climbing 2h) as a lightweight session with no exercises. */
-    fun logActivity(name: String, durationSecs: Long, date: String, note: String) {
+    fun logActivity(name: String, type: ActivityType?, durationSecs: Long, date: String, note: String) {
         val log = WorkoutLog(
             templateName = name.trim(),
             date = date,
             startedAt = System.currentTimeMillis(),
             notes = note.trim(),
             exercises = emptyList(),
+            activityType = type,
+            energyKcal = estimate(type, weight.value, durationSecs),
         )
         viewModelScope.launch { workoutRepository.completeWorkout(log, durationSecs) }
     }
@@ -52,6 +73,9 @@ fun LogActivityDialog(
     viewModel: LogActivityViewModel = hiltViewModel(),
 ) {
     var name by remember { mutableStateOf("") }
+    var type by remember { mutableStateOf<ActivityType?>(null) }
+    val weightKg by viewModel.weight.collectAsStateWithLifecycle()
+    val labels = ActivityType.entries.associateWith { stringResource(activityLabelRes(it)) }
     var hours by remember { mutableStateOf("") }
     var minutes by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
@@ -95,17 +119,21 @@ fun LogActivityDialog(
             ) {
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = { v ->
+                        name = v
+                        type = labels.entries.firstOrNull { it.value.equals(v.trim(), ignoreCase = true) }?.key
+                    },
                     label = { Text(stringResource(R.string.training_activity)) },
                     placeholder = { Text(stringResource(R.string.training_activity_hint)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    stringArrayResource(R.array.training_activity_suggestions).forEach { s ->
-                        SuggestionChip(
-                            onClick = { name = s },
-                            label = { Text(s, style = MaterialTheme.typography.labelSmall) },
+                    labels.forEach { (t, label) ->
+                        FilterChip(
+                            selected = type == t,
+                            onClick = { name = label; type = t },
+                            label = { Text(label, style = MaterialTheme.typography.labelSmall) },
                         )
                     }
                 }
@@ -121,6 +149,13 @@ fun LogActivityDialog(
                         onValueChange = { minutes = it.filter(Char::isDigit).take(2) },
                         label = { Text(stringResource(R.string.training_minutes)) },
                         modifier = Modifier.weight(1f),
+                    )
+                }
+                viewModel.estimate(type, weightKg, durationSecs)?.let { kcal ->
+                    Text(
+                        stringResource(R.string.training_activity_energy, formatGroupedInt(kcal)),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 com.kalos.app.core.ui.component.KalosButton(
@@ -142,7 +177,7 @@ fun LogActivityDialog(
             TextButton(
                 enabled = canSave,
                 onClick = {
-                    viewModel.logActivity(name, durationSecs, date.toString(), note)
+                    viewModel.logActivity(name, type, durationSecs, date.toString(), note)
                     onSaved()
                 },
             ) { Text(stringResource(R.string.action_save)) }
@@ -151,6 +186,20 @@ fun LogActivityDialog(
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         },
     )
+}
+
+@StringRes
+fun activityLabelRes(type: ActivityType): Int = when (type) {
+    ActivityType.CLIMBING -> R.string.activity_climbing
+    ActivityType.HIKING -> R.string.activity_hiking
+    ActivityType.SWIMMING -> R.string.activity_swimming
+    ActivityType.RUNNING -> R.string.activity_running
+    ActivityType.CYCLING -> R.string.activity_cycling
+    ActivityType.FOOTBALL -> R.string.activity_football
+    ActivityType.YOGA -> R.string.activity_yoga
+    ActivityType.BOXING -> R.string.activity_boxing
+    ActivityType.TENNIS -> R.string.activity_tennis
+    ActivityType.SKIING -> R.string.activity_skiing
 }
 
 @Composable

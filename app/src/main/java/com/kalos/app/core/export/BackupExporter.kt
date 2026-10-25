@@ -121,6 +121,7 @@ class BackupExporter @Inject constructor(
                     date = log.date, startedAt = log.startedAt, finishedAt = log.finishedAt,
                     durationSecs = log.durationSecs, notes = log.notes,
                     totalVolumeKg = log.totalVolumeKg,
+                    activityType = log.activityType, energyKcal = log.energyKcal,
                     exercises = (exsByLog[log.id] ?: emptyList()).map { ex ->
                         LogExerciseBackup(
                             exerciseId = ex.exerciseId, exerciseName = ex.exerciseName,

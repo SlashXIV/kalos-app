@@ -47,18 +47,18 @@
     <string name="training_minutes">Minutes</string>
     <string name="training_date_value">Date : %1$s</string>
     <string name="training_note_optional">Note (facultative)</string>
-    <string-array name="training_activity_suggestions">
-        <item>Escalade</item>
-        <item>Randonnée</item>
-        <item>Natation</item>
-        <item>Course à pied</item>
-        <item>Vélo</item>
-        <item>Football</item>
-        <item>Yoga</item>
-        <item>Boxe</item>
-        <item>Tennis</item>
-        <item>Ski</item>
-    </string-array>
+    <string name="activity_climbing">Escalade</string>
+    <string name="activity_hiking">Randonnée</string>
+    <string name="activity_swimming">Natation</string>
+    <string name="activity_running">Course à pied</string>
+    <string name="activity_cycling">Vélo</string>
+    <string name="activity_football">Football</string>
+    <string name="activity_yoga">Yoga</string>
+    <string name="activity_boxing">Boxe</string>
+    <string name="activity_tennis">Tennis</string>
+    <string name="activity_skiing">Ski</string>
+    <string name="training_activity_energy">≈ %1$s kcal dépensées (estimation)</string>
+    <string name="training_activity_energy_short">≈ %1$s kcal</string>
 
     <!-- Programmes -->
     <string name="training_program">Programme</string>

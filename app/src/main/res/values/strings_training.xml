@@ -137,6 +137,16 @@
     <string name="training_secondary_muscles">Muscles secondaires : %1$s</string>
     <string name="training_instructions">Instructions</string>
     <string name="training_progression">Progression</string>
+    <string name="training_records">Records</string>
+    <string name="training_one_rep_max">1RM estimé</string>
+    <plurals name="training_one_rep_max_hint">
+        <item quantity="one">Charge maximale pour une répétition, estimée par la formule d’Epley à partir des séries de %1$d répétition ou moins.</item>
+        <item quantity="other">Charge maximale pour une répétition, estimée par la formule d’Epley à partir des séries de %1$d répétitions ou moins.</item>
+    </plurals>
+    <plurals name="training_reps">
+        <item quantity="one">%1$d répétition</item>
+        <item quantity="other">%1$d répétitions</item>
+    </plurals>
     <plurals name="training_progression_summary">
         <item quantity="one">Charge maximale par séance, %d séance</item>
         <item quantity="other">Charge maximale par séance, %d séances</item>

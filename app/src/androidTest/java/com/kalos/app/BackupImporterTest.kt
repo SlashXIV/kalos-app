@@ -12,6 +12,7 @@ import com.kalos.app.core.export.BackupImporter
 import com.kalos.app.core.export.KalosBackup
 import com.kalos.app.core.export.MealEntryBackup
 import com.kalos.app.core.export.MealItemBackup
+import com.kalos.app.core.export.TrainingProgramBackup
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -63,5 +64,25 @@ class BackupImporterTest {
 
         assertEquals(1, db.mealEntryDao().getEntriesForDate("2026-10-25").first().size)
         assertEquals(3, db.mealEntryDao().getAllItemsForDate("2026-10-25").first().size)
+    }
+
+    @Test
+    fun onlyOneProgramStaysActive() = runTest {
+        fun program(id: Long, name: String) = TrainingProgramBackup(
+            id = id, name = name, description = "", durationWeeks = 4, daysPerWeek = 3,
+            isActive = true, createdAt = 0, workouts = emptyList(),
+        )
+        val backup = KalosBackup(
+            appVersion = "4.3.5", exportedAt = "2026-10-25T10:00:00Z", profile = null, nutritionGoal = null,
+            dietaryFilters = emptyList(), waterGoalMl = 2000, customFoods = emptyList(), mealEntries = emptyList(),
+            waterIntake = emptyList(), bodyWeight = emptyList(), workoutTemplates = emptyList(),
+            workoutLogs = emptyList(), trainingPrograms = listOf(program(1, "Force"), program(2, "Volume")),
+        )
+
+        assertTrue(importer.import(backup).isSuccess)
+
+        val programs = db.programDao().getAll().first()
+        assertEquals(listOf("Force"), programs.filter { it.isActive }.map { it.name })
+        assertEquals(2, programs.size)
     }
 }

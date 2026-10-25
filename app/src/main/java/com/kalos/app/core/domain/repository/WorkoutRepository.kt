@@ -43,6 +43,8 @@ interface WorkoutRepository {
 
     // Exercise progression
     suspend fun getExerciseProgression(exerciseId: Long): List<Pair<String, Float>>
+    /** Meilleure charge pour chaque nombre de répétitions déjà validé. */
+    suspend fun getRepRecords(exerciseId: Long): List<RepRecord>
 
     // Body weight
     suspend fun logBodyWeight(date: String, weightKg: Float)

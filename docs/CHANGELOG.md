@@ -2,6 +2,18 @@
 
 ---
 
+## v4.4.0 — 25 October 2026
+
+### Added — records par répétitions
+
+- **Fiche exercice, carte « Records »** : le 1RM estimé (formule d'Epley, séries de 12 répétitions ou moins, arrondi au demi-kilo) et la meilleure charge pour chaque nombre de répétitions. Seuls les records utiles sont montrés : une charge battue ou égalée par une série plus longue disparaît (20 kg × 8 n'apprend rien après 24 kg × 10). Exercices en répétitions × charge seulement ; une phrase TalkBack par ligne. Calculé à partir des séries déjà enregistrées, sans changement de schéma ; règles testées (JVM).
+
+### Fixed — programme actif
+
+- Une sauvegarde qui marquait plusieurs programmes actifs les restaurait tels quels ; seul le premier reste actif, comme lorsqu'on en active un dans l'app. Test instrumenté.
+
+---
+
 ## v4.3.5 — 25 October 2026
 
 ### Changed — démarrage plus rapide

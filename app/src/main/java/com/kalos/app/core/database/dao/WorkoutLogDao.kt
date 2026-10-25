@@ -135,6 +135,18 @@ interface WorkoutLogDao {
     """)
     suspend fun getLastSessionSets(exerciseId: Long): List<LastSessionSetRow>
 
+    // Best weight per rep count (records by reps)
+    data class RepRecordRow(val reps: Int, val weightKg: Float)
+
+    @Query("""
+        SELECT wls.reps AS reps, MAX(wls.weightKg) AS weightKg
+        FROM workout_log_set wls
+        JOIN workout_log_exercise wle ON wls.logExerciseId = wle.id
+        WHERE wle.exerciseId = :exerciseId AND wls.isCompleted = 1 AND wls.weightKg > 0 AND wls.reps > 0
+        GROUP BY wls.reps
+    """)
+    suspend fun getRepRecords(exerciseId: Long): List<RepRecordRow>
+
     // Exercise progression
     data class ExerciseProgressionRow(val date: String, val maxWeight: Float)
 

@@ -96,7 +96,7 @@ Statuses: **Done** · **Partial** · **Planned**
 | Text search | Done | Accent-insensitive (nameNormalized), no debounce |
 | Filter by muscle group (13 options) | Done | |
 | Filter by type (5 options) | Done | |
-| Exercise detail screen | Done | Muscles, equipment, description, progression chart |
+| Exercise detail screen | Done | Muscles, equipment, description, progression chart, records card (estimated 1RM, best load per rep count, v4.4.0) |
 | Exercise progression chart | Done | `MeSeriesChart` line: max load per session, dated X-axis, min/max ticks, PR badge, 20 last sessions; cursor by touch, keyboard and TalkBack (v4.3.0) |
 | Dual-mode behavior (standalone / builder) | Done | |
 | Exercise favorites | Done | Heart icon toggle in standalone mode, Favoris filter chip |

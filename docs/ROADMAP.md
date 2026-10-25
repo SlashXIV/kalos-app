@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: v4.3.5 — 25 October 2026
+> Last updated: v4.4.0 — 25 October 2026
 >
 > The June 2026 UX review cycle (18 findings, 3 waves: v3.10.1 / v3.11.0 / v3.12.0) is fully closed. No pending UX backlog.
 
@@ -62,6 +62,10 @@ Aliment ajouté (l'aiguille avance), objectif du jour atteint (les graduations s
 | Écrans migrés en trois familles parallèles, puis relecture indépendante | la relecture n'a trouvé aucune régression de comportement, et quelques défauts d'accessibilité corrigés avant la release |
 | Performance de défilement mesurée sur téléphone | l'émulateur (rendu logiciel partagé avec les builds) donne des écarts plus grands que l'effet mesuré |
 | Avertissements lint antérieurs figés dans `lint-baseline.xml` | tout nouvel avertissement se voit ; les 90 mises à jour de dépendances restent une décision à part |
+| 1RM estimé et records par répétitions, sans schéma (25/10/2026) | tout est déjà dans les séries enregistrées ; seuls les records qu'aucune série plus longue n'a égalés sont montrés |
+| Pas de saisie du RPE (25/10/2026) | un champ de plus par série sur l'écran le plus utilisé ; la colonne `rpe` reste (base et sauvegardes) si le besoin revient |
+| Pas d'affichage en livres (25/10/2026) | appli en français seul et métrique ; toucherait chaque saisie et chaque affichage de charge |
+| Pas de programmes datés (25/10/2026) | les programmes sont des cycles hebdomadaires (le constructeur ne gère pas les numéros de semaine) ; une date de début coûterait une migration et des écrans pour peu d'usage. Le risque réel (plusieurs programmes actifs) est corrigé à l'import |
 
 ### Hors refonte, relevé au passage
 
@@ -85,8 +89,10 @@ Détail et statuts dans `docs/TECHNICAL_AUDIT.md` (A1 à A20).
 | Règles métier centralisées et testées, date du jour suivie (A14, A16, A19) | v4.1.0 | Done | Medium |
 | Filtres alimentaires rebranchés sur la recherche (A18) | v4.1.0 | Done | Medium |
 | Activités typées avec dépense estimée, affichée seulement (O1) | v4.1.0 | Done | Low |
-| e1RM et record par répétitions, saisie du RPE, affichage en livres (O2) | — | Planned (décision produit) | Low |
-| Programmes datés : semaine courante, un seul programme actif garanti (O3) | — | Planned (décision produit) | Low |
+| e1RM et records par répétitions (O2) | v4.4.0 | Done | Low |
+| Saisie du RPE, affichage en livres (O2) | — | Écarté (voir journal des décisions) | Low |
+| Un seul programme actif garanti, y compris à l'import (O3) | v4.4.0 | Done | Low |
+| Programmes datés : date de début, semaine courante (O3) | — | Écarté (voir journal des décisions) | Low |
 | Profil de référence (baseline profile) : module `:baselineprofile` | v4.3.5 | Done (démarrage à froid −9 % sur émulateur ; mesure sur téléphone écartée : elle désinstalle l'app) | Low |
 | Recette release avec vraie sauvegarde : historique et moyenne après une pause (A22) | v4.3.1 | Done | High |
 | Pages de 16 Ko : CameraX 1.3.4 → 1.4.2 (A23) | v4.3.2 | Done | Medium |

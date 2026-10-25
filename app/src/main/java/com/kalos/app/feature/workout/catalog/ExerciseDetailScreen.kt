@@ -29,6 +29,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.kalos.app.R
+import kotlin.math.roundToInt
+import androidx.compose.ui.semantics.contentDescription
+import com.kalos.app.core.domain.usecase.EstimateOneRepMaxUseCase
+import com.kalos.app.core.domain.model.RepRecord
 import com.kalos.app.core.ui.util.formatKg
 import com.kalos.app.core.ui.component.KalosButton
 import com.kalos.app.core.ui.component.KalosCard
@@ -116,6 +120,49 @@ fun ExerciseDetailScreen(
             }
             if (state.progression.size >= 2 || state.pr != null) {
                 ExerciseProgressionCard(progression = state.progression, pr = state.pr)
+            }
+            if (state.repRecords.isNotEmpty()) {
+                RecordsCard(records = state.repRecords, oneRepMax = state.oneRepMax)
+            }
+        }
+    }
+}
+
+/** 1RM estimé puis une ligne par record utile : « 10 répétitions · 24 kg », une phrase TalkBack par ligne. */
+@Composable
+private fun RecordsCard(records: List<RepRecord>, oneRepMax: Float?) {
+    val kgSpoken = stringResource(R.string.me_unit_kg_spoken)
+    KalosCard {
+        SectionLabel(stringResource(R.string.training_records))
+        if (oneRepMax != null) {
+            // Arrondi au demi-kilo : la précision d'une estimation ne va pas au-delà.
+            val value = formatKg((oneRepMax * 2).roundToInt() / 2f)
+            val spoken = stringResource(R.string.me_value_spoken, stringResource(R.string.training_one_rep_max), value, kgSpoken)
+            Row(
+                Modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = spoken },
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(stringResource(R.string.training_one_rep_max), style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.training_kg_value, value), style = KalosTheme.type.metricLarge)
+            }
+            Text(
+                pluralStringResource(R.plurals.training_one_rep_max_hint, EstimateOneRepMaxUseCase.MAX_REPS, EstimateOneRepMaxUseCase.MAX_REPS),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        records.forEach { r ->
+            val reps = pluralStringResource(R.plurals.training_reps, r.reps, r.reps)
+            val kg = formatKg(r.weightKg)
+            Row(
+                Modifier.fillMaxWidth().clearAndSetSemantics {
+                    contentDescription = reps + ", " + kg + " " + kgSpoken
+                },
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(reps, style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.training_kg_value, kg), style = KalosTheme.type.metric)
             }
         }
     }

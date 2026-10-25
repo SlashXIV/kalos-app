@@ -329,12 +329,15 @@ class BackupImporter @Inject constructor(
         }
 
         // ── Training programs ────────────────────────────────────────────────
+        // Un seul programme actif, comme l'impose activate() : un fichier modifié à la main
+        // ou ancien peut en marquer plusieurs, le premier l'emporte.
+        val activeProgramId = backup.trainingPrograms.firstOrNull { it.isActive }?.id
         backup.trainingPrograms.forEach { prog ->
             val newProgId = importDao.insertProgram(
                 TrainingProgramEntity(
                     id = 0, name = prog.name, description = prog.description,
                     durationWeeks = prog.durationWeeks, daysPerWeek = prog.daysPerWeek,
-                    isActive = prog.isActive, isCustom = prog.isCustom, createdAt = prog.createdAt,
+                    isActive = prog.id == activeProgramId, isCustom = prog.isCustom, createdAt = prog.createdAt,
                 )
             )
             prog.workouts.forEach { w ->

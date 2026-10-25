@@ -20,7 +20,7 @@ Sortir Kalos de son allure « Material par défaut » avec la méthode mise au p
 |---|---|---|---|
 | R1 — Fondations | v4.0.0, v4.3.0 | Done | 28 tests JVM verts (contrastes et daltonisme des 3 palettes × clair/sombre, registre, migration des thèmes 3.x, niveau de mouvement, textes en dur, calculs) ; lint sans nouvel avertissement ; tous les écrans vérifiés sur émulateur en sombre et clair, police 200 %, densités 520 et 600, paysage ; arbre TalkBack (uiautomator) : une phrase par mesure ; CPU au repos sur Aujourd'hui ≈ 0,02 s/min, scanner 57,5 s/min (identique à 3.26.2 : le viseur ne coûte rien) ; téléphone 2506BPN68G, build optimisé : défilement du catalogue (160 exercices) et de la recherche d'aliments 0 à 0,06 % d'images en retard, médiane 5 ms, 99e centile 6 ms ; CPU au repos sur Aujourd'hui 0,00 s/min |
 | R2 — Moments | v4.2.0 | Done | Quatre moments vérifiés sur émulateur, animations ralenties ×5 et captures : pesée de 0 à 712 kcal, objectif atteint (graduations allumées, statut « Objectif du jour atteint », pas de reprise au relancement), tampon et annonces « Série 1 validée. Repos, 90 secondes » / « Repos terminé » (absente quand le repos est passé), récapitulatif (titre, volume compté de 702 à 1 230 kg, règle remplie). Règle de zone testée (JVM) |
-| R3 — Vitrine (README, kit portfolio) | v4.0.1 | Partial (README fait ; reste le kit portfolio) | Icône vectorielle `design/icon/kalos-icon.svg` comparée côte à côte avec Brut, Dromos et Topo ; vérifiée sur émulateur (tiroir d'applis, écran de lancement) ; README avec quatre captures `design/screenshots/` |
+| R3 — Vitrine (README, kit portfolio) | v4.0.1 | Done | Icône vectorielle `design/icon/kalos-icon.svg` comparée côte à côte avec Brut, Dromos et Topo ; vérifiée sur émulateur (tiroir d'applis, écran de lancement) ; README avec quatre captures `design/screenshots/` |
 
 ### R1 — Fondations (v4.0.0) — High
 
@@ -46,7 +46,7 @@ Aliment ajouté (l'aiguille avance), objectif du jour atteint (les graduations s
 
 - **Icône dans la grammaire commune** — Done (v4.0.1). K dessiné, règle graduée verte, anneau des macros ; source SVG, calques vectoriels, icône à thème.
 - **README illustré** — Done (v4.0.1). Icône, accroche et quatre captures sur émulateur (profil de démonstration, aucune donnée réelle).
-- **Kit portfolio** — Planned (Low). Visuels et textes de présentation hors dépôt.
+- **Kit portfolio** — Done (25 octobre 2026, hors dépôt : `portfolio/web`). Fiche réécrite pour la v4 (lien APK), démo jouable refaite dans « la graduation » : cadran et règles, aliments à peser, objectif calculé par les formules de l'app, moment « objectif atteint », Jade / Encre / Océan en clair et sombre ; aperçu 1000 × 625 capturé sur la démo.
 
 ### Journal des décisions (refonte)
 

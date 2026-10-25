@@ -2,6 +2,16 @@
 
 ---
 
+## v4.1.1 — 25 October 2026
+
+Correctif relevé pendant la recette sur téléphone.
+
+### Fixed — rappels intelligents
+
+- Le rappel quotidien se replanifiait en remplaçant sa propre tâche, ce qui l'annulait en cours d'exécution : seul le rappel « journal » partait, jamais ceux d'inactivité ni d'hydratation (depuis la v3.18.0). La replanification se fait désormais à la suite de la tâche en cours. Vérifié sur téléphone : les trois rappels partent et l'exécution du lendemain est planifiée.
+
+---
+
 ## v4.1.0 — 25 October 2026
 
 Suite de l'audit technique du 25 octobre 2026 : schéma 18, activités typées, filtres alimentaires rebranchés, séance active plus sobre, règles métier centralisées, release optimisée par R8. La refonte « Moments » passe en v4.2.0.

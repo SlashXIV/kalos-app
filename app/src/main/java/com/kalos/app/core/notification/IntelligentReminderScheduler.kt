@@ -56,14 +56,18 @@ class IntelligentReminderScheduler @Inject constructor(
         private const val WORK_NAME = "kalos_smart_reminder"
 
         /** Enqueues a single run at the next occurrence of [hour]. Called by the scheduler and by the worker to chain the next day. */
-        fun enqueueNext(context: Context, hour: Int) {
+        /**
+         * [policy] REPLACE re-anchors the chain (settings, app start). The worker itself must pass
+         * APPEND_OR_REPLACE: REPLACE would cancel the running worker before its later reminders.
+         */
+        fun enqueueNext(context: Context, hour: Int, policy: ExistingWorkPolicy = ExistingWorkPolicy.REPLACE) {
             val request = OneTimeWorkRequestBuilder<IntelligentReminderWorker>()
                 .setInitialDelay(minutesUntilNextTarget(hour), TimeUnit.MINUTES)
                 .setConstraints(Constraints.Builder().setRequiresBatteryNotLow(false).build())
                 .build()
             WorkManager.getInstance(context).enqueueUniqueWork(
                 WORK_NAME,
-                ExistingWorkPolicy.REPLACE,
+                policy,
                 request,
             )
         }

@@ -40,6 +40,7 @@ Audit d'architecture et de modélisation (nourriture, musculation, activités) m
 | A4 | Ids d'exercices de seed dépendants de l'historique d'installation : restauration sur un autre téléphone mal remappée | Done v4.0.2 (`exerciseSeedIds`) |
 | A5 | Brouillon de séance sans mode de suivi : exercices chronométrés repris en reps × poids | Done v4.0.2 |
 | A6 | Écritures multi-étapes hors transaction (templates, programmes, repas, eau) | Done v4.0.2 |
+| A21 | Rappels intelligents : `enqueueNext(REPLACE)` appelé par le worker annule le worker en cours, seuls les premiers rappels partent | Done v4.1.1 (APPEND_OR_REPLACE depuis le worker, vérifié sur téléphone) |
 | A7 | Aucun test de migration | Done v4.0.2 (13→17 ; 7 à 12 sans schéma exporté, non testables) |
 
 ### Recommandé

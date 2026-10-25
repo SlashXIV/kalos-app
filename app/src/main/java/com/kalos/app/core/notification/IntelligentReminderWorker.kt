@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import com.kalos.app.R
+import androidx.work.ExistingWorkPolicy
 
 class IntelligentReminderWorker(
     context: Context,
@@ -34,7 +35,7 @@ class IntelligentReminderWorker(
 
         // Chain the next day's run up-front, anchored to the configured hour, so a
         // failure below never breaks the schedule.
-        IntelligentReminderScheduler.enqueueNext(applicationContext, prefs.getInt("hour", 20))
+        IntelligentReminderScheduler.enqueueNext(applicationContext, prefs.getInt("hour", 20), ExistingWorkPolicy.APPEND_OR_REPLACE)
 
         val ep = EntryPointAccessors.fromApplication(applicationContext, WorkerEntryPoint::class.java)
         val today = LocalDate.now().toString()

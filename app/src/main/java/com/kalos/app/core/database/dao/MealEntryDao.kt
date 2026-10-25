@@ -61,6 +61,9 @@ interface MealEntryDao {
     // Earliest logged date — lets the history know whether older data exists beyond the window.
     @Query("SELECT MIN(date) FROM meal_entry")
     suspend fun getEarliestDate(): String?
+
+    @Query("SELECT MAX(date) FROM meal_entry")
+    suspend fun getLatestDate(): String?
 }
 
 data class DailySummaryRow(

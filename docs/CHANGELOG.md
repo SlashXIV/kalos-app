@@ -2,6 +2,17 @@
 
 ---
 
+## v4.3.1 — 25 October 2026
+
+Correctifs relevés en recette sur la build release, avec une vraie sauvegarde importée.
+
+### Fixed — après une pause
+
+- **Historique nutritionnel** : quand le dernier repas datait de plus de 30 jours (pause, ou sauvegarde restaurée), l'écran affichait « Aucun historique — Enregistrez vos repas » et il fallait toucher plusieurs fois « Charger plus » pour retrouver ses journées. La fenêtre s'ouvre désormais sur les 30 jours qui finissent au dernier repas.
+- **Calendrier** : sans aucun repas sur les 7 derniers jours, la moyenne calorique affichait « 0 / 1 900 kcal », comme une journée à jeun ; elle laisse place à « Aucun repas enregistré sur la période ».
+
+---
+
 ## v4.3.0 — 25 October 2026
 
 Fin du jalon R1 de la refonte « Graduation » : les deux graphiques Sport qui n'étaient que restylés passent sur la brique commune `MeSeriesChart`, comme le bilan et le poids.

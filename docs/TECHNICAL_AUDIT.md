@@ -60,6 +60,8 @@ Audit d'architecture et de modélisation (nourriture, musculation, activités) m
 | A18 | Filtres alimentaires non appliqués depuis v3.18.0 | Done v4.1.0 (rebranchés sur la recherche, règle testée) |
 | A19 | Aucun test de ViewModel ni de repository ; dispatchers en dur | Partial v4.1.0 (tests métier, importeur, DAO, migrations, brouillon ; pas de test de ViewModel, dispatchers toujours en dur) — Low |
 | A20 | N+1 dans `buildLog`, `getTemplates`, `buildProgram` ; lectures secondaires dans `Flow.map` non réactives | Partial v4.1.0 (historique des séances groupé ; `getTemplates` et `buildProgram` gardent une requête par élément, volumes faibles) — Low |
+| A22 | Recette release avec une vraie sauvegarde (25/10/2026) : historique nutritionnel vide après une pause de plus de 30 jours (« Aucun historique » alors que 201 repas existent), moyenne calorique du calendrier à 0 sans aucun jour enregistré | Done v4.3.1 (fenêtre ouverte sur les derniers repas, testée ; « Aucun repas enregistré sur la période ») |
+| A23 | Pages de 16 Ko : `libimage_processing_util_jni.so` de CameraX 1.3.4 alignée sur 4 Ko (arm64 et x86_64) ; sur un appareil à pages de 16 Ko, Android affiche un avertissement au lancement et lance l'app en mode de compatibilité. Les bibliothèques ML Kit et AndroidX graphics sont déjà alignées | Planned — Medium (passer CameraX en 1.4.x, puis revérifier le scanner sur téléphone) |
 
 ### Optionnel
 

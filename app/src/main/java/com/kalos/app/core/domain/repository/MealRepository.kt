@@ -16,4 +16,6 @@ interface MealRepository {
     fun getLoggedDates(): Flow<List<String>>
     /** Earliest date with any logged meal, or null if the journal is empty. */
     suspend fun getEarliestMealDate(): String?
+    /** Latest date with any logged meal, or null if the journal is empty. */
+    suspend fun getLatestMealDate(): String?
 }

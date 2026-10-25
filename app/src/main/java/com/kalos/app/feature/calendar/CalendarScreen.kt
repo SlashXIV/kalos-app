@@ -448,7 +448,9 @@ private fun InsightsSection(insights: CalendarInsightsState) {
     if (insights.kcalGoal > 0f) {
         KalosCard {
             InstrumentLabel(stringResource(R.string.me_cal_avg_title))
-            MeasureRow(
+            if (insights.daysLogged7d == 0) {
+                Text(stringResource(R.string.me_insights_no_meals), style = MaterialTheme.typography.bodyMedium)
+            } else MeasureRow(
                 label = stringResource(R.string.me_cal_avg_label),
                 value = insights.avgKcal7d,
                 goal = insights.kcalGoal,

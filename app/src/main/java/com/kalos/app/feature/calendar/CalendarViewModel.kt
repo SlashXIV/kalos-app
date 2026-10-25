@@ -35,6 +35,8 @@ data class DayDetail(
 
 data class CalendarInsightsState(
     val avgKcal7d: Float = 0f,
+    /** Jours avec des repas sur les 7 derniers : à 0, pas de moyenne (elle se lirait « rien mangé »). */
+    val daysLogged7d: Int = 0,
     val kcalGoal: Float = 0f,
     val workoutsPerWeek: List<Int> = emptyList(),
 )
@@ -113,6 +115,7 @@ class CalendarViewModel @Inject constructor(
             }
             CalendarInsightsState(
                 avgKcal7d = avgKcal,
+                daysLogged7d = daysWithData,
                 kcalGoal = kcalGoal,
                 workoutsPerWeek = workoutsPerWeek,
             )

@@ -173,7 +173,7 @@ fun CustomFoodScreen(
             }
 
             KalosButton(
-                stringResource(R.string.action_save),
+                stringResource(if (state.isSaving) R.string.action_saving else R.string.action_save),
                 onClick = viewModel::save,
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 enabled = !state.isSaving,

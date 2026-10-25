@@ -16,6 +16,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import com.kalos.app.R
+import com.kalos.app.core.ui.util.kcalSpoken
+import com.kalos.app.core.ui.util.gramsSpoken
 import com.kalos.app.core.ui.component.KalosButton
 import com.kalos.app.core.ui.component.KalosCard
 import com.kalos.app.core.ui.component.ScreenHeader
@@ -140,7 +142,7 @@ fun EditGoalsScreen(
             )
 
             KalosButton(
-                stringResource(R.string.action_save),
+                stringResource(if (state.isSaving) R.string.action_saving else R.string.action_save),
                 onClick = viewModel::save,
                 enabled = !state.isSaving && state.isValid,
                 modifier = Modifier.fillMaxWidth(),
@@ -151,7 +153,7 @@ fun EditGoalsScreen(
 
 @Composable
 private fun MacroBreakdownRow(label: String, formula: String, grams: Int, kcal: Int, color: Color) {
-    val sentence = stringResource(R.string.meal_item_spoken, label, formatGroupedInt(grams), formatGroupedInt(kcal)) + ", " + formula
+    val sentence = stringResource(R.string.meal_item_spoken, label, gramsSpoken(grams), kcalSpoken(kcal)) + ", " + formula
     Row(
         modifier = Modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = sentence },
         verticalAlignment = Alignment.CenterVertically,

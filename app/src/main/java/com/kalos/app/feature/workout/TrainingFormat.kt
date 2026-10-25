@@ -3,6 +3,7 @@ package com.kalos.app.feature.workout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.kalos.app.R
+import com.kalos.app.core.ui.util.dayLabel
 import com.kalos.app.core.ui.util.formatKg
 import com.kalos.app.core.domain.model.ExerciseTrackingMode
 import com.kalos.app.core.domain.model.WorkoutSet
@@ -63,12 +64,5 @@ fun logDateShort(dateStr: String): String {
 
 /** « Lundi 3 mars 2025 » (ou aujourd’hui / hier). */
 @Composable
-fun logDateLong(dateStr: String): String {
-    val d = LocalDate.parse(dateStr)
-    val today = LocalDate.now()
-    return when (d) {
-        today -> stringResource(R.string.today_title)
-        today.minusDays(1) -> stringResource(R.string.yesterday)
-        else -> d.format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.FRENCH)).replaceFirstChar { it.uppercase() }
-    }
-}
+fun logDateLong(dateStr: String): String =
+    dayLabel(LocalDate.parse(dateStr), "EEEE d MMMM yyyy").replaceFirstChar { it.uppercase() }

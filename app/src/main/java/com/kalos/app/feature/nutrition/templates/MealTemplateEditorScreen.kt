@@ -22,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
+import com.kalos.app.core.ui.util.kcalSpoken
 import com.kalos.app.core.domain.model.Food
 import com.kalos.app.core.ui.component.KalosButton
 import com.kalos.app.core.ui.component.KalosNumberField
@@ -147,7 +148,7 @@ private fun ItemRow(
     // Local text buffer so partial edits (empty, trailing separator) don't fight the model.
     var text by remember(item.food.id) { mutableStateOf(item.amountG.roundToInt().toString()) }
     val kcal = formatGroupedInt(item.kcal.roundToInt())
-    val spoken = stringResource(R.string.food_item_kcal_spoken, item.food.name, kcal)
+    val spoken = stringResource(R.string.food_item_kcal_spoken, item.food.name, kcalSpoken(item.kcal.roundToInt()))
     val amountDesc = stringResource(R.string.food_item_amount_desc, item.food.name)
 
     Row(

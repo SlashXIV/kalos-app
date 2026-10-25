@@ -50,6 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
+import com.kalos.app.core.ui.util.dayLabel
 import com.kalos.app.core.ui.component.Dot
 import com.kalos.app.core.ui.component.InstrumentLabel
 import com.kalos.app.core.ui.component.KalosButton
@@ -332,11 +333,7 @@ private fun DayDetailCard(
     onNavigateToNutrition: () -> Unit,
 ) {
     val date = remember(selectedDate) { LocalDate.parse(selectedDate) }
-    val dateLabel = when (date) {
-        LocalDate.now() -> stringResource(R.string.today_title)
-        LocalDate.now().minusDays(1) -> stringResource(R.string.yesterday)
-        else -> longDate(date)
-    }
+    val dateLabel = dayLabel(date, "EEEE d MMMM").replaceFirstChar { it.uppercase() }
     KalosCard {
         SectionLabel(dateLabel)
         val kcal = detail?.totalKcal ?: 0f

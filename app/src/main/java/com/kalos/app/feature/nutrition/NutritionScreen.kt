@@ -61,6 +61,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
+import com.kalos.app.core.ui.util.kcalSpoken
+import com.kalos.app.core.ui.util.gramsSpoken
+import com.kalos.app.core.ui.util.dayLabel
 import com.kalos.app.core.domain.model.Food
 import com.kalos.app.core.domain.model.MealEntry
 import com.kalos.app.core.domain.model.MealItem
@@ -187,12 +190,7 @@ fun NutritionScreen(
     }
 
     val date = remember(state.date) { LocalDate.parse(state.date) }
-    val today = LocalDate.now()
-    val title = when (date) {
-        today -> stringResource(R.string.today_title)
-        today.minusDays(1) -> stringResource(R.string.yesterday)
-        else -> date.format(DateTimeFormatter.ofPattern("EEE d MMM", Locale.FRENCH))
-    }
+    val title = dayLabel(date, "EEE d MMM")
     val eyebrow = remember(date) { date.format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.FRENCH)) }
 
     Scaffold(
@@ -474,7 +472,7 @@ private fun MealTicket(
                     name = item.food.name,
                     amount = "$amount ${stringResource(R.string.unit_g)}",
                     value = kcal,
-                    spoken = stringResource(R.string.meal_item_spoken, item.food.name, amount, kcal),
+                    spoken = stringResource(R.string.meal_item_spoken, item.food.name, gramsSpoken(item.totalAmountG.roundToInt()), kcalSpoken(item.totalKcal.roundToInt())),
                 ) {
                     IconButton(onClick = { onDeleteItems(item.itemIds) }) {
                         Icon(

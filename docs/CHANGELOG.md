@@ -2,6 +2,22 @@
 
 ---
 
+## v4.3.3 — 25 October 2026
+
+Défauts relevés à la relecture de la refonte (Low).
+
+### Fixed — lecture et retours
+
+- **TalkBack accorde les unités** : « glucides 1 gramme », « 1 kilocalorie » (singulier sous 2, selon les règles de la langue du téléphone) dans les aliments, l'historique, les repas, les favoris et la répartition des macros.
+- **Enregistrement visible** : le bouton des aliments personnalisés et des objectifs affiche « Enregistrement… » pendant la sauvegarde, comme le poids.
+
+### Changed — textes centralisés
+
+- « Aujourd'hui / Hier » : une seule fonction (`dayLabel`) au lieu de sept copies, chaque écran garde son format de date.
+- « il y a 12 min » (séance en cours) passe dans les ressources : plus aucun texte d'interface dans le code.
+
+---
+
 ## v4.3.2 — 25 October 2026
 
 ### Fixed — téléphones à pages mémoire de 16 Ko

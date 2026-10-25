@@ -49,10 +49,15 @@
     <!-- Aujourd’hui (journal du jour) -->
     <string name="today_title">Aujourd’hui</string>
     <string name="yesterday">Hier</string>
+    <string name="elapsed_now">à l’instant</string>
+    <string name="elapsed_minutes">il y a %1$d min</string>
+    <string name="elapsed_hours">il y a %1$d h</string>
+    <string name="elapsed_days">il y a %1$d j</string>
     <string name="action_history">Historique</string>
     <string name="action_more">Plus d’options</string>
     <string name="action_close">Fermer</string>
     <string name="action_save">Enregistrer</string>
+    <string name="action_saving">Enregistrement…</string>
     <string name="action_cancel">Annuler</string>
     <string name="action_validate">Valider</string>
     <string name="day_previous">Jour précédent</string>
@@ -94,7 +99,11 @@
     <string name="meal_options">Options : %1$s</string>
     <string name="meal_add_food">Ajouter un aliment : %1$s</string>
     <string name="meal_item_remove">Retirer %1$s</string>
-    <string name="meal_item_spoken">%1$s, %2$s grammes, %3$s kilocalories</string>
+    <string name="meal_item_spoken">%1$s, %2$s, %3$s</string>
+    <plurals name="grams_spoken">
+        <item quantity="one">%1$s gramme</item>
+        <item quantity="other">%1$s grammes</item>
+    </plurals>
     <string name="today_workout">Séance du jour</string>
     <plurals name="workout_exercise_count">
         <item quantity="one">%1$d exercice · ~%2$d min</item>

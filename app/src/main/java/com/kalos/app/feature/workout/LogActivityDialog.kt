@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kalos.app.R
+import com.kalos.app.core.ui.util.dayLabel
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kalos.app.core.domain.model.ActivityType
 import com.kalos.app.core.ui.util.formatGroupedInt
@@ -18,8 +19,6 @@ import com.kalos.app.core.ui.component.KalosNumberField
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -159,11 +158,4 @@ fun activityLabelRes(type: ActivityType): Int = when (type) {
 }
 
 @Composable
-private fun formatActivityDate(date: LocalDate): String {
-    val today = LocalDate.now()
-    return when (date) {
-        today -> stringResource(R.string.today_title)
-        today.minusDays(1) -> stringResource(R.string.yesterday)
-        else -> date.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.FRENCH))
-    }
-}
+private fun formatActivityDate(date: LocalDate): String = dayLabel(date, "d MMM yyyy")

@@ -42,6 +42,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
+import com.kalos.app.core.ui.util.dayLabel
 import com.kalos.app.core.ui.util.formatKg
 import com.kalos.app.core.domain.model.Sex
 import com.kalos.app.core.ui.component.FitText
@@ -55,8 +56,6 @@ import com.kalos.app.core.ui.theme.KalosTheme
 import com.kalos.app.core.ui.util.formatGroupedInt
 import com.kalos.app.navigation.Screen
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import kotlin.math.abs
 
 @Composable
@@ -187,11 +186,7 @@ fun ProfileScreen(
 @Composable
 private fun BodyWeightCard(weightKg: Float, date: String, delta: Float?, onClick: () -> Unit) {
     val d = LocalDate.parse(date)
-    val dateLabel = when (d) {
-        LocalDate.now() -> stringResource(R.string.today_title)
-        LocalDate.now().minusDays(1) -> stringResource(R.string.yesterday)
-        else -> d.format(DateTimeFormatter.ofPattern("d MMM", Locale.FRENCH))
-    }
+    val dateLabel = dayLabel(d, "d MMM")
     val kg = stringResource(R.string.kg)
     val deltaLabel = delta?.let { (if (it >= 0f) "+" else "") + formatKg(it) }
     val title = stringResource(R.string.me_profile_body_weight)

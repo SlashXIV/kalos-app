@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: v4.3.2 — 25 October 2026
+> Last updated: v4.3.3 — 25 October 2026
 >
 > The June 2026 UX review cycle (18 findings, 3 waves: v3.10.1 / v3.11.0 / v3.12.0) is fully closed. No pending UX backlog.
 
@@ -68,7 +68,7 @@ Aliment ajouté (l'aiguille avance), objectif du jour atteint (les graduations s
 - `CalculateMacroGoalsUseCaseTest` attendait 2 g/kg de protéines alors que le calcul applique le ratio de chaque objectif depuis la transparence des macros : test aligné sur le calcul (décision de Gabriel), calcul inchangé. — Done v4.0.0
 - `versionName` / `versionCode` alignés sur le CHANGELOG : 4.0.0 / 40000 (décision de Gabriel). — Done v4.0.0
 - Onboarding jamais branché à la navigation : supprimé (décision de Gabriel). — Done v4.0.0
-- Défauts relevés à la relecture, non bloquants (Low) : libellés TalkBack qui gardent l'unité au pluriel pour une quantité de 1 (« 1 grammes ») ; bouton Enregistrer sans indicateur pendant la sauvegarde (aliment perso, objectifs) ; libellés de date « Aujourd'hui / Hier » mis en forme à cinq endroits ; `formatElapsedSince` encore en dur dans le code. — Planned
+- Défauts relevés à la relecture, non bloquants (Low) : libellés TalkBack qui gardent l'unité au pluriel pour une quantité de 1 (« 1 grammes ») ; bouton Enregistrer sans indicateur pendant la sauvegarde (aliment perso, objectifs) ; libellés de date « Aujourd'hui / Hier » mis en forme à cinq endroits ; `formatElapsedSince` encore en dur dans le code. — Done v4.3.3 (`gramsSpoken` / `kcalSpoken`, « Enregistrement… », `dayLabel`, textes en ressources)
 
 ---
 

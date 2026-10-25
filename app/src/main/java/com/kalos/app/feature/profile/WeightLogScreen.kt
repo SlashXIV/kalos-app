@@ -36,6 +36,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
+import com.kalos.app.core.ui.util.dayLabel
 import com.kalos.app.core.ui.component.FitText
 import com.kalos.app.core.ui.component.InstrumentLabel
 import com.kalos.app.core.ui.component.KalosButton
@@ -277,15 +278,7 @@ private fun kg1(kg: Float): String = "%.1f".format(Locale.FRENCH, kg)
 private fun signed(v: Float): String = (if (v >= 0f) "+" else "") + kg1(v)
 
 @Composable
-private fun formatDate(dateStr: String): String {
-    val d = LocalDate.parse(dateStr)
-    val today = LocalDate.now()
-    return when (d) {
-        today -> stringResource(R.string.today_title)
-        today.minusDays(1) -> stringResource(R.string.yesterday)
-        else -> d.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.FRENCH))
-    }
-}
+private fun formatDate(dateStr: String): String = dayLabel(LocalDate.parse(dateStr), "d MMM yyyy")
 
 private fun shortDate(dateStr: String): String =
     LocalDate.parse(dateStr).format(DateTimeFormatter.ofPattern("EEE d MMM", Locale.FRENCH)).replaceFirstChar { it.uppercase() }

@@ -28,6 +28,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.kalos.app.R
+import com.kalos.app.core.ui.util.kcalSpoken
+import com.kalos.app.core.ui.util.gramsSpoken
 import com.kalos.app.core.domain.model.Food
 import com.kalos.app.core.ui.theme.KalosShape
 import com.kalos.app.core.ui.theme.KalosTheme
@@ -55,7 +57,11 @@ fun FoodListItem(
     val c = food.carbsPer100g.roundToInt().toString()
     val f = food.fatPer100g.roundToInt().toString()
     val customSpoken = stringResource(R.string.food_custom_spoken)
-    val macrosSpoken = stringResource(R.string.food_item_spoken, kcal, p, c, f)
+    val macrosSpoken = stringResource(
+        R.string.food_item_spoken,
+        kcalSpoken(food.kcalPer100g.roundToInt()), gramsSpoken(food.proteinPer100g.roundToInt()),
+        gramsSpoken(food.carbsPer100g.roundToInt()), gramsSpoken(food.fatPer100g.roundToInt()),
+    )
     // Satiété affichée seulement aux extrêmes utiles ; « Modéré » reste discret.
     val satiety = level.takeIf { it != SatietyLevel.MODERATE }?.label
     val spoken = listOfNotNull(

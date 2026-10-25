@@ -24,7 +24,7 @@
     <string name="food_custom_badge">Perso</string>
     <string name="food_custom_spoken">aliment personnalisé</string>
     <string name="food_per100_line">%1$s kcal · P %2$s g · G %3$s g · L %4$s g / 100 g</string>
-    <string name="food_item_spoken">%1$s kilocalories, protéines %2$s grammes, glucides %3$s grammes, lipides %4$s grammes, pour 100 grammes</string>
+    <string name="food_item_spoken">%1$s, protéines %2$s, glucides %3$s, lipides %4$s, pour 100 grammes</string>
 
     <!-- Feuille de quantité -->
     <string name="food_satiety_line">%1$s · %2$s kcal/100 g</string>
@@ -93,7 +93,7 @@
         <item quantity="other">%1$s kcal · %2$d aliments</item>
     </plurals>
     <string name="food_template_empty_items">Aucun aliment. Ajoutez-en avec le bouton ci-dessous.</string>
-    <string name="food_item_kcal_spoken">%1$s, %2$s kilocalories</string>
+    <string name="food_item_kcal_spoken">%1$s, %2$s</string>
     <string name="food_item_amount_desc">Quantité de %1$s, en grammes</string>
     <string name="food_kcal_value">%1$s kcal</string>
 
@@ -104,7 +104,7 @@
     <string name="food_history_empty_title">Aucun historique</string>
     <string name="food_history_empty_subtitle">Enregistrez vos repas pour voir votre historique</string>
     <string name="food_history_load_more">Charger plus</string>
-    <string name="food_history_day_spoken">%1$s, %2$s kilocalories, protéines %3$s grammes, glucides %4$s grammes, lipides %5$s grammes</string>
+    <string name="food_history_day_spoken">%1$s, %2$s, protéines %3$s, glucides %4$s, lipides %5$s</string>
     <string name="food_macro_p">P %1$s g</string>
     <string name="food_macro_c">G %1$s g</string>
     <string name="food_macro_f">L %1$s g</string>

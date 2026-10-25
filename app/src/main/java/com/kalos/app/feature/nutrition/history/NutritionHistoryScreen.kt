@@ -21,6 +21,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
+import com.kalos.app.core.ui.util.kcalSpoken
+import com.kalos.app.core.ui.util.gramsSpoken
+import com.kalos.app.core.ui.util.dayLabel
 import com.kalos.app.core.domain.model.DailyTotals
 import com.kalos.app.core.ui.component.EmptyState
 import com.kalos.app.core.ui.component.InstrumentLabel
@@ -32,8 +35,6 @@ import com.kalos.app.core.ui.theme.KalosTheme
 import com.kalos.app.core.ui.util.formatGroupedInt
 import com.kalos.app.navigation.Screen
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import kotlin.math.roundToInt
 
 @Composable
@@ -112,7 +113,10 @@ private fun DaySummaryCard(summary: DailyTotals, onClick: () -> Unit) {
     val p = formatGroupedInt(summary.totalProtein.roundToInt())
     val c = formatGroupedInt(summary.totalCarbs.roundToInt())
     val f = formatGroupedInt(summary.totalFat.roundToInt())
-    val spoken = stringResource(R.string.food_history_day_spoken, date, kcal, p, c, f)
+    val spoken = stringResource(
+        R.string.food_history_day_spoken, date, kcalSpoken(summary.totalKcal.roundToInt()),
+        gramsSpoken(summary.totalProtein.roundToInt()), gramsSpoken(summary.totalCarbs.roundToInt()), gramsSpoken(summary.totalFat.roundToInt()),
+    )
     val nutrients = KalosTheme.nutrients
     KalosCard(onClick = onClick) {
         Column(
@@ -176,14 +180,6 @@ private fun buildNutritionTsv(summaries: List<DailyTotals>): String {
 @Composable
 private fun formatHistoryDate(dateStr: String): String {
     val d = LocalDate.parse(dateStr)
-    val today = LocalDate.now()
-    return when (d) {
-        today -> stringResource(R.string.today_title)
-        today.minusDays(1) -> stringResource(R.string.yesterday)
-        else -> {
-            val pattern = if (d.year == today.year) "EEEE d MMMM" else "EEEE d MMMM yyyy"
-            d.format(DateTimeFormatter.ofPattern(pattern, Locale.FRENCH))
-                .replaceFirstChar { it.uppercase() }
-        }
-    }
+    val pattern = if (d.year == LocalDate.now().year) "EEEE d MMMM" else "EEEE d MMMM yyyy"
+    return dayLabel(d, pattern).replaceFirstChar { it.uppercase() }
 }

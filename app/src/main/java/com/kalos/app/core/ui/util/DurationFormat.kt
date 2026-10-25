@@ -1,5 +1,9 @@
 package com.kalos.app.core.ui.util
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.kalos.app.R
+
 /**
  * Lightweight `mm:ss` ↔ seconds helpers for duration-tracked sets (cardio, holds).
  *
@@ -39,12 +43,13 @@ fun formatSecsAsDuration(secs: Int): String {
  * Beyond one hour we intentionally drop the minutes: "il y a 19h35" reads like a
  * clock time (started AT 19:35) rather than a duration — the coarser unit is clearer.
  */
+@Composable
 fun formatElapsedSince(startedAtMillis: Long, nowMillis: Long = System.currentTimeMillis()): String {
     val minutes = ((nowMillis - startedAtMillis) / 60_000).coerceAtLeast(0)
     return when {
-        minutes < 1 -> "à l’instant"
-        minutes < 60 -> "il y a $minutes min"
-        minutes < 24 * 60 -> "il y a ${minutes / 60} h"
-        else -> "il y a ${minutes / (24 * 60)} j"
+        minutes < 1 -> stringResource(R.string.elapsed_now)
+        minutes < 60 -> stringResource(R.string.elapsed_minutes, minutes)
+        minutes < 24 * 60 -> stringResource(R.string.elapsed_hours, minutes / 60)
+        else -> stringResource(R.string.elapsed_days, minutes / (24 * 60))
     }
 }

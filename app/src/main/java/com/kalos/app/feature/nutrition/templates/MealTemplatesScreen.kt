@@ -20,6 +20,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kalos.app.R
+import com.kalos.app.core.ui.util.kcalSpoken
+import com.kalos.app.core.ui.util.gramsSpoken
 import com.kalos.app.core.domain.model.MealTemplate
 import com.kalos.app.core.ui.component.EmptyState
 import com.kalos.app.core.ui.component.MeasureTicket
@@ -127,7 +129,7 @@ private fun TemplateTicket(template: MealTemplate, onEdit: () -> Unit, onDelete:
                 name = item.food.name,
                 amount = "$amount $g",
                 value = kcal,
-                spoken = stringResource(R.string.meal_item_spoken, item.food.name, amount, kcal),
+                spoken = stringResource(R.string.meal_item_spoken, item.food.name, gramsSpoken(item.amountG.roundToInt()), kcalSpoken(item.food.kcalForAmount(item.amountG).roundToInt())),
                 modifier = Modifier.padding(end = 8.dp),
             )
         }

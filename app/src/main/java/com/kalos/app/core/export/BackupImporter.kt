@@ -6,6 +6,7 @@ import androidx.room.withTransaction
 import com.kalos.app.core.data.DietaryPreferencesStore
 import com.kalos.app.core.data.util.normalizeForSearch
 import com.kalos.app.core.database.KalosDatabase
+import com.kalos.app.core.database.dao.ExerciseDao
 import com.kalos.app.core.database.dao.FoodDao
 import com.kalos.app.core.database.dao.ImportDao
 import com.kalos.app.core.database.entity.*
@@ -22,6 +23,7 @@ class BackupImporter @Inject constructor(
     private val database: KalosDatabase,
     private val importDao: ImportDao,
     private val foodDao: FoodDao,
+    private val exerciseDao: ExerciseDao,
     private val dietaryPrefsStore: DietaryPreferencesStore,
     private val waterRepository: WaterRepository,
     @ApplicationContext private val context: Context,
@@ -72,12 +74,14 @@ class BackupImporter @Inject constructor(
      * so Room assigns a new ID. A map of old→new IDs is propagated to child rows.
      */
     suspend fun import(backup: KalosBackup): Result<Unit> = runCatching {
+        val resolveExercise = exerciseResolver(backup)
+
         // ── 1. Validate references before touching anything ──────────────────
-        validateReferences(backup)
+        validateReferences(backup, resolveExercise)
 
         // ── 2. Transactional clear + insert (rollback on any failure) ────────
         database.withTransaction {
-            clearAndInsert(backup)
+            clearAndInsert(backup, resolveExercise)
         }
     }
 
@@ -86,7 +90,19 @@ class BackupImporter @Inject constructor(
      * either in the backup itself or in the current seed data. Throws on
      * the first orphan found, with a human-readable French message.
      */
-    private suspend fun validateReferences(backup: KalosBackup) {
+    /**
+     * Maps a backup exercise id to this device's id. Seed exercise ids depend on install
+     * history (new seeds are appended by later versions), so they are matched by seedId;
+     * ids without a seedId (older backups) are kept as-is.
+     */
+    private suspend fun exerciseResolver(backup: KalosBackup): (Long) -> Long {
+        val idBySeedId = exerciseDao.getAllOnce()
+            .mapNotNull { e -> e.seedId?.let { it to e.id } }
+            .toMap()
+        return { oldId -> backup.exerciseSeedIds[oldId]?.let { idBySeedId[it] } ?: oldId }
+    }
+
+    private suspend fun validateReferences(backup: KalosBackup, resolveExercise: (Long) -> Long) {
         // Custom foods present in the backup (will be remapped at insert).
         val backupFoodIds = backup.customFoods.map { it.id }.toSet()
 
@@ -127,11 +143,23 @@ class BackupImporter @Inject constructor(
             error("Programmes référencent des séances introuvables : $sample")
         }
 
+        // workout_template_exercise.exerciseId is a RESTRICT FK → fail early with a clear message
+        // instead of a constraint error mid-transaction.
+        val existingExerciseIds = exerciseDao.getAllOnce().map { it.id }.toSet()
+        val orphanExerciseIds = backup.workoutTemplates.asSequence()
+            .flatMap { it.exercises.asSequence() }
+            .map { resolveExercise(it.exerciseId) }
+            .filter { it !in existingExerciseIds }
+            .toSet()
+        if (orphanExerciseIds.isNotEmpty()) {
+            error("Séances référençant des exercices introuvables : ${orphanExerciseIds.take(5).joinToString()}")
+        }
+
         // workout_log.templateId is nullable → we don't fail, we'll just null it
         // out at insert time. No check needed here.
     }
 
-    private suspend fun clearAndInsert(backup: KalosBackup) {
+    private suspend fun clearAndInsert(backup: KalosBackup, resolveExercise: (Long) -> Long) {
         // ── Clear user data in FK-safe order ─────────────────────────────────
         importDao.clearMealEntries()        // cascades → meal_entry_item
         importDao.clearWorkoutLogs()        // cascades → workout_log_exercise → workout_log_set
@@ -188,7 +216,7 @@ class BackupImporter @Inject constructor(
                     defaultServingG = f.defaultServingG,
                     servingUnit = f.servingUnit, isFavorite = f.isFavorite,
                     lastUsedAt = f.lastUsedAt, barcode = f.barcode,
-                    isCustom = true, tags = f.tags,
+                    isCustom = true, tags = f.tags, isArchived = f.isArchived,
                 )
             )
             foodIdMap[f.id] = newId
@@ -252,7 +280,7 @@ class BackupImporter @Inject constructor(
             t.exercises.forEach { ex ->
                 importDao.insertTemplateExercise(
                     WorkoutTemplateExEntity(
-                        id = 0, templateId = newTemplateId, exerciseId = ex.exerciseId,
+                        id = 0, templateId = newTemplateId, exerciseId = resolveExercise(ex.exerciseId),
                         orderIndex = ex.orderIndex, defaultSets = ex.defaultSets,
                         defaultReps = ex.defaultReps, defaultWeightKg = ex.defaultWeightKg,
                         restSeconds = ex.restSeconds, notes = ex.notes,
@@ -279,7 +307,7 @@ class BackupImporter @Inject constructor(
             log.exercises.forEach { ex ->
                 val newLogExId = importDao.insertLogExercise(
                     WorkoutLogExEntity(
-                        id = 0, logId = newLogId, exerciseId = ex.exerciseId,
+                        id = 0, logId = newLogId, exerciseId = resolveExercise(ex.exerciseId),
                         exerciseName = ex.exerciseName, orderIndex = ex.orderIndex,
                         status = ex.status, replacedExerciseName = ex.replacedExerciseName,
                     )

@@ -128,17 +128,21 @@ interface WorkoutLogDao {
     // Exercise progression
     data class ExerciseProgressionRow(val date: String, val maxWeight: Float)
 
+    // The latest :limit sessions, returned oldest first for the chart.
     @Query("""
-        SELECT wl.date AS date, MAX(wls.weightKg) AS maxWeight
-        FROM workout_log_set wls
-        JOIN workout_log_exercise wle ON wls.logExerciseId = wle.id
-        JOIN workout_log wl ON wle.logId = wl.id
-        WHERE wle.exerciseId = :exerciseId
-          AND wls.isCompleted = 1
-          AND wls.weightKg > 0
-        GROUP BY wl.id
-        ORDER BY wl.date ASC
-        LIMIT :limit
+        SELECT date, maxWeight FROM (
+            SELECT wl.date AS date, MAX(wls.weightKg) AS maxWeight, wl.startedAt AS startedAt
+            FROM workout_log_set wls
+            JOIN workout_log_exercise wle ON wls.logExerciseId = wle.id
+            JOIN workout_log wl ON wle.logId = wl.id
+            WHERE wle.exerciseId = :exerciseId
+              AND wls.isCompleted = 1
+              AND wls.weightKg > 0
+            GROUP BY wl.id
+            ORDER BY wl.date DESC, wl.startedAt DESC
+            LIMIT :limit
+        )
+        ORDER BY date ASC, startedAt ASC
     """)
     suspend fun getExerciseProgression(exerciseId: Long, limit: Int = 20): List<ExerciseProgressionRow>
 

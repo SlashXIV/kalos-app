@@ -16,9 +16,9 @@ interface MealTemplateDao {
     @Query("SELECT * FROM meal_template_item WHERE templateId = :templateId")
     suspend fun getItems(templateId: Long): List<MealTemplateItemEntity>
 
-    // REPLACE for the edit-then-rebuild pattern (same as WorkoutTemplateDao.upsert): on a save
-    // we upsert the template then delete + re-insert its items.
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    // @Upsert, not REPLACE: REPLACE deletes the row first, which cascades to its children
+    // (program links, items). Returns -1 when an existing row was updated.
+    @Upsert
     suspend fun upsertTemplate(template: MealTemplateEntity): Long
 
     @Query("DELETE FROM meal_template_item WHERE templateId = :templateId")

@@ -44,6 +44,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.roundToInt
+import com.kalos.app.core.ui.util.parseDecimal
 
 data class EditorItem(val food: Food, val amountG: Float) {
     val kcal: Float get() = food.kcalForAmount(amountG)
@@ -265,7 +266,7 @@ private fun ItemRow(
             value = text,
             onValueChange = {
                 text = it
-                it.replace(',', '.').toFloatOrNull()?.let(onAmountChange)
+                it.parseDecimal()?.let(onAmountChange)
             },
             suffix = { Text(stringResource(R.string.unit_g)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),

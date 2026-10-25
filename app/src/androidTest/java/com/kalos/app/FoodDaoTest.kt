@@ -3,6 +3,7 @@ package com.kalos.app
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.kalos.app.core.data.util.normalizeForSearch
 import com.kalos.app.core.database.KalosDatabase
 import com.kalos.app.core.database.dao.FoodDao
 import com.kalos.app.core.database.entity.FoodEntity
@@ -38,7 +39,7 @@ class FoodDaoTest {
         category: String = "Fruits",
         kcal: Float = 89f,
     ) = FoodEntity(
-        id = id, name = name, brand = "", category = category,
+        id = id, name = name, nameNormalized = name.normalizeForSearch(), brand = "", category = category,
         kcalPer100g = kcal, proteinPer100g = 1.1f, carbsPer100g = 23f,
         fatPer100g = 0.3f, fiberPer100g = 2.6f, defaultServingG = 100f,
         servingUnit = "g", isCustom = false, isFavorite = false, lastUsedAt = 0,

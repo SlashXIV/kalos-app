@@ -47,6 +47,7 @@ import com.kalos.app.core.ui.util.formatGroupedInt
 import com.kalos.app.feature.nutrition.scan.SCANNED_BARCODE_KEY
 import com.kalos.app.navigation.Screen
 import kotlin.math.roundToInt
+import com.kalos.app.core.ui.util.parseDecimal
 
 /** savedStateHandle key: id of the food picked in pick mode, read by the caller. */
 const val PICKED_FOOD_ID_KEY = "picked_food_id"
@@ -295,9 +296,9 @@ private fun FoodDetailSheet(
     val hasUnitServing = food.servingUnit != "g"
 
     val amountFloat: Float = if (hasUnitServing && servingMode == ServingMode.UNITS) {
-        (servingCount.toFloatOrNull() ?: 0f) * food.defaultServingG
+        (servingCount.parseDecimal() ?: 0f) * food.defaultServingG
     } else {
-        amount.toFloatOrNull() ?: 0f
+        amount.parseDecimal() ?: 0f
     }
 
     val kcal = food.kcalForAmount(amountFloat)

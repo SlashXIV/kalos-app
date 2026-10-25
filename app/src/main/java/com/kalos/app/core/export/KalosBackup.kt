@@ -24,6 +24,9 @@ data class KalosBackup(
     val workoutLogs: List<WorkoutLogBackup>,
     val trainingPrograms: List<TrainingProgramBackup>,
     val mealTemplates: List<MealTemplateBackup> = emptyList(),  // added v3.16 — default preserves old backups
+    // added v4.0.2 — exercise id → seedId: seed ids depend on install history, so the importer
+    // resolves exercises by seedId on another device. Empty in older backups (ids kept as-is).
+    val exerciseSeedIds: Map<Long, String> = emptyMap(),
 )
 
 @Serializable
@@ -68,6 +71,7 @@ data class FoodBackup(
     val tags: String,              // comma-separated token string
     val lastUsedAt: Long = 0L,     // added v3.7 — preserves "Recents" ordering after restore
     val barcode: String? = null,   // added v3.14 — scanned foods; default preserves old backups
+    val isArchived: Boolean = false, // added v4.0.2 — archived foods are exported so their meals restore
 )
 
 @Serializable

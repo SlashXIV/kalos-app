@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
+import com.kalos.app.core.ui.util.parseDecimal
 
 data class SetInput(
     val reps: String = "",
@@ -159,6 +160,8 @@ class ActiveWorkoutViewModel @Inject constructor(
                         id = ed.exerciseId,
                         name = ed.exerciseName,
                         primaryMuscle = ed.exercisePrimaryMuscle,
+                        trackingMode = ExerciseTrackingMode.entries.find { it.name == ed.trackingMode }
+                            ?: ExerciseTrackingMode.REPS_WEIGHT,
                     ),
                     orderIndex = ed.orderIndex,
                     defaultSets = ed.defaultSets,
@@ -477,7 +480,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                             id = 0, logExerciseId = 0,  // logExerciseId assigned inside the transaction
                             setNumber = setIdx + 1,
                             reps = si.reps.toIntOrNull() ?: 0,
-                            weightKg = si.weight.toFloatOrNull() ?: 0f,
+                            weightKg = si.weight.parseDecimal() ?: 0f,
                             durationSecs = parseDurationToSecs(si.duration) ?: 0,
                             isCompleted = si.isCompleted,
                         )
@@ -542,6 +545,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                 sets = ep.sets.map { SetDraft(reps = it.reps, weight = it.weight, duration = it.duration, isCompleted = it.isCompleted) },
                 status = ep.status.name,
                 originalExerciseName = ep.originalExerciseName,
+                trackingMode = ep.templateExercise.exercise.trackingMode.name,
             )
         }
         store.save(

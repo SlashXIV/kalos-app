@@ -16,7 +16,9 @@ interface ProgramDao {
     @Query("SELECT * FROM training_program WHERE id = :id")
     suspend fun getById(id: Long): TrainingProgramEntity?
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    // @Upsert, not REPLACE: REPLACE deletes the row first, which cascades to its children
+    // (program links, items). Returns -1 when an existing row was updated.
+    @Upsert
     suspend fun upsert(program: TrainingProgramEntity): Long
 
     @Delete

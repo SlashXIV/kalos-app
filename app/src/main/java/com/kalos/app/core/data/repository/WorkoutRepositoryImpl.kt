@@ -61,10 +61,11 @@ class WorkoutRepositoryImpl @Inject constructor(
         return exerciseDao.getByIds(distinct).associate { it.id to it.toDomain() }
     }
 
-    override suspend fun saveTemplate(template: WorkoutTemplate): Long {
+    override suspend fun saveTemplate(template: WorkoutTemplate): Long = database.withTransaction {
         val id = templateDao.upsert(WorkoutTemplateEntity(
             id = template.id, name = template.name, description = template.description,
             estimatedDurationMin = template.estimatedDurationMin))
+            .let { if (template.id > 0) template.id else it }
         templateDao.deleteAllExercisesForTemplate(id)
         template.exercises.forEachIndexed { i, te ->
             templateDao.upsertExercise(WorkoutTemplateExEntity(
@@ -72,7 +73,7 @@ class WorkoutRepositoryImpl @Inject constructor(
                 defaultSets = te.defaultSets, defaultReps = te.defaultReps,
                 defaultWeightKg = te.defaultWeightKg, restSeconds = te.restSeconds, notes = te.notes))
         }
-        return id
+        id
     }
 
     override suspend fun deleteTemplate(template: WorkoutTemplate) =
@@ -115,7 +116,7 @@ class WorkoutRepositoryImpl @Inject constructor(
             exercises = exercises)
     }
 
-    override suspend fun startLog(log: WorkoutLog): Long {
+    override suspend fun startLog(log: WorkoutLog): Long = database.withTransaction {
         val logId = logDao.insertLog(WorkoutLogEntity(
             templateId = log.templateId, templateName = log.templateName,
             date = log.date, startedAt = log.startedAt))
@@ -126,7 +127,7 @@ class WorkoutRepositoryImpl @Inject constructor(
                 status = le.status.name,
                 replacedExerciseName = le.replacedExerciseName))
         }
-        return logId
+        logId
     }
 
     override suspend fun finishLog(logId: Long, durationSecs: Long, totalVolume: Float) {

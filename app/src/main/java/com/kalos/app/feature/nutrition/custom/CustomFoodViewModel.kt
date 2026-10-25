@@ -9,6 +9,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.kalos.app.core.ui.util.parseDecimal
 
 data class CustomFoodState(
     val editingFoodId: Long = 0,
@@ -117,9 +118,9 @@ class CustomFoodViewModel @Inject constructor(
     }
 
     val isValid: Boolean get() = with(_state.value) {
-        name.isNotBlank() && kcal.parseFloat() != null &&
-                protein.parseFloat() != null && carbs.parseFloat() != null &&
-                fat.parseFloat() != null
+        name.isNotBlank() && kcal.parseDecimal() != null &&
+                protein.parseDecimal() != null && carbs.parseDecimal() != null &&
+                fat.parseDecimal() != null
     }
 
     fun save() {
@@ -176,12 +177,12 @@ class CustomFoodViewModel @Inject constructor(
                 Food(
                     id = s.editingFoodId,
                     name = s.name.trim(), brand = s.brand.trim(), category = s.category,
-                    kcalPer100g = s.kcal.parseFloat() ?: 0f,
-                    proteinPer100g = s.protein.parseFloat() ?: 0f,
-                    carbsPer100g = s.carbs.parseFloat() ?: 0f,
-                    fatPer100g = s.fat.parseFloat() ?: 0f,
-                    fiberPer100g = s.fiber.parseFloat() ?: 0f,
-                    defaultServingG = s.serving.parseFloat() ?: 100f,
+                    kcalPer100g = s.kcal.parseDecimal() ?: 0f,
+                    proteinPer100g = s.protein.parseDecimal() ?: 0f,
+                    carbsPer100g = s.carbs.parseDecimal() ?: 0f,
+                    fatPer100g = s.fat.parseDecimal() ?: 0f,
+                    fiberPer100g = s.fiber.parseDecimal() ?: 0f,
+                    defaultServingG = s.serving.parseDecimal() ?: 100f,
                     servingUnit = s.unit,
                     isCustom = true,
                     isFavorite = s.isFavorite,
@@ -199,7 +200,6 @@ class CustomFoodViewModel @Inject constructor(
 }
 
 // Accepts both "7.5" and "7,5" (French decimal separator)
-private fun String.parseFloat(): Float? = replace(',', '.').toFloatOrNull()
 
 // Float → editable field string: whole numbers drop the ".0" ("250.0" → "250").
 private fun Float.toFieldString(): String =

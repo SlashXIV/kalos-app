@@ -1,6 +1,8 @@
 package com.kalos.app.core.data.repository
 
 import android.content.Context
+import androidx.room.withTransaction
+import com.kalos.app.core.database.KalosDatabase
 import com.kalos.app.core.database.dao.WaterIntakeDao
 import com.kalos.app.core.database.entity.WaterIntakeEntity
 import com.kalos.app.core.domain.repository.WaterRepository
@@ -11,6 +13,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 class WaterRepositoryImpl @Inject constructor(
+    private val database: KalosDatabase,
     private val dao: WaterIntakeDao,
     @ApplicationContext context: Context,
 ) : WaterRepository {
@@ -27,8 +30,10 @@ class WaterRepositoryImpl @Inject constructor(
 
     override suspend fun addWater(amountMl: Int, date: String) {
         if (amountMl == 0) return
-        if (amountMl > 0) dao.insertIfAbsent(WaterIntakeEntity(date = date, totalMl = 0))
-        dao.adjust(date, amountMl)
+        database.withTransaction {
+            if (amountMl > 0) dao.insertIfAbsent(WaterIntakeEntity(date = date, totalMl = 0))
+            dao.adjust(date, amountMl)
+        }
     }
 
     override fun setGoalMl(goalMl: Int) {

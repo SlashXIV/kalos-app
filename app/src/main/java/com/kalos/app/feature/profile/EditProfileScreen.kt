@@ -35,6 +35,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.kalos.app.core.ui.util.parseDecimal
 
 data class EditProfileState(
     val name: String = "",
@@ -91,9 +92,9 @@ class EditProfileViewModel @Inject constructor(
             _state.update { it.copy(isSaving = true) }
             val profile = UserProfile(
                 name = s.name.trim(), age = s.age.toIntOrNull() ?: 25,
-                sex = s.sex, heightCm = s.heightCm.toFloatOrNull() ?: 175f,
-                weightKg = s.weightKg.toFloatOrNull() ?: 75f,
-                targetWeightKg = s.targetWeightKg.toFloatOrNull() ?: 70f,
+                sex = s.sex, heightCm = s.heightCm.parseDecimal() ?: 175f,
+                weightKg = s.weightKg.parseDecimal() ?: 75f,
+                targetWeightKg = s.targetWeightKg.parseDecimal() ?: 70f,
                 activityLevel = s.activityLevel, goal = s.goal,
                 onboardingCompleted = true,
             )

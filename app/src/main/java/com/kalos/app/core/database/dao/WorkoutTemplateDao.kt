@@ -16,7 +16,9 @@ interface WorkoutTemplateDao {
     @Query("SELECT * FROM workout_template WHERE name = :name LIMIT 1")
     suspend fun getByName(name: String): WorkoutTemplateEntity?
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    // @Upsert, not REPLACE: REPLACE deletes the row first, which cascades to its children
+    // (program links, items). Returns -1 when an existing row was updated.
+    @Upsert
     suspend fun upsert(template: WorkoutTemplateEntity): Long
 
     @Delete

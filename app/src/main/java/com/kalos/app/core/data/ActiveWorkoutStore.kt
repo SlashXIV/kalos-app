@@ -42,6 +42,8 @@ data class ExerciseDraft(
     val sets: List<SetDraft>,
     val status: String = "PLANNED",
     val originalExerciseName: String = "",
+    // ExerciseTrackingMode name; empty in drafts written before the field existed.
+    val trackingMode: String = "",
 )
 
 @Serializable

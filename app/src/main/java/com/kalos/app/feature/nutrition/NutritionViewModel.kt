@@ -112,7 +112,7 @@ class NutritionViewModel @Inject constructor(
     }
 
     fun deleteItems(itemIds: List<Long>) {
-        viewModelScope.launch { itemIds.forEach { mealRepository.removeItem(it) } }
+        viewModelScope.launch { mealRepository.removeItems(itemIds) }
     }
 
     /** Applies a favourite meal to the given meal type on the current date (appends items). */

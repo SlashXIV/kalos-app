@@ -1,5 +1,7 @@
 package com.kalos.app.core.data.repository
 
+import androidx.room.withTransaction
+import com.kalos.app.core.database.KalosDatabase
 import com.kalos.app.core.database.dao.ProgramDao
 import com.kalos.app.core.database.dao.WorkoutTemplateDao
 import com.kalos.app.core.database.dao.ExerciseDao
@@ -12,6 +14,7 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class ProgramRepositoryImpl @Inject constructor(
+    private val database: KalosDatabase,
     private val dao: ProgramDao,
     private val templateDao: WorkoutTemplateDao,
     private val exerciseDao: ExerciseDao,
@@ -50,11 +53,12 @@ class ProgramRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun save(program: TrainingProgram): Long {
+    override suspend fun save(program: TrainingProgram): Long = database.withTransaction {
         val id = dao.upsert(TrainingProgramEntity(
             id = program.id, name = program.name, description = program.description,
             durationWeeks = program.durationWeeks, daysPerWeek = program.daysPerWeek,
             isActive = program.isActive, isCustom = program.isCustom))
+            .let { if (program.id > 0) program.id else it }
         dao.deleteAllWorkoutsForProgram(id)
         program.workouts.forEach { pw ->
             pw.template?.let {
@@ -63,27 +67,29 @@ class ProgramRepositoryImpl @Inject constructor(
                     dayOfWeek = pw.dayOfWeek, weekNumber = pw.weekNumber))
             }
         }
-        return id
+        id
     }
 
     override suspend fun delete(program: TrainingProgram) =
         dao.delete(TrainingProgramEntity(id = program.id, name = program.name))
 
-    override suspend fun activate(id: Long) {
+    override suspend fun activate(id: Long) = database.withTransaction {
         dao.deactivateAll()
         dao.activate(id)
     }
 
     override suspend fun linkTemplate(templateId: Long, programId: Long, dayOfWeek: Int) {
-        dao.deleteWorkoutByProgramAndDay(programId, dayOfWeek)
-        dao.deleteWorkoutByProgramAndTemplate(programId, templateId)
-        dao.upsertWorkout(
-            ProgramWorkoutEntity(
-                programId = programId,
-                templateId = templateId,
-                dayOfWeek = dayOfWeek,
+        database.withTransaction {
+            dao.deleteWorkoutByProgramAndDay(programId, dayOfWeek)
+            dao.deleteWorkoutByProgramAndTemplate(programId, templateId)
+            dao.upsertWorkout(
+                ProgramWorkoutEntity(
+                    programId = programId,
+                    templateId = templateId,
+                    dayOfWeek = dayOfWeek,
+                )
             )
-        )
+        }
     }
 
     override suspend fun unlinkTemplate(templateId: Long, programId: Long) {

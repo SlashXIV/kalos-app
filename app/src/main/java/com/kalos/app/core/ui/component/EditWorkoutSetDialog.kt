@@ -26,6 +26,7 @@ import com.kalos.app.core.domain.model.ExerciseTrackingMode
 import com.kalos.app.core.domain.model.WorkoutSet
 import com.kalos.app.core.ui.util.formatSecsAsDuration
 import com.kalos.app.core.ui.util.parseDurationToSecs
+import com.kalos.app.core.ui.util.parseDecimal
 
 /**
  * Shared edit-set dialog used from both the post-workout summary and the
@@ -128,7 +129,7 @@ fun EditWorkoutSetDialog(
         confirmButton = {
             TextButton(onClick = {
                 val reps = if (showReps) repsValue.text.toIntOrNull() ?: set.reps else 0
-                val weight = if (showWeight) weightValue.text.replace(',', '.').toFloatOrNull() ?: set.weightKg
+                val weight = if (showWeight) weightValue.text.parseDecimal() ?: set.weightKg
                              else 0f
                 val durationSecs = if (showDuration) parseDurationToSecs(durationValue.text) ?: set.durationSecs
                                    else 0

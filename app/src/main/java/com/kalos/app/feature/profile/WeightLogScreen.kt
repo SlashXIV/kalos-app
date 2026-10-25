@@ -61,6 +61,7 @@ import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
+import com.kalos.app.core.ui.util.parseDecimal
 
 // ─── ViewModel ───────────────────────────────────────────────────────────────
 
@@ -276,7 +277,7 @@ private fun WeightInputDialog(
     onDismiss: () -> Unit,
 ) {
     var input by remember { mutableStateOf(currentWeight?.let { kg1(it) } ?: "") }
-    val parsed = input.replace(',', '.').toFloatOrNull()
+    val parsed = input.parseDecimal()
     val isValid = parsed != null && parsed in 30f..300f
 
     AlertDialog(

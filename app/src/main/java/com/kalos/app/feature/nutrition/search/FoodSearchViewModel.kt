@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
+import com.kalos.app.core.ui.util.parseDecimal
 
 enum class ServingMode { GRAMS, UNITS }
 
@@ -68,7 +69,7 @@ class FoodSearchViewModel @Inject constructor(
     private val scannedFoodHolder: ScannedFoodHolder,
 ) : ViewModel() {
 
-    private val searchDate = savedStateHandle.get<String>("date") ?: LocalDate.now().toString()
+    private val searchDate = savedStateHandle.get<String>("date")?.ifBlank { null } ?: LocalDate.now().toString()
 
     private val _state = MutableStateFlow(FoodSearchUiState())
     val state: StateFlow<FoodSearchUiState> = _state
@@ -213,10 +214,10 @@ class FoodSearchViewModel @Inject constructor(
         val food = _state.value.selectedFood ?: return
         val amount = when (_state.value.servingMode) {
             ServingMode.UNITS -> {
-                val count = _state.value.servingCount.toFloatOrNull() ?: return
+                val count = _state.value.servingCount.parseDecimal() ?: return
                 count * food.defaultServingG
             }
-            ServingMode.GRAMS -> _state.value.amountG.toFloatOrNull() ?: return
+            ServingMode.GRAMS -> _state.value.amountG.parseDecimal() ?: return
         }
         viewModelScope.launch {
             runCatching {

@@ -68,6 +68,10 @@ class MealTemplateRepositoryImpl @Inject constructor(
     override suspend fun applyToMeal(templateId: Long, date: String, mealType: MealType) {
         val template = getTemplate(templateId) ?: return
         if (template.items.isEmpty()) return
+        database.withTransaction { applyItems(template, date, mealType) }
+    }
+
+    private suspend fun applyItems(template: MealTemplate, date: String, mealType: MealType) {
         val entryId = mealRepository.getOrCreateMealEntry(date, mealType)
         template.items.forEach { item ->
             mealRepository.addItemToMeal(

@@ -12,8 +12,12 @@ interface ExportDao {
     @Query("SELECT * FROM nutrition_goal WHERE id = 1")
     suspend fun getGoal(): NutritionGoalEntity?
 
-    @Query("SELECT * FROM food WHERE isCustom = 1 AND isArchived = 0 ORDER BY name ASC")
+    // Archived foods included: they are archived precisely because meals still reference them.
+    @Query("SELECT * FROM food WHERE isCustom = 1 ORDER BY name ASC")
     suspend fun getCustomFoods(): List<FoodEntity>
+
+    @Query("SELECT * FROM exercise WHERE seedId IS NOT NULL")
+    suspend fun getSeededExercises(): List<ExerciseEntity>
 
     @Query("SELECT * FROM meal_entry ORDER BY date ASC")
     suspend fun getAllMealEntries(): List<MealEntryEntity>

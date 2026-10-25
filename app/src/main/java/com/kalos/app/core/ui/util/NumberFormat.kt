@@ -17,3 +17,6 @@ fun formatGroupedInt(value: Number): String =
 /** Poids ou charge sans « ,0 » final, virgule française : 100 → « 100 », 82.5 → « 82,5 ». */
 fun formatKg(kg: Float): String =
     if (kg == kg.toLong().toFloat()) kg.toLong().toString() else "%.1f".format(Locale.FRENCH, kg)
+
+/** Saisie décimale tolérant la virgule du clavier français : « 82,5 » → 82.5, null si invalide. */
+fun String.parseDecimal(): Float? = trim().replace(',', '.').toFloatOrNull()

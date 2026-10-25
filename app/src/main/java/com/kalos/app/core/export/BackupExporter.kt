@@ -46,6 +46,7 @@ class BackupExporter @Inject constructor(
         val programWorkouts = exportDao.getAllProgramWorkouts()
         val mealTemplates   = exportDao.getAllMealTemplates()
         val mealTemplateItems = exportDao.getAllMealTemplateItems()
+        val seededExercises = exportDao.getSeededExercises()
 
         val itemsByEntry    = allItems.groupBy { it.mealEntryId }
         val exsByTemplate   = templateExs.groupBy { it.templateId }
@@ -84,7 +85,7 @@ class BackupExporter @Inject constructor(
                     fiberPer100g = it.fiberPer100g, sugarPer100g = it.sugarPer100g,
                     defaultServingG = it.defaultServingG,
                     servingUnit = it.servingUnit, isFavorite = it.isFavorite, tags = it.tags,
-                    lastUsedAt = it.lastUsedAt, barcode = it.barcode,
+                    lastUsedAt = it.lastUsedAt, barcode = it.barcode, isArchived = it.isArchived,
                 )
             },
             mealEntries = allEntries.map { entry ->
@@ -157,6 +158,7 @@ class BackupExporter @Inject constructor(
                     },
                 )
             },
+            exerciseSeedIds = seededExercises.associate { it.id to it.seedId!! },
         )
     }
 }

@@ -50,7 +50,7 @@ sealed class Screen(val route: String) {
         fun route(templateId: Long) = "workout/catalog?templateId=$templateId"
         fun standalone() = "workout/catalog?templateId=-1"
     }
-    object ExerciseDetail : Screen("workout/exercise/{exerciseId}") {
+    object ExerciseDetail : Screen("workout/exercise/{exerciseId}?fromBuilder={fromBuilder}") {
         fun route(exerciseId: Long) = "workout/exercise/$exerciseId"
         fun routeFromBuilder(exerciseId: Long) = "workout/exercise/$exerciseId?fromBuilder=true"
     }

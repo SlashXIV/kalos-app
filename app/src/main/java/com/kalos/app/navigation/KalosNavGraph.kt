@@ -118,7 +118,7 @@ fun KalosNavGraph(
 
             // Nutrition sub-screens
             composable(
-                route = "nutrition/food_search?mealType={mealType}&date={date}&query={query}&pick={pick}",
+                route = Screen.FoodSearch.route,
                 arguments = listOf(
                     navArgument("mealType") { type = NavType.StringType },
                     navArgument("date") { type = NavType.StringType; defaultValue = "" },
@@ -134,7 +134,7 @@ fun KalosNavGraph(
                 )
             }
             composable(
-                route = "nutrition/custom_food?foodId={foodId}&barcode={barcode}",
+                route = Screen.CustomFood.route,
                 arguments = listOf(
                     navArgument("foodId") { type = NavType.LongType; defaultValue = -1L },
                     navArgument("barcode") { type = NavType.StringType; defaultValue = "" },
@@ -150,14 +150,14 @@ fun KalosNavGraph(
             composable(Screen.MyFoods.route) { MyFoodsScreen(navController) }
             composable(Screen.MealTemplates.route) { MealTemplatesScreen(navController) }
             composable(
-                route = "nutrition/meal_template_edit?templateId={templateId}",
+                route = Screen.MealTemplateEdit.route,
                 arguments = listOf(
                     navArgument("templateId") { type = NavType.LongType; defaultValue = -1L },
                 )
             ) { MealTemplateEditorScreen(navController) }
             composable(Screen.NutritionHistory.route) { NutritionHistoryScreen(navController) }
             composable(
-                route = "nutrition/day/{date}",
+                route = Screen.NutritionDay.route,
                 arguments = listOf(navArgument("date") { type = NavType.StringType })
             ) { backStackEntry ->
                 NutritionScreen(
@@ -168,7 +168,7 @@ fun KalosNavGraph(
 
             // Workout sub-screens
             composable(
-                route = "workout/catalog?templateId={templateId}",
+                route = Screen.ExerciseCatalog.route,
                 arguments = listOf(navArgument("templateId") { type = NavType.LongType; defaultValue = -1L })
             ) { backStackEntry ->
                 ExerciseCatalogScreen(
@@ -177,7 +177,7 @@ fun KalosNavGraph(
                 )
             }
             composable(
-                route = "workout/exercise/{exerciseId}?fromBuilder={fromBuilder}",
+                route = Screen.ExerciseDetail.route,
                 arguments = listOf(
                     navArgument("exerciseId") { type = NavType.LongType },
                     navArgument("fromBuilder") { type = NavType.BoolType; defaultValue = false },
@@ -190,7 +190,7 @@ fun KalosNavGraph(
                 )
             }
             composable(
-                route = "workout/builder?templateId={templateId}",
+                route = Screen.WorkoutBuilder.route,
                 arguments = listOf(navArgument("templateId") { type = NavType.LongType; defaultValue = -1L })
             ) { backStackEntry ->
                 WorkoutBuilderScreen(
@@ -199,7 +199,7 @@ fun KalosNavGraph(
                 )
             }
             composable(
-                route = "workout/active/{templateId}",
+                route = Screen.ActiveWorkout.route,
                 arguments = listOf(navArgument("templateId") { type = NavType.LongType })
             ) { backStackEntry ->
                 ActiveWorkoutScreen(
@@ -208,7 +208,7 @@ fun KalosNavGraph(
                 )
             }
             composable(
-                route = "workout/summary/{logId}",
+                route = Screen.WorkoutSummary.route,
                 arguments = listOf(navArgument("logId") { type = NavType.LongType })
             ) { backStackEntry ->
                 WorkoutSummaryScreen(
@@ -218,7 +218,7 @@ fun KalosNavGraph(
             }
             composable(Screen.Programs.route) { ProgramsScreen(navController) }
             composable(
-                route = "workout/program/{programId}",
+                route = Screen.ProgramDetail.route,
                 arguments = listOf(navArgument("programId") { type = NavType.LongType })
             ) { backStackEntry ->
                 ProgramDetailScreen(
@@ -227,7 +227,7 @@ fun KalosNavGraph(
                 )
             }
             composable(
-                route = "workout/program_editor?programId={programId}",
+                route = Screen.ProgramEditor.route,
                 arguments = listOf(navArgument("programId") { type = NavType.LongType; defaultValue = -1L })
             ) { backStackEntry ->
                 ProgramEditorScreen(
@@ -237,7 +237,7 @@ fun KalosNavGraph(
             }
             composable(Screen.WorkoutHistory.route) { WorkoutHistoryScreen(navController) }
             composable(
-                route = "workout/log/{logId}",
+                route = Screen.WorkoutLogDetail.route,
                 arguments = listOf(navArgument("logId") { type = NavType.LongType })
             ) { backStackEntry ->
                 WorkoutLogDetailScreen(

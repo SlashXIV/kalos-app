@@ -1,5 +1,7 @@
 package com.kalos.app
 
+import com.kalos.app.core.domain.model.KcalZone
+import com.kalos.app.core.domain.model.NutritionGoal
 import com.kalos.app.core.domain.model.ProgramWorkout
 import com.kalos.app.core.domain.model.TrainingProgram
 import com.kalos.app.core.domain.model.WorkoutSet
@@ -33,5 +35,15 @@ class DomainRulesTest {
     @Test
     fun todayFlowStartsWithToday() = runBlocking {
         assertEquals(LocalDate.now(), todayFlow().first())
+    }
+
+    @Test
+    fun kcalZoneFollowsTheGoalBand() {
+        val goal = NutritionGoal(kcal = 2000)
+        assertEquals(KcalZone.BELOW, goal.zoneOf(1799f))
+        assertEquals(KcalZone.IN, goal.zoneOf(1800f))
+        assertEquals(KcalZone.IN, goal.zoneOf(2100f))
+        assertEquals(KcalZone.OVER, goal.zoneOf(2101f))
+        assertEquals(KcalZone.BELOW, NutritionGoal(kcal = 0).zoneOf(500f))
     }
 }

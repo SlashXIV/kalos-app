@@ -2,6 +2,19 @@
 
 ---
 
+## v4.2.0 — 25 October 2026
+
+Jalon R2 de la refonte « Graduation » : les quatre moments de la planche validée le 13 octobre 2026. Déclenchés par un événement, jamais en boucle ; un toucher les fige sur leur état final ; en ambiance Sobre ou avec « Supprimer les animations », la valeur finale s'affiche directement.
+
+### Added — moments
+
+- **Aliment ajouté** : au retour sur Aujourd'hui, l'aiguille pèse l'ajout de l'ancienne valeur à la nouvelle (elle repartait de la nouvelle valeur), les graduations franchies passent à l'encre, vibration courte. Aucune annonce automatique.
+- **Objectif du jour atteint** : quand les calories entrent dans la zone 90–105 %, une fois par jour, l'aiguille se pose puis un balayage allume les graduations en vert jusqu'à elle ; vibration de confirmation ; TalkBack lit « Objectif du jour atteint » par le nœud de statut. Les graduations restent allumées tant que la journée est dans la zone.
+- **Série validée et repos** : coup de tampon et vibration courte à la validation, vibration de confirmation à la fin naturelle du repos (pas quand on le passe). TalkBack : « Série 3 validée. Repos, 90 secondes » au début, « Repos terminé » à la fin, rien entre les deux.
+- **Séance terminée** : le titre monte lettre à lettre, le volume est compté, les règles des exercices se remplissent l'une après l'autre, une vibration de confirmation. Joué une seule fois (pas après une rotation).
+
+---
+
 ## v4.1.1 — 25 October 2026
 
 Correctif relevé pendant la recette sur téléphone.

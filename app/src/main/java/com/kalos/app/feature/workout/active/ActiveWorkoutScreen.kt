@@ -90,6 +90,18 @@ import com.kalos.app.navigation.Screen
 import kotlin.math.cos
 import kotlin.math.sin
 import androidx.compose.ui.platform.LocalContext
+import com.kalos.app.core.ui.motion.LiveAnnouncement
+import com.kalos.app.core.ui.motion.LocalMotionLevel
+import com.kalos.app.core.ui.motion.Motion
+import com.kalos.app.core.ui.motion.rememberHaptics
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.withFrameNanos
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.graphics.graphicsLayer
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -105,6 +117,28 @@ fun ActiveWorkoutScreen(
     LaunchedEffect(templateId) { viewModel.loadTemplate(templateId) }
 
     val context = LocalContext.current
+    val haptics = rememberHaptics()
+    val scope = rememberCoroutineScope()
+    // Annonces TalkBack du moment « série et repos » : au début et à la fin, rien entre les deux.
+    var announcement by remember { mutableStateOf("") }
+    fun announce(text: String) = scope.launch {
+        announcement = ""  // un texte identique au précédent (« Repos terminé ») doit être relu
+        withFrameNanos { }
+        announcement = text
+    }
+    val onSetValidated: (Int, Int) -> Unit = { setNumber, restSecs ->
+        haptics.tick()
+        announce(context.getString(R.string.moment_set_validated, setNumber, restSecs))
+    }
+    var seenRestEnds by rememberSaveable { mutableIntStateOf(state.restCompletions) }
+    LaunchedEffect(state.restCompletions) {
+        if (state.restCompletions > seenRestEnds) {
+            haptics.confirm()
+            announce(context.getString(R.string.moment_rest_done))
+        }
+        seenRestEnds = state.restCompletions
+    }
+
     LaunchedEffect(state.errorMessage) {
         state.errorMessage?.let { res ->
             snackbarHostState.showSnackbar(context.getString(res))
@@ -163,8 +197,12 @@ fun ActiveWorkoutScreen(
                     Text(stringResource(R.string.training_no_exercises), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 // Only the session content, not the ticking timers, so a tick does not recompose the sets.
-                else -> ActiveContent(state.exercises, state.currentExIndex, state.exerciseReferences, viewModel, Modifier.weight(1f))
+                else -> ActiveContent(
+                    state.exercises, state.currentExIndex, state.exerciseReferences, viewModel,
+                    onSetValidated, Modifier.weight(1f),
+                )
             }
+            LiveAnnouncement(announcement)
 
             AnimatedVisibility(visible = state.isResting) {
                 RestBar(secsLeft = state.restSecsLeft, totalSecs = state.restTotalSecs, onSkip = viewModel::skipRest)
@@ -261,6 +299,7 @@ private fun ActiveContent(
     currentExIndex: Int,
     references: Map<Long, ExerciseReference>,
     viewModel: ActiveWorkoutViewModel,
+    onSetValidated: (setNumber: Int, restSecs: Int) -> Unit,
     modifier: Modifier,
 ) {
     val tabIndex = currentExIndex.coerceIn(0, exercises.size - 1)
@@ -348,7 +387,12 @@ private fun ActiveContent(
                     onRepsChange = { viewModel.onRepsChange(exIdx, setIdx, it) },
                     onWeightChange = { viewModel.onWeightChange(exIdx, setIdx, it) },
                     onDurationChange = { viewModel.onDurationChange(exIdx, setIdx, it) },
-                    onToggleComplete = { viewModel.toggleSetCompleted(exIdx, setIdx) },
+                    onToggleComplete = {
+                        val validating = !si.isCompleted
+                        viewModel.toggleSetCompleted(exIdx, setIdx)
+                        // Le repos vient d'être lancé de façon synchrone : sa durée est déjà dans l'état.
+                        if (validating) onSetValidated(setIdx + 1, viewModel.state.value.restTotalSecs)
+                    },
                     onRemove = if (ep.sets.size > 1) {
                         { viewModel.removeSet(exIdx, setIdx) }
                     } else null,
@@ -588,11 +632,25 @@ private fun SetRow(
     }
 }
 
+private const val STAMP_SCALE = 1.15f
+private const val STAMP_MS = 380
+
 /** Pastille ronde « tampon » : vide tant que la série n'est pas validée, pleine (objectif atteint) ensuite. */
 @Composable
 private fun SetStamp(setNumber: Int, done: Boolean, onToggle: () -> Unit) {
     val stamp = KalosTheme.nutrients.goalReached
     val label = stringResource(R.string.training_set_number, setNumber)
+    // Coup de tampon à la validation (pas à l'affichage d'une série déjà validée).
+    val level = LocalMotionLevel.current
+    val press = remember { Animatable(1f) }
+    var wasDone by remember { mutableStateOf(done) }
+    LaunchedEffect(done) {
+        if (done && !wasDone && level.decorative) {
+            press.snapTo(STAMP_SCALE)
+            press.animateTo(1f, tween(STAMP_MS, easing = Motion.Enter))
+        }
+        wasDone = done
+    }
     Box(
         Modifier
             .size(48.dp)
@@ -603,6 +661,7 @@ private fun SetStamp(setNumber: Int, done: Boolean, onToggle: () -> Unit) {
         Box(
             Modifier
                 .size(34.dp)
+                .graphicsLayer { scaleX = press.value; scaleY = press.value }
                 .clip(CircleShape)
                 .then(
                     if (done) Modifier.background(stamp)

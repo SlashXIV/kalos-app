@@ -17,6 +17,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 import com.kalos.app.core.domain.model.NutritionGoal
 import com.kalos.app.core.ui.util.todayFlow
+import com.kalos.app.core.data.MomentsStore
 
 data class NutritionUiState(
     val date: String = LocalDate.now().toString(),
@@ -48,7 +49,11 @@ class NutritionViewModel @Inject constructor(
     private val mealTemplateRepository: MealTemplateRepository,
     programRepository: ProgramRepository,
     workoutRepository: WorkoutRepository,
+    private val momentsStore: MomentsStore,
 ) : ViewModel() {
+
+    /** Vrai une seule fois par jour : le moment « objectif atteint » se joue alors. */
+    fun claimGoalMoment(date: String): Boolean = momentsStore.claimGoalMoment(date)
 
     /** Séance du programme actif prévue aujourd'hui (même règle que le calendrier), et si elle est faite. */
     val todayWorkout: StateFlow<TodayWorkout?> = combine(

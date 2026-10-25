@@ -35,12 +35,23 @@ import com.kalos.app.core.ui.component.InstrumentLabel
 import com.kalos.app.core.ui.theme.KalosTheme
 import com.kalos.app.core.ui.util.formatGroupedInt
 import kotlin.math.roundToInt
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import com.kalos.app.core.ui.motion.CountUp
+import com.kalos.app.core.ui.motion.LocalMotionLevel
+import com.kalos.app.core.ui.motion.Motion
+import kotlinx.coroutines.delay
 
 /** Briques communes au récapitulatif et au détail d'une séance passée. */
 
-/** Durée / volume / séries en grands chiffres tabulaires, chaque mesure lue en une phrase. */
+/**
+ * Durée / volume / séries en grands chiffres tabulaires, chaque mesure lue en une phrase.
+ * [countUp] : le volume est compté jusqu'à sa valeur (moment « séance terminée »).
+ */
 @Composable
-fun SessionStats(log: WorkoutLog, modifier: Modifier = Modifier) {
+fun SessionStats(log: WorkoutLog, modifier: Modifier = Modifier, countUp: Boolean = false) {
     val sets = log.exercises.sumOf { le -> le.sets.count { it.isCompleted } }
     val h = (log.durationSecs / 3600).toInt()
     val m = ((log.durationSecs % 3600) / 60).toInt()
@@ -60,6 +71,7 @@ fun SessionStats(log: WorkoutLog, modifier: Modifier = Modifier) {
                 unit = stringResource(R.string.kg),
                 spoken = stringResource(R.string.training_kg_spoken, kg),
                 modifier = Modifier.weight(1.4f),
+                countTo = if (countUp) log.totalVolumeKg.toDouble() else null,
             )
         }
         StatColumn(
@@ -73,11 +85,25 @@ fun SessionStats(log: WorkoutLog, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun StatColumn(label: String, value: String, unit: String?, spoken: String, modifier: Modifier) {
+private fun StatColumn(
+    label: String,
+    value: String,
+    unit: String?,
+    spoken: String,
+    modifier: Modifier,
+    countTo: Double? = null,
+) {
     Column(modifier.clearAndSetSemantics { contentDescription = "$label, $spoken" }) {
         InstrumentLabel(label)
         Row(verticalAlignment = Alignment.Bottom) {
-            FitText(value, style = KalosTheme.type.metricLarge, modifier = Modifier.weight(1f, fill = false))
+            if (countTo != null) {
+                CountUp(
+                    countTo, { formatGroupedInt(it.roundToInt()) },
+                    Modifier.weight(1f, fill = false), style = KalosTheme.type.metricLarge,
+                )
+            } else {
+                FitText(value, style = KalosTheme.type.metricLarge, modifier = Modifier.weight(1f, fill = false))
+            }
             if (unit != null) {
                 Text(" $unit", style = KalosTheme.type.metricSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -87,10 +113,19 @@ private fun StatColumn(label: String, value: String, unit: String?, spoken: Stri
 
 /** Règle graduée « séries validées sur prévues » d'un exercice ; rien si aucune série n'était prévue. */
 @Composable
-fun ExerciseSetsScale(logExercise: LogExercise) {
+fun ExerciseSetsScale(logExercise: LogExercise, revealDelayMs: Int? = null) {
     val planned = logExercise.sets.size
     if (planned == 0) return
     val done = logExercise.sets.count { it.isCompleted }
+    // [revealDelayMs] : la règle se remplit après ce délai (les exercices l'un après l'autre).
+    val level = LocalMotionLevel.current
+    val reveal = remember { Animatable(if (revealDelayMs != null && level.decorative) 0f else 1f) }
+    LaunchedEffect(level) {
+        if (reveal.value == 1f) return@LaunchedEffect
+        if (!level.decorative) return@LaunchedEffect reveal.snapTo(1f)
+        delay(revealDelayMs?.toLong() ?: 0L)
+        reveal.animateTo(1f, tween(Motion.ENTER_MS, easing = Motion.Enter))
+    }
     val complete = done >= planned
     val sentence = pluralStringResource(R.plurals.training_sets_scale_spoken, done, done, planned) +
         if (complete) ", " + stringResource(R.string.state_goal_reached) else ""
@@ -104,7 +139,7 @@ fun ExerciseSetsScale(logExercise: LogExercise) {
             )
         }
         GraduatedScale(
-            value = done.toFloat(),
+            value = done * reveal.value,
             goal = planned.toFloat(),
             color = if (complete) KalosTheme.nutrients.goalReached else MaterialTheme.colorScheme.primary,
             ticks = 20,

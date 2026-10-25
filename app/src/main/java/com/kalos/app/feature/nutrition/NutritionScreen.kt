@@ -86,7 +86,17 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import com.kalos.app.core.domain.model.NutritionGoal
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import com.kalos.app.core.domain.model.KcalZone
+import com.kalos.app.core.ui.motion.InterruptibleMotion
+import com.kalos.app.core.ui.motion.LocalMotionLevel
+import com.kalos.app.core.ui.motion.Motion
+import kotlinx.coroutines.delay
 
 @Composable
 fun NutritionScreen(
@@ -136,7 +146,6 @@ fun NutritionScreen(
                                 modifier = Modifier.clickable {
                                     viewModel.applyTemplate(mealType, t.id)
                                     applyForMeal = null
-                                    haptics.tick()
                                     snack(context.getString(R.string.favorite_added, t.name))
                                 },
                             )
@@ -248,7 +257,7 @@ fun NutritionScreen(
                 }
             }
 
-            item(key = "summary") { DaySummary(state) }
+            item(key = "summary") { DaySummary(state, onGoalReached = viewModel::claimGoalMoment) }
 
             item(key = "hydration") {
                 HydrationCard(
@@ -306,65 +315,114 @@ fun NutritionScreen(
     }
 }
 
-/** Le cadran du jour et les trois règles des macros. */
+/**
+ * Le cadran du jour et les trois règles des macros, avec deux moments : l'aiguille pèse l'ajout
+ * (de l'ancienne valeur à la nouvelle au retour sur l'écran), et l'objectif atteint allume les
+ * graduations, une fois par jour. Un toucher fige l'état final.
+ */
 @Composable
-private fun DaySummary(state: NutritionUiState) {
+private fun DaySummary(state: NutritionUiState, onGoalReached: (String) -> Boolean) {
     val goal = state.goal.kcal
     val kcal = state.totalKcal.roundToInt()
     val rest = goal - kcal
-    val over = goal > 0 && state.totalKcal > goal * NutritionGoal.ZONE_HIGH
+    val zone = state.goal.zoneOf(state.totalKcal)
     val status = if (rest >= 0) stringResource(R.string.kcal_remaining, formatGroupedInt(rest))
                  else stringResource(R.string.kcal_over, formatGroupedInt(abs(rest)))
     val nutrients = KalosTheme.nutrients
-    KalosCard(contentPadding = PaddingValues(start = 14.dp, end = 14.dp, top = 18.dp, bottom = 16.dp)) {
-        GraduatedDial(
-            value = state.totalKcal,
-            goal = goal.toFloat(),
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-        ) {
-            val sentence = stringResource(R.string.kcal_dial_sentence, formatGroupedInt(kcal), formatGroupedInt(goal), status)
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.clearAndSetSemantics { contentDescription = sentence },
+    val haptics = rememberHaptics()
+    val level = LocalMotionLevel.current
+
+    // Valeur montrée avant de quitter l'écran (ajout depuis la recherche) : gardée tant
+    // qu'Aujourd'hui est dans la pile, pour que l'aiguille reparte de là au retour.
+    var lastShown by rememberSaveable(state.date) { mutableFloatStateOf(Float.NaN) }
+    val from = remember(state.date) { lastShown.takeUnless { it.isNaN() } ?: state.totalKcal }
+    LaunchedEffect(state.totalKcal, state.isLoading) {
+        if (state.isLoading) return@LaunchedEffect
+        if (!lastShown.isNaN() && state.totalKcal > lastShown) haptics.tick()
+        lastShown = state.totalKcal
+    }
+
+    val lit = remember { Animatable(0f) }
+    var announceGoal by remember { mutableStateOf(false) }
+    LaunchedEffect(zone, state.isLoading, state.date, level) {
+        when {
+            state.isLoading -> Unit
+            zone != KcalZone.IN -> lit.snapTo(0f)
+            state.isToday && onGoalReached(state.date) -> {
+                announceGoal = true
+                haptics.confirm()
+                if (level.decorative) {
+                    lit.snapTo(0f)
+                    delay(Motion.WEIGH_MS.toLong())  // l'aiguille se pose d'abord
+                    lit.animateTo(1f, tween(GOAL_SWEEP_MS, easing = Motion.Enter))
+                } else lit.snapTo(1f)
+            }
+            else -> lit.snapTo(1f)
+        }
+    }
+
+    InterruptibleMotion(resetKey = state.totalKcal) {
+        KalosCard(contentPadding = PaddingValues(start = 14.dp, end = 14.dp, top = 18.dp, bottom = 16.dp)) {
+            GraduatedDial(
+                value = state.totalKcal,
+                goal = goal.toFloat(),
+                from = from,
+                litProgress = lit.value,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
             ) {
-                InstrumentLabel(stringResource(R.string.kcal_label))
-                FitText(formatGroupedInt(kcal), style = KalosTheme.type.metricHuge)
-                Text(
-                    stringResource(R.string.kcal_of, formatGroupedInt(goal)),
-                    style = KalosTheme.type.metricSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    status,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = when {
-                        over -> nutrients.overTarget
-                        goal > 0 && state.totalKcal >= goal * NutritionGoal.ZONE_LOW -> nutrients.goalReached
-                        else -> MaterialTheme.colorScheme.onSurface
+                val sentence = stringResource(R.string.kcal_dial_sentence, formatGroupedInt(kcal), formatGroupedInt(goal), status)
+                val goalReached = stringResource(R.string.moment_goal_reached)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clearAndSetSemantics {
+                        // Le statut n'est lu d'office qu'une fois, quand l'objectif du jour est atteint.
+                        if (announceGoal) {
+                            liveRegion = LiveRegionMode.Polite
+                            contentDescription = "$sentence. $goalReached"
+                        } else contentDescription = sentence
                     },
+                ) {
+                    InstrumentLabel(stringResource(R.string.kcal_label))
+                    FitText(formatGroupedInt(kcal), style = KalosTheme.type.metricHuge)
+                    Text(
+                        stringResource(R.string.kcal_of, formatGroupedInt(goal)),
+                        style = KalosTheme.type.metricSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        status,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = when (zone) {
+                            KcalZone.OVER -> nutrients.overTarget
+                            KcalZone.IN -> nutrients.goalReached
+                            KcalZone.BELOW -> MaterialTheme.colorScheme.onSurface
+                        },
+                    )
+                }
+            }
+            val grams = stringResource(R.string.unit_grams_spoken)
+            val g = stringResource(R.string.unit_g)
+            listOf(
+                Triple(R.string.nutrition_protein, state.totalProtein to state.goal.proteinG, nutrients.protein),
+                Triple(R.string.nutrition_carbs, state.totalCarbs to state.goal.carbsG, nutrients.carbs),
+                Triple(R.string.nutrition_fat, state.totalFat to state.goal.fatG, nutrients.fat),
+            ).forEach { (label, values, color) ->
+                MeasureRow(
+                    label = stringResource(label),
+                    value = values.first,
+                    goal = values.second.toFloat(),
+                    valueText = formatGroupedInt(values.first.roundToInt()),
+                    goalText = formatGroupedInt(values.second),
+                    unit = g,
+                    spokenUnit = grams,
+                    color = color,
                 )
             }
         }
-        val grams = stringResource(R.string.unit_grams_spoken)
-        val g = stringResource(R.string.unit_g)
-        listOf(
-            Triple(R.string.nutrition_protein, state.totalProtein to state.goal.proteinG, nutrients.protein),
-            Triple(R.string.nutrition_carbs, state.totalCarbs to state.goal.carbsG, nutrients.carbs),
-            Triple(R.string.nutrition_fat, state.totalFat to state.goal.fatG, nutrients.fat),
-        ).forEach { (label, values, color) ->
-            MeasureRow(
-                label = stringResource(label),
-                value = values.first,
-                goal = values.second.toFloat(),
-                valueText = formatGroupedInt(values.first.roundToInt()),
-                goalText = formatGroupedInt(values.second),
-                unit = g,
-                spokenUnit = grams,
-                color = color,
-            )
-        }
     }
 }
+
+private const val GOAL_SWEEP_MS = 700
 
 @Composable
 private fun MealTicket(

@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import com.kalos.app.core.ui.motion.pressScale
 import com.kalos.app.core.ui.theme.KalosShape
 import com.kalos.app.core.ui.theme.KalosTheme
+import com.kalos.app.core.ui.motion.RisingText
 
 /** Carte d'instrument : surface pleine, peu d'arrondi, pas d'ombre. */
 @Composable
@@ -90,6 +91,7 @@ fun ScreenHeader(
     eyebrow: String? = null,
     navigation: (@Composable () -> Unit)? = null,
     small: Boolean = false,
+    rising: Boolean = false,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     Row(
@@ -100,12 +102,17 @@ fun ScreenHeader(
         if (navigation != null) Box(Modifier.padding(bottom = 2.dp)) { navigation() }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             if (eyebrow != null) InstrumentLabel(eyebrow)
-            FitText(
+            val style = if (small) KalosTheme.type.posterSmall else KalosTheme.type.poster
+            val titleNode = Modifier.clearAndSetSemantics { contentDescription = title; heading() }
+            // [rising] : le titre monte lettre à lettre (moment « séance terminée »).
+            if (rising) Box(titleNode) {
+                RisingText(title.uppercase(), style = style, color = MaterialTheme.colorScheme.onBackground)
+            } else FitText(
                 title.uppercase(),
-                style = if (small) KalosTheme.type.posterSmall else KalosTheme.type.poster,
+                style = style,
                 color = MaterialTheme.colorScheme.onBackground,
                 minFontSize = 18.sp,
-                modifier = Modifier.clearAndSetSemantics { contentDescription = title; heading() },
+                modifier = titleNode,
             )
         }
         Row(verticalAlignment = Alignment.CenterVertically, content = actions)

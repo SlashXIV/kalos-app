@@ -26,6 +26,7 @@
     <string name="unit_litres_spoken">litres</string>
     <string name="state_over_target">au-dessus de l’objectif</string>
     <string name="state_goal_reached">objectif atteint</string>
+    <string name="moment_goal_reached">Objectif du jour atteint</string>
 
     <!-- Apparence -->
     <string name="appearance_title">Apparence</string>

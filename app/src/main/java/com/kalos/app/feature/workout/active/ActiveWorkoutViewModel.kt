@@ -46,6 +46,8 @@ data class ActiveWorkoutUiState(
     /** Durée totale du repos en cours (pour le cadran qui se vide). */
     val restTotalSecs: Int = 0,
     val isResting: Boolean = false,
+    /** Repos allés à leur terme (pas ceux passés) : chaque hausse déclenche le moment « repos terminé ». */
+    val restCompletions: Int = 0,
     val isSaving: Boolean = false,
     val savedLogId: Long? = null,
     val isLoading: Boolean = true,
@@ -272,7 +274,13 @@ class ActiveWorkoutViewModel @Inject constructor(
                 delay(500)
                 val elapsed = ((System.currentTimeMillis() - restStartedAt) / 1000).toInt()
                 val left = (restDurationSecs - elapsed).coerceAtLeast(0)
-                _state.update { it.copy(restSecsLeft = left, isResting = left > 0) }
+                _state.update {
+                    it.copy(
+                        restSecsLeft = left,
+                        isResting = left > 0,
+                        restCompletions = if (left == 0) it.restCompletions + 1 else it.restCompletions,
+                    )
+                }
                 if (left == 0) break
             }
         }

@@ -1,6 +1,6 @@
 # Features
 
-> Version: 4.1.0
+> Version: 4.2.0
 
 Statuses: **Done** · **Partial** · **Planned**
 
@@ -14,7 +14,8 @@ Statuses: **Done** · **Partial** · **Planned**
 | Palette registry (Jade, Encre, Océan) × brightness (System / Light / Dark) | Done | `Palettes.kt`; contrast + colour-blindness test per palette (`PaletteContrastTest`) |
 | Nutrient colours outside Material | Done | Protein / carbs / fat / water + goal reached / over target, same in every palette |
 | Motion levels FULL / REDUCED / NONE | Done | « Ambiance » setting (Expressive / Sobre) + Android « Remove animations » |
-| Centralised haptics + « Vibrations » setting | Done | `Haptics.tick()` / `confirm()`; used by the moments (v4.1.0) |
+| Centralised haptics + « Vibrations » setting | Done | `Haptics.tick()` / `confirm()`; used by the moments (v4.2.0) |
+| Moments (food added, daily goal reached, set validated and rest, workout finished) | Done | v4.2.0. Event-driven, never looping; a touch freezes the final state (`InterruptibleMotion`); Sobre / « Remove animations » show the final value directly; goal moment once a day (`MomentsStore`); TalkBack announcements at start and end only (`LiveAnnouncement`) |
 | House components | Done | Graduated dial and scales, measure tickets, screen headers, instrument labels, value chips, filter chips, graduated nav bar, charts with adjustable cursor |
 | All UI text in `strings.xml` (French) | Done | `HardcodedUiTextTest` guards against hardcoded text |
 | Launcher icon and splash | Done | K on a graduated rule inside a three-arc macro ring; vector source `design/icon/kalos-icon.svg`, themed (monochrome) icon (v4.0.1) |

@@ -1,5 +1,7 @@
 package com.kalos.app.core.ui.component
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
@@ -12,7 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -30,6 +34,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kalos.app.core.ui.motion.LocalMotionLevel
+import com.kalos.app.core.ui.motion.MotionLevel
 import com.kalos.app.core.ui.motion.Motion
 import com.kalos.app.core.ui.theme.KalosTheme
 import kotlin.math.cos
@@ -44,14 +49,13 @@ private const val SCALE_HEADROOM = 1.25f
  * glisse brièvement en ambiance sobre, saute directement sans animations.
  */
 @Composable
-fun animateMeasure(target: Float, label: String): State<Float> {
-    val level = LocalMotionLevel.current
-    val spec = when {
-        level.decorative -> tween<Float>(Motion.WEIGH_MS, easing = Motion.Weigh)
-        level.animates -> tween(200, easing = Motion.Enter)
-        else -> snap()
-    }
-    return animateFloatAsState(target, spec, label = label)
+fun animateMeasure(target: Float, label: String): State<Float> =
+    animateFloatAsState(target, measureSpec(LocalMotionLevel.current), label = label)
+
+private fun measureSpec(level: MotionLevel): AnimationSpec<Float> = when {
+    level.decorative -> tween(Motion.WEIGH_MS, easing = Motion.Weigh)
+    level.animates -> tween(200, easing = Motion.Enter)
+    else -> snap()
 }
 
 /** Simple rangée de graduations décoratives (aperçu de palette, soulignement d'onglet). */
@@ -141,7 +145,8 @@ fun GraduatedDial(
     goal: Float,
     modifier: Modifier = Modifier,
     size: Dp = 220.dp,
-    lit: Float = 0f,
+    from: Float = value,
+    litProgress: Float = 0f,
     center: @Composable BoxScope.() -> Unit,
 ) {
     val tickColor = MaterialTheme.colorScheme.outlineVariant
@@ -149,7 +154,13 @@ fun GraduatedDial(
     val needleColor = MaterialTheme.colorScheme.primary
     val nutrients = KalosTheme.nutrients
     val max = if (goal > 0f) goal * SCALE_HEADROOM else maxOf(value, 1f)
-    val shown by animateMeasure(value, "cadran")
+    // [from] : valeur montrée avant (retour sur l'écran après un ajout), l'aiguille repart de là.
+    val level = LocalMotionLevel.current
+    val needle = remember { Animatable(from) }
+    LaunchedEffect(value, level) {
+        if (level.animates) needle.animateTo(value, measureSpec(level)) else needle.snapTo(value)
+    }
+    val shown = needle.value
     Box(
         modifier
             .size(size)
@@ -178,6 +189,8 @@ fun GraduatedDial(
                         style = Stroke(3.dp.toPx(), cap = StrokeCap.Round),
                     )
                     val f = shown / max
+                    // Objectif atteint : les graduations s'allument du début jusqu'à l'aiguille.
+                    val lit = f * litProgress
                     for (i in 0..n) {
                         val t = i / n.toFloat()
                         val col = when {

@@ -7,6 +7,13 @@ data class NutritionGoal(
     val fatG: Int = DEFAULT_FAT_G,
     val isCustom: Boolean = false,
 ) {
+    /** Where [kcalOfDay] stands against the daily goal zone ([ZONE_LOW]–[ZONE_HIGH] of [kcal]). */
+    fun zoneOf(kcalOfDay: Float): KcalZone = when {
+        kcal <= 0 || kcalOfDay < kcal * ZONE_LOW -> KcalZone.BELOW
+        kcalOfDay > kcal * ZONE_HIGH -> KcalZone.OVER
+        else -> KcalZone.IN
+    }
+
     companion object {
         const val DEFAULT_KCAL = 2000
         const val DEFAULT_PROTEIN_G = 150
@@ -21,3 +28,5 @@ data class NutritionGoal(
         const val MIN_WATER_GOAL_ML = 100
     }
 }
+
+enum class KcalZone { BELOW, IN, OVER }

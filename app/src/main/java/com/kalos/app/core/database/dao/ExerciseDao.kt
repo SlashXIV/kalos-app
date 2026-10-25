@@ -6,18 +6,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ExerciseDao {
-    @Query("SELECT * FROM exercise WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
-    fun search(query: String): Flow<List<ExerciseEntity>>
-
-    @Query("SELECT * FROM exercise WHERE primaryMuscle = :muscle ORDER BY name ASC")
-    fun getByMuscle(muscle: String): Flow<List<ExerciseEntity>>
-
-    @Query("SELECT * FROM exercise WHERE type = :type ORDER BY name ASC")
-    fun getByType(type: String): Flow<List<ExerciseEntity>>
-
-    @Query("SELECT * FROM exercise WHERE level = :level ORDER BY name ASC")
-    fun getByLevel(level: String): Flow<List<ExerciseEntity>>
-
     @Query("""
         SELECT * FROM exercise
         WHERE (:query = '' OR nameNormalized LIKE '%' || :query || '%')

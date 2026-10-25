@@ -57,11 +57,10 @@ android {
 
     buildTypes {
         release {
-            // R8/shrinking left off for this first signed release to guarantee a working
-            // build (kotlinx.serialization backup, enum valueOf, etc. would need vetted keep
-            // rules first). Can be enabled in a follow-up once release output is tested.
-            isMinifyEnabled = false
-            isShrinkResources = false
+            // R8 on since v4.1.0: keep rules in proguard-rules.pro cover kotlinx.serialization
+            // (backup, workout draft, OpenFoodFacts) and enums stored by name.
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
